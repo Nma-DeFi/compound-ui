@@ -1,0 +1,113 @@
+@import "bootstrap/scss/mixins/banner";
+@include bsBanner("");
+
+// Configuration
+@import "bootstrap/scss/functions";
+
+// Include any default variable overrides here
+$primary: shade-color(rgb(0, 211, 149), 5%);
+
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+
+// Include any default map overrides here
+/*$custom-colors: (
+  "compound": shade-color(rgb(0, 211, 149), 5%)
+);
+$theme-colors: map-merge($theme-colors, $custom-colors);*/
+
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/utilities";
+
+// Layout & components
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/button-group";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/navbar";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/accordion";
+@import "bootstrap/scss/breadcrumb";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/progress";
+@import "bootstrap/scss/list-group";
+@import "bootstrap/scss/close";
+@import "bootstrap/scss/toasts";
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/tooltip";
+@import "bootstrap/scss/popover";
+@import "bootstrap/scss/carousel";
+@import "bootstrap/scss/spinners";
+@import "bootstrap/scss/offcanvas";
+@import "bootstrap/scss/placeholders";
+
+// Helpers
+@import "bootstrap/scss/helpers";
+
+// Utilities
+@import "bootstrap/scss/utilities/api";
+
+
+$sidebar-pt: 90px;
+$sidebar-font-size: $font-size-base * 1.075;
+
+body { 
+    overflow-y: scroll; 
+    background-color: var(--bs-tertiary-bg);
+    #main-container {
+        margin-top: 3rem;
+        #menu-column {
+            position: sticky; 
+            top: 8rem;
+            #network-select {
+                margin-bottom: 2rem;
+            }
+            #pages-navigation {
+                margin-bottom: 2.5rem;
+            }
+        }
+    }
+}
+
+#network-select {
+    .icon { width: 1.8rem; height: 1.8rem; }
+    .chevron { width: 1.8rem; }
+}
+
+
+/* Mixins */
+@mixin item-hover() {
+    cursor: pointer;
+    &:hover {
+        background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+    }
+}
+
+/* Utilities */
+.item-hover {
+    @include item-hover();
+}
+
+.color-primary-shaded {
+    color: shade-color($primary, 5%) !important;
+}
+
+/* FARM */
+.asset-item {
+    @include item-hover();
+}
+
+/* CLAIM */
+#claim-accordion .accordion-button::after { margin-left: inherit; }

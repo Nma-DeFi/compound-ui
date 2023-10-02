@@ -1,5 +1,13 @@
+import Head from "next/head";
 
 export default function Claim() {
-    return <h2>Claim</h2>;
+    return ( 
+        <>
+            <Head>
+            <title>Claim</title>
+            </Head>
+            <h2>Claim</h2>
+        </>
+    );
 }
   

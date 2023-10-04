@@ -9,10 +9,10 @@ export default function Layout({ children }) {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <title>Compound UI</title>
             </Head>
-            <nav className="navbar navbar-expand-xl sticky-top bg-white border-bottom shadow-sm py-3">
+            <nav className="navbar navbar-expand-xl sticky-top bg-white border-bottom shadow-sm px-1 py-3">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="#">
-                        <img src="/images/compound-logo.svg" alt="Compound" width="180" />
+                        <img src="/images/compound-logo.svg" alt="Compound" width="185" />
                     </a>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
@@ -25,22 +25,22 @@ export default function Layout({ children }) {
                             <li className="nav-item"><a className="nav-link" href="#">Farm</a></li>
                             <li className="nav-item"><a className="nav-link" href="#">Claim</a></li>
                         </ul>
-                        <div className="d-none d-xl-flex mx-auto text-center">
-                            <div className="px-5">
+                        <div className="d-none d-xl-flex justify-content-evenly flex-grow-1 text-center">
+                            <div>
                                 <div className="fw-semibold">Total collateral</div> 
                                 <div className="text-body-tertiary">$543.12M</div>
                             </div>
-                            <div className="px-5">
+                            <div>
                                 <div className="fw-semibold">Total borrowing</div> 
                                 <div className="text-body-tertiary">$345.78M</div>
                             </div>
-                            <div className="px-5">
+                            <div>
                                 <div className="fw-semibold">Total farming</div> 
                                 <div className="text-body-tertiary">$480.78M</div>
                             </div>
                         </div>
                         <div className="d-none d-lg-block">
-                            <button className="btn btn-primary text-white shadow-sm me-1" type="button"><i className="bi bi-wallet me-1"></i> 0x23....46ac</button>
+                            <button className="btn btn-primary text-white shadow-sm me-2" type="button"><i className="bi bi-wallet me-1"></i> 0x23....46ac</button>
                             <button className="btn btn-primary text-white shadow-sm" type="button"><i className="bi bi-power"></i></button>
                         </div>
                     </div>

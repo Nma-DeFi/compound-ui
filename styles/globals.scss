@@ -63,6 +63,8 @@ $theme-colors: map-merge($theme-colors, $custom-colors);*/
 $sidebar-pt: 90px;
 $sidebar-font-size: $font-size-base * 1.075;
 
+$sticky-menu-top: 8.3rem;
+
 body { 
     overflow-y: scroll; 
     background-color: var(--bs-tertiary-bg);
@@ -70,7 +72,7 @@ body {
         margin-top: 3rem;
         #menu-column {
             position: sticky; 
-            top: 8rem;
+            top: $sticky-menu-top;
             #network-select {
                 margin-bottom: 2rem;
             }

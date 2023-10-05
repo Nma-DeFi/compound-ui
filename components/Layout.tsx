@@ -1,7 +1,9 @@
-import Head from "next/head";
-import NavLink from "./NavLink";
+import Head from 'next/head';
+import NavLink from './NavLink';
+import ConnectButton from './ConnectButton';
 
 export default function Layout({ children }) {
+
     return (
         <> 
             <Head>
@@ -25,24 +27,21 @@ export default function Layout({ children }) {
                             <li className="nav-item"><a className="nav-link" href="#">Farm</a></li>
                             <li className="nav-item"><a className="nav-link" href="#">Claim</a></li>
                         </ul>
-                        <div className="d-none d-xl-flex justify-content-evenly flex-grow-1 text-center">
-                            <div>
+                        <div className="d-none d-xl-flex justify-content-center flex-grow-1 text-center">
+                            <div className="px-5">
                                 <div className="fw-semibold">Total collateral</div> 
                                 <div className="text-body-tertiary">$543.12M</div>
                             </div>
-                            <div>
+                            <div className="px-5">
                                 <div className="fw-semibold">Total borrowing</div> 
                                 <div className="text-body-tertiary">$345.78M</div>
                             </div>
-                            <div>
+                            <div className="px-5">
                                 <div className="fw-semibold">Total farming</div> 
                                 <div className="text-body-tertiary">$480.78M</div>
                             </div>
                         </div>
-                        <div className="d-none d-lg-block">
-                            <button className="btn btn-primary text-white shadow-sm me-2" type="button"><i className="bi bi-wallet me-1"></i> 0x23....46ac</button>
-                            <button className="btn btn-primary text-white shadow-sm" type="button"><i className="bi bi-power"></i></button>
-                        </div>
+                        <div className="d-none d-lg-block"><ConnectButton /></div>
                     </div>
                 </div>
             </nav>

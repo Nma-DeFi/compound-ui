@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import NavLink from './NavLink';
 import ConnectButton from './ConnectButton';
+import NetworkSelector from './NetworkSelector';
 
 export default function Layout({ children }) {
 
@@ -49,14 +50,7 @@ export default function Layout({ children }) {
                 <div className="row">
                     <div className="col-2 d-none d-xl-flex flex-column">
                         <div id="menu-column">
-                            <button id="network-select" type="button" className="btn btn-light bg-body btn-lg border shadow w-100 rounded-5">
-                                <div className="d-flex justify-content-around fs-5">
-                                    <img className="icon d-none d-xl-inline" src="/images/networks/Ethereum.svg" alt="networks" />
-                                    <div className="">Ethereum</div>
-                                    <div className="chevron"><i className="bi bi-chevron-down"></i></div>
-                                </div>
-                            </button>
-
+                            <NetworkSelector />
                             <div id="pages-navigation" className="bg-body px-3 py-4 border rounded-4 shadow">
                                 <ul className="nav nav-pills flex-column mb-auto">
                                     <li className="nav-item"><NavLink href="/borrow"><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>

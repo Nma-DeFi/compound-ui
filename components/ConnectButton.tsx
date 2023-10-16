@@ -1,5 +1,3 @@
-import Head from 'next/head';
-import NavLink from './NavLink';
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { useAccount, useDisconnect } from 'wagmi';
 import { truncateAddress } from '../utils/page';

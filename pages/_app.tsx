@@ -14,7 +14,7 @@ const wagmiConfig = defaultWagmiConfig({ chains: CHAINS, projectId });
 createWeb3Modal({ 
   wagmiConfig, projectId, chains: CHAINS, 
   themeMode: 'light', 
-  themeVariables: {'--w3m-z-index': 10000 }
+  themeVariables: { '--w3m-z-index': 10000 }
 });
 
 export default function App({ Component, pageProps }: AppProps) {

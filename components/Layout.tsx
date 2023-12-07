@@ -2,8 +2,12 @@ import Head from 'next/head';
 import NavLink from './NavLink';
 import ConnectButton from './ConnectButton';
 import NetworkSelector from './NetworkSelector';
+import { useState } from 'react';
+import { mainnet } from 'wagmi';
 
 export default function Layout({ children }) {
+
+    const [ chainId, setChainId ] = useState(mainnet.id);    
 
     return (
         <> 
@@ -50,7 +54,7 @@ export default function Layout({ children }) {
                 <div className="row">
                     <div className="col-2 d-none d-xl-flex flex-column">
                         <div id="menu-column">
-                            <NetworkSelector />
+                            <NetworkSelector currentId={chainId} onChange={setChainId} />
                             <div id="pages-navigation" className="bg-body px-3 py-4 border rounded-4 shadow">
                                 <ul className="nav nav-pills flex-column mb-auto">
                                     <li className="nav-item"><NavLink href="/borrow"><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
@@ -58,7 +62,6 @@ export default function Layout({ children }) {
                                     <li className="nav-item"><NavLink href="/claim"><i className="bi bi-stars me-1"></i> Claim</NavLink></li>
                                 </ul>
                             </div>
-                                                                    
                             <div className="d-flex justify-content-around fs-4 text-primary">
                                 <a href="#"><i className="bi bi-github"></i></a>
                                 <a href="#"><i className="bi bi-discord"></i></a>

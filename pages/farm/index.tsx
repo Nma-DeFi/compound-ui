@@ -1,32 +1,66 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import UserAccount from "../../components/UserAccount";
+import { arbitrum, mainnet, polygon, base } from "wagmi/chains";
 
-export default function Farm() {
-
-  const [ tokens, setTokens ] = useState([]);    
-
-
-  useEffect(() => {
-    const tokenList = [
+const TOKENS = {
+  [mainnet.id]: 
+    [
       {
         symbol: 'USDC',
-        name: 'USD Coin',
+        name: 'USD Coin (eth)',
         address: '1'
       },
       {
         symbol: 'ETH',
-        name: 'Ether',
+        name: 'Ether (eth)',
         address: '2'
-      },
-      {
-        symbol: 'COMP',
-        name: 'Compound',
-        address: '3'
       }
-    ];
-    setTokens(tokenList);
-  }, []);
+    ],
+  [polygon.id]: 
+      [
+        {
+          symbol: 'USDC',
+          name: 'USD Coin (poly)',
+          address: '1'
+        },
+        {
+          symbol: 'ETH',
+          name: 'Ether (poly)',
+          address: '2'
+        }
+      ],
+  [arbitrum.id]: 
+      [
+        {
+          symbol: 'USDC',
+          name: 'USD Coin (arb)',
+          address: '1'
+        },
+        {
+          symbol: 'ETH',
+          name: 'Ether (arb)',
+          address: '2'
+        }
+      ],
+  [base.id]: 
+      [
+        {
+          symbol: 'USDC',
+          name: 'USD Coin (base)',
+          address: '1'
+        },
+        {
+          symbol: 'ETH',
+          name: 'Ether (base)',
+          address: '2'
+        }
+      ],
+}
+
+export default function Farm({ chainId }) {
+
+  const [ tokens, ] = useState(TOKENS);
 
   return ( 
       <>
@@ -47,7 +81,7 @@ export default function Farm() {
                 <div className="col text-center">Action</div>
             </div>
 
-            {tokens.map(token => 
+            {tokens[chainId].map(token => 
               <div key={token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">

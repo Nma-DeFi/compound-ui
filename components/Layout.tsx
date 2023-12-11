@@ -2,12 +2,16 @@ import Head from 'next/head';
 import NavLink from './NavLink';
 import ConnectButton from './ConnectButton';
 import NetworkSelector from './NetworkSelector';
-import { useState } from 'react';
+import { cloneElement, useState } from 'react';
 import { mainnet } from 'wagmi';
 
 export default function Layout({ children }) {
 
     const [ chainId, setChainId ] = useState(mainnet.id);    
+
+    const renderChildren = () => {
+        return cloneElement(children, { chainId });
+    };
 
     return (
         <> 
@@ -70,7 +74,7 @@ export default function Layout({ children }) {
                             </div>
                         </div>
                     </div>
-                    {children}
+                    {renderChildren()}
                 </div>
             </div>
         </>

@@ -4,13 +4,16 @@
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "graphql-codegen": "graphql-codegen --config graphql/codegen.ts"
   },
   "dependencies": {
     "@compound-finance/compound-js": "^0.6.2",
     "@web3modal/wagmi": "^3.0.2",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.1",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
     "next": "latest",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -21,6 +24,10 @@
     "node": ">=18"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-graphql-request": "^6.0.1",
+    "@graphql-codegen/typescript-operations": "^4.0.1",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.2",
     "@types/jest": "^29.5.11",
@@ -29,6 +36,6 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "sass": "^1.68.0",
-    "typescript": "5.2.2"
+    "typescript": "^5.2.2"
   }
 }

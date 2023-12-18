@@ -1,0 +1,32 @@
+query AllMarkets {
+    markets {
+        cometProxy
+        configuration {
+            baseToken {
+                token {
+                    symbol
+                }
+            }
+        }
+    }
+}
+
+query MarketByID($id: ID!) {
+    market(id: $id) {
+        cometProxy
+    }
+}
+
+query MarketsBy($where: Market_filter) {
+    markets(where: $where) {
+        cometProxy
+        configuration {
+            baseToken {
+                token {
+                    name
+                    symbol
+                }
+            }
+        }
+    }
+}

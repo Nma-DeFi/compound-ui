@@ -8,11 +8,11 @@ import { useEffect } from "react";
 export default function Farm() {
 
   const { currentChainId } = useCurrentChain();
-  const { isPending, isSuccess, data } = useMarkets(currentChainId);
+  const { isLoading, isSuccess, data } = useMarkets(currentChainId);
 
   useEffect(() => {
-    console.log('useEffects', { isPending, data }); 
-  }, [ isPending, data ]);
+    console.log('useEffects', { isLoading, data }); 
+  }, [ isLoading, data ]);
 
   return ( 
       <>
@@ -33,7 +33,7 @@ export default function Farm() {
                 <div className="col text-center">Action</div>
             </div>
 
-            { isPending && <>Loading ...</> }
+            { isLoading && <>Loading ...</> }
 
             { isSuccess && data.markets.map(m => m.configuration.baseToken.token).map(token => 
               <div key={token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">

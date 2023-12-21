@@ -1,19 +1,21 @@
+query MarketByID($id: ID!) {
+    market(id: $id) {
+        cometProxy
+    }
+}
+
 query AllMarkets {
     markets {
         cometProxy
         configuration {
             baseToken {
                 token {
+                    address
+                    name
                     symbol
                 }
             }
         }
-    }
-}
-
-query MarketByID($id: ID!) {
-    market(id: $id) {
-        cometProxy
     }
 }
 
@@ -23,6 +25,7 @@ query MarketsBy($where: Market_filter) {
         configuration {
             baseToken {
                 token {
+                    address
                     name
                     symbol
                 }

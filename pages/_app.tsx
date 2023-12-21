@@ -2,10 +2,12 @@ import type { AppProps } from 'next/app'
 import Layout from '../components/Layout';
 import '../styles/globals.scss';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { CHAINS } from '../networks';
+import { CHAINS } from '../utils/networks';
 import { useEffect } from 'react';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
 import { WagmiConfig } from 'wagmi';
+import { CurrentChainProvider } from '../context/CurrentChainContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
@@ -17,6 +19,8 @@ createWeb3Modal({
   themeVariables: { '--w3m-z-index': 10000 }
 });
 
+const queryClient = new QueryClient();
+
 export default function App({ Component, pageProps }: AppProps) {
   
   useEffect(() => { 
@@ -25,9 +29,13 @@ export default function App({ Component, pageProps }: AppProps) {
   
   return (
     <WagmiConfig config={wagmiConfig}>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <QueryClientProvider client={queryClient}>
+        <CurrentChainProvider>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </CurrentChainProvider>
+      </QueryClientProvider>
     </WagmiConfig>
   );
 }

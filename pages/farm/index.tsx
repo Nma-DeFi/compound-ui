@@ -1,66 +1,18 @@
 import Head from "next/head";
-import { useState } from "react";
 import UserAccount from "../../components/UserAccount";
-import { arbitrum, mainnet, polygon, base } from "wagmi/chains";
+import { useCurrentChain } from "../../hooks/useCurrentChain";
+import { useMarkets } from "../../hooks/useMarkets";
+import { useEffect } from "react";
 
-const TOKENS = {
-  [mainnet.id]: 
-    [
-      {
-        symbol: 'USDC',
-        name: 'USD Coin (eth)',
-        address: '1'
-      },
-      {
-        symbol: 'ETH',
-        name: 'Ether (eth)',
-        address: '2'
-      }
-    ],
-  [polygon.id]: 
-      [
-        {
-          symbol: 'USDC',
-          name: 'USD Coin (poly)',
-          address: '1'
-        },
-        {
-          symbol: 'ETH',
-          name: 'Ether (poly)',
-          address: '2'
-        }
-      ],
-  [arbitrum.id]: 
-      [
-        {
-          symbol: 'USDC',
-          name: 'USD Coin (arb)',
-          address: '1'
-        },
-        {
-          symbol: 'ETH',
-          name: 'Ether (arb)',
-          address: '2'
-        }
-      ],
-  [base.id]: 
-      [
-        {
-          symbol: 'USDC',
-          name: 'USD Coin (base)',
-          address: '1'
-        },
-        {
-          symbol: 'ETH',
-          name: 'Ether (base)',
-          address: '2'
-        }
-      ],
-}
 
-export default function Farm({ chainId }) {
+export default function Farm() {
 
-  const [ tokens, ] = useState(TOKENS);
+  const { currentChainId } = useCurrentChain();
+  const { isPending, isSuccess, data } = useMarkets(currentChainId);
+
+  useEffect(() => {
+    console.log('useEffects', { isPending, data }); 
+  }, [ isPending, data ]);
 
   return ( 
       <>
@@ -81,7 +33,9 @@ export default function Farm({ chainId }) {
                 <div className="col text-center">Action</div>
             </div>
 
-            {tokens[chainId].map(token => 
+            { isPending && <>Loading ...</> }
+
+            { isSuccess && data.markets.map(m => m.configuration.baseToken.token).map(token => 
               <div key={token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">

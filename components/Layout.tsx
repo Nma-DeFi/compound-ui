@@ -2,16 +2,8 @@ import Head from 'next/head';
 import NavLink from './NavLink';
 import ConnectButton from './ConnectButton';
 import NetworkSelector from './NetworkSelector';
-import { cloneElement, useState } from 'react';
-import { mainnet } from 'wagmi';
 
 export default function Layout({ children }) {
-
-    const [ chainId, setChainId ] = useState(mainnet.id);    
-
-    const renderChildren = () => {
-        return cloneElement(children, { chainId });
-    };
 
     return (
         <> 
@@ -58,7 +50,7 @@ export default function Layout({ children }) {
                 <div className="row">
                     <div className="col-2 d-none d-xl-flex flex-column">
                         <div id="menu-column">
-                            <NetworkSelector currentId={chainId} onChange={setChainId} />
+                            <NetworkSelector />
                             <div id="pages-navigation" className="bg-body px-3 py-4 border rounded-4 shadow">
                                 <ul className="nav nav-pills flex-column mb-auto">
                                     <li className="nav-item"><NavLink href="/borrow"><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
@@ -74,7 +66,7 @@ export default function Layout({ children }) {
                             </div>
                         </div>
                     </div>
-                    {renderChildren()}
+                    { children }
                 </div>
             </div>
         </>

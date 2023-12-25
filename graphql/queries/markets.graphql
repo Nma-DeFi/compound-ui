@@ -10,11 +10,22 @@ query AllMarkets {
         configuration {
             baseToken {
                 token {
-                    address
                     name
                     symbol
+                    address
+                    decimals
                 }
             }
+        }
+        accounting {
+            baseSupplyIndex
+            totalBasePrincipalSupply
+            totalBaseSupply
+            totalBaseSupplyUsd
+            lastAccrualTime
+            netSupplyApr
+            rewardSupplyApr
+            supplyApr   
         }
     }
 }

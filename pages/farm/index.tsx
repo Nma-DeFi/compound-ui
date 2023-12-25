@@ -3,6 +3,8 @@ import UserAccount from "../../components/UserAccount";
 import { useCurrentChain } from "../../hooks/useCurrentChain";
 import { useMarkets } from "../../hooks/useMarkets";
 import { useEffect } from "react";
+import { bnf } from "../../utils/bn";
+import { nf } from "../../utils/number";
 
 
 export default function Farm() {
@@ -35,27 +37,27 @@ export default function Farm() {
 
             { isLoading && <>Loading ...</> }
 
-            { isSuccess && data.markets.map(m => m.configuration.baseToken.token).map(token => 
-              <div key={token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
+            { isSuccess && data.map(m => 
+              <div key={m.configuration.baseToken.token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
-                          <img src={`/images/tokens/${token.symbol}.svg`} className="d-none d-sm-block me-2" alt="USDC" width="42" />
+                          <img src={`/images/tokens/${m.configuration.baseToken.token.symbol}.svg`} className="d-none d-sm-block me-2" alt="USDC" width="42" />
                           <div>
-                              <div className="mb-1">{token.symbol}</div>
-                              <small className="d-none d-sm-block text-body-secondary">{token.name}</small>
+                              <div className="mb-1">{m.configuration.baseToken.token.symbol}</div>
+                              <small className="d-none d-sm-block text-body-secondary">{m.configuration.baseToken.token.name}</small>
                           </div>
                       </div>
                   </div>
                   <div className="col text-center d-none d-md-block">
-                      <div className="mb-1">731.86M</div>
-                      <small className="text-body-secondary">$731.86M</small>
+                      <div className="mb-1">{bnf(m.accounting.totalBaseSupplyScaled)}</div>
+                      <small className="text-body-secondary">${bnf(m.accounting.totalBaseSupplyUsd)}</small>
                   </div>
                   <div className="col text-center">
-                      <div className="mb-1">1.61K</div>
-                      <small className="text-body-secondary">$1.60K</small>
+                      <div className="mb-1">—</div>
+                      <small className="text-body-secondary">—</small>
                   </div>
                   <div className="col text-center">
-                    7.12<small className="text-body-secondary">%</small> <i className="bi bi-info-square text-body-tertiary ms-1 d-none d-sm-inline"></i>
+                  {nf(m.accounting.netSupplyAprScaled)}<small className="text-body-secondary">%</small> <i className="bi bi-info-square text-body-tertiary ms-1 d-none d-sm-inline"></i>
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">

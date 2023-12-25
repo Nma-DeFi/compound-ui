@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { useSubgraph } from "./useSubgraph";
+import { MarketInfoService } from "../services/market-info-service";
 
 export function useMarkets(chainId: number) {
 
-    const subgraph = useSubgraph(chainId);
+    const marketInfoService = new MarketInfoService({ chainId });
+    console.log('useMarkets', marketInfoService.findAllMarkets().then(m => console.log(m)));
 
     return useQuery({
         queryKey: ['AllMarkets', chainId],
-        queryFn: () => subgraph.AllMarkets(),
+        queryFn: () => marketInfoService.findAllMarkets(),
     });
 }

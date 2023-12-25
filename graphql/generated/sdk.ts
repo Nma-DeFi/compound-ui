@@ -8262,7 +8262,7 @@ export type MarketByIdQuery = { __typename?: 'Query', market?: { __typename?: 'M
 export type AllMarketsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', token: { __typename?: 'Token', address: any, name: string, symbol: string } } } }> };
+export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null } } }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any } }> };
 
 export type MarketsByQueryVariables = Exact<{
   where?: InputMaybe<Market_Filter>;
@@ -8286,11 +8286,22 @@ export const AllMarketsDocument = gql`
     configuration {
       baseToken {
         token {
-          address
           name
           symbol
+          address
+          decimals
         }
       }
+    }
+    accounting {
+      baseSupplyIndex
+      totalBasePrincipalSupply
+      totalBaseSupply
+      totalBaseSupplyUsd
+      lastAccrualTime
+      netSupplyApr
+      rewardSupplyApr
+      supplyApr
     }
   }
 }
@@ -8312,21 +8323,21 @@ export const MarketsByDocument = gql`
 }
     `;
 
-export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string) => Promise<T>;
+export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType, variables) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
     MarketByID(variables: MarketByIdQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<MarketByIdQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<MarketByIdQuery>(MarketByIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'MarketByID', 'query');
+      return withWrapper((wrappedRequestHeaders) => client.request<MarketByIdQuery>(MarketByIdDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'MarketByID', 'query', variables);
     },
     AllMarkets(variables?: AllMarketsQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<AllMarketsQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<AllMarketsQuery>(AllMarketsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AllMarkets', 'query');
+      return withWrapper((wrappedRequestHeaders) => client.request<AllMarketsQuery>(AllMarketsDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'AllMarkets', 'query', variables);
     },
     MarketsBy(variables?: MarketsByQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<MarketsByQuery> {
-      return withWrapper((wrappedRequestHeaders) => client.request<MarketsByQuery>(MarketsByDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'MarketsBy', 'query');
+      return withWrapper((wrappedRequestHeaders) => client.request<MarketsByQuery>(MarketsByDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'MarketsBy', 'query', variables);
     }
   };
 }

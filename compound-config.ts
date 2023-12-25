@@ -1,6 +1,6 @@
 import { mainnet, arbitrum, polygon, base } from 'wagmi/chains';
 
-export const NETWORKS_CONFIG = {
+export const COMPOUND_CONFIG = {
     [mainnet.id]: {
         subgraph: 'https://api.thegraph.com/subgraphs/name/papercliplabs/compound-v3-mainnet',
     },

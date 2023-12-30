@@ -22,3 +22,25 @@ it('MarketByID2', async () => {
     console.log("MarketByID2", data, data.markets?.map(m => m.configuration.baseToken));
     expect(data.markets?.length).toBe(1);
 })
+
+it('PositionsByAccount', async () => {
+    const data = await sdk.PositionsBy({where: {account_: {address: "0x00ba3ca0b6df1486c912893d9f288311a60ed753"}}});
+    console.log("PositionsByAccount", data);
+    expect(data.positions?.length > 0).toBeTruthy();
+})
+
+it('SupplyPositionsByAccount', async () => {
+    const data = await sdk.PositionsBy({where: {account_: {address: "0x001bcbba74d76875c3a34d6f7d9772bca38b7f8e"}, accounting_: {baseBalance_gt: "0"}}});
+    console.log("SupplyPositionsByAccount", data);
+    expect(data.positions?.length > 0).toBeTruthy();
+})
+
+it('SupplyPositionsByAccount2', async () => {
+    const data = await sdk.SupplyPositionsByAccount({ address: "0x001bcbba74d76875c3a34d6f7d9772bca38b7f8e" });
+    expect(data.positions?.length).toBe(1);
+    console.log("SupplyPositionsByAccount2", data, 
+        data.positions[0].account, 
+        data.positions[0].accounting, 
+        data.positions[0].market);
+}, 10000)
+

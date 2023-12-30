@@ -12,7 +12,7 @@ export function priceScale(price) {
     return bn(price).div(PRICE_SCALE);
 }
 
-export function tokenScale(tokenValue, decimals) {
+export function tokenScale(amount, decimals) {
     const factor = bn(10).pow(decimals);
-    return bn(tokenValue).div(factor);
+    return bn(amount).div(factor);
 }

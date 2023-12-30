@@ -1,0 +1,60 @@
+
+query SupplyPositionsByAccount($address: Bytes!) {
+  positions(
+    where: {account_: {address: $address}, accounting_: {baseBalance_gt: "0"}}
+  ) {
+    account {
+      address
+    }
+    accounting {
+      basePrincipal
+      baseBalance
+      baseBalanceUsd
+    }
+    market {
+      id
+      cometProxy
+      configuration {
+        baseToken {
+          token {
+            name
+            symbol
+            address
+          }
+        }
+      }
+      accounting {
+        baseSupplyIndex    
+      }
+    }
+  }
+}
+
+query PositionsBy($where: Position_filter) {
+  positions(where: $where) {
+    account {
+      address
+    }
+    accounting {
+      basePrincipal
+      baseBalance
+      baseBalanceUsd
+    }
+    market {
+      id
+      cometProxy
+      configuration {
+        baseToken {
+          token {
+            name
+            symbol
+            address
+          }
+        }
+      }
+      accounting {
+        baseSupplyIndex    
+      }
+    }
+  }
+}

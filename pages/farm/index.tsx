@@ -1,20 +1,22 @@
 import Head from "next/head";
 import UserAccount from "../../components/UserAccount";
 import { useCurrentChain } from "../../hooks/useCurrentChain";
-import { useMarkets } from "../../hooks/useMarkets";
-import { useEffect } from "react";
 import { bnf } from "../../utils/bn";
 import { nf } from "../../utils/number";
+import { useAccount } from "wagmi";
+import { useMarketsWithSupplyPositions } from "../../hooks/useMarketsWithSupplyPositions";
+import { useEffect } from "react";
 
 
 export default function Farm() {
 
+  const { address } = useAccount();
   const { currentChainId } = useCurrentChain();
-  const { isLoading, isSuccess, data } = useMarkets(currentChainId);
+  const { isLoading, isSuccess, data } = useMarketsWithSupplyPositions({ chainId: currentChainId, account: address });
 
   useEffect(() => {
-    console.log('useEffects', { isLoading, data }); 
-  }, [ isLoading, data ]);
+    console.log('useEffects Farm load success', isSuccess, data); 
+  }, [ isSuccess, data ]);
 
   return ( 
       <>
@@ -35,7 +37,7 @@ export default function Farm() {
                 <div className="col text-center">Action</div>
             </div>
 
-            { isLoading && <>Loading ...</> }
+            { isLoading && <div className="text-body-tertiary">Loading ...</div> }
 
             { isSuccess && data.map(m => 
               <div key={m.configuration.baseToken.token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
@@ -53,8 +55,17 @@ export default function Farm() {
                       <small className="text-body-secondary">${bnf(m.accounting.totalBaseSupplyUsd)}</small>
                   </div>
                   <div className="col text-center">
+                  {m.userPosition ? (
+                    <>
+                      <div className="mb-1">{bnf(m.userPosition.balance)}</div>
+                      <small className="text-body-secondary">${bnf(m.userPosition.balanceUsd)}</small>
+                    </>
+                    ) : (
+                    <>
                       <div className="mb-1">—</div>
                       <small className="text-body-secondary">—</small>
+                    </>
+                  )}
                   </div>
                   <div className="col text-center">
                   {nf(m.accounting.netSupplyAprScaled)}<small className="text-body-secondary">%</small> <i className="bi bi-info-square text-body-tertiary ms-1 d-none d-sm-inline"></i>

@@ -8,7 +8,7 @@ import { useMarkets } from "../../hooks/useMarkets";
 import { useState } from "react";
 import Supply, { SUPPLY_MODAL } from "../../components/farm/Supply";
 import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw";
-import { openModal as showBsModal } from "../../utils/bootstrap";
+import { useBootstrap } from "../../hooks/useBootstrap";
 
 const Action = {
   Supply: 0,
@@ -19,22 +19,25 @@ export default function Farm() {
 
   const [ targetMarket, setTargetMarket ] = useState(null);
 
+  const bootstrap = useBootstrap();
   const { address } = useAccount();
   const { currentChainId } = useCurrentChain();
   const { isLoading, isSuccess, data } = useMarkets({ chainId: currentChainId, account: address });
 
   function openModal(market, action) {
     setTargetMarket(market);
-    showBsModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL);
+    bootstrap.openModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL);
   }
 
   return ( 
       <>
-        <Supply {...targetMarket} />
-        <Withdraw {...targetMarket} />
         <Head>
           <title>Farm</title>
         </Head>
+
+        <Supply {...targetMarket} />
+        <Withdraw {...targetMarket} />
+        
         <div className="col-8 px-5">
             <div className="row g-0 align-items-center p-4 mb-5 bg-body border rounded shadow mb-5">
                 <div className="col-12 col-sm-4"><h2 className="mb-3 mb-sm-0">Farm</h2></div>

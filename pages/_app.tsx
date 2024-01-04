@@ -2,7 +2,7 @@ import type { AppProps } from 'next/app'
 import Layout from '../components/Layout';
 import '../styles/globals.scss';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { CHAINS } from '../utils/networks';
+import { CHAINS } from '../utils/chains';
 import { useEffect } from 'react';
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
 import { WagmiConfig } from 'wagmi';
@@ -23,9 +23,9 @@ const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: AppProps) {
   
-  useEffect(() => { 
+  /*useEffect(() => { 
     require('bootstrap/dist/js/bootstrap.bundle.min.js');
-  });
+  });*/
   
   return (
     <WagmiConfig config={wagmiConfig}>

@@ -14,14 +14,14 @@ export class MarketInfoService {
     }
 
     async findAllMarkets() {
-        const data = await this.subgraph.AllMarkets();
-        return data.markets.map(m => this.extendMarket(m));
+        const { markets } = await this.subgraph.AllMarkets();
+        return markets.map(m => this.extendMarket(m));
     }
 
     async findAllMarketsWithSupplyPositions(account) {
         const markets = await this.findAllMarkets();
         const { positions } = await this.subgraph.SupplyPositionsByAccount({ address: account});
-        return markets.map((m) => {
+        return markets.map(m => {
             const baseTokenDecimals =  m.configuration.baseToken.token.decimals;
             const position = positions?.find(p => p.market.id === m.id);
             const userBaseBalance = position?.accounting.baseBalance || 0;
@@ -35,7 +35,6 @@ export class MarketInfoService {
         });
     }
 
-
     extendMarket(market) {
         const baseTokenDecimals =  market.configuration.baseToken.token.decimals;
         const presentTotalBaseSupply = presentBaseValue(market.accounting.totalBasePrincipalSupply, market.accounting.baseSupplyIndex);
@@ -44,5 +43,4 @@ export class MarketInfoService {
         market.accounting.totalPresentSupplyScaled = tokenScale(presentTotalBaseSupply, baseTokenDecimals);
         return market;
     }
-
   }

@@ -4,22 +4,34 @@ import { useCurrentChain } from "../../hooks/useCurrentChain";
 import { bnf } from "../../utils/bn";
 import { nf } from "../../utils/number";
 import { useAccount } from "wagmi";
-import { useMarketsWithSupplyPositions } from "../../hooks/useMarketsWithSupplyPositions";
-import { useEffect } from "react";
+import { useMarkets } from "../../hooks/useMarkets";
+import { useState } from "react";
+import Supply, { SUPPLY_MODAL } from "../../components/farm/Supply";
+import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw";
+import { openModal as showBsModal } from "../../utils/bootstrap";
 
+const Action = {
+  Supply: 0,
+  Withdraw: 1,
+}
 
 export default function Farm() {
 
+  const [ targetMarket, setTargetMarket ] = useState(null);
+
   const { address } = useAccount();
   const { currentChainId } = useCurrentChain();
-  const { isLoading, isSuccess, data } = useMarketsWithSupplyPositions({ chainId: currentChainId, account: address });
+  const { isLoading, isSuccess, data } = useMarkets({ chainId: currentChainId, account: address });
 
-  useEffect(() => {
-    console.log('useEffects Farm load success', isSuccess, data); 
-  }, [ isSuccess, data ]);
+  function openModal(market, action) {
+    setTargetMarket(market);
+    showBsModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL);
+  }
 
   return ( 
       <>
+        <Supply {...targetMarket} />
+        <Withdraw {...targetMarket} />
         <Head>
           <title>Farm</title>
         </Head>
@@ -72,8 +84,8 @@ export default function Farm() {
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">
-                          <button type="button" className="btn btn-primary text-white mb-2">Deposit</button>
-                          <button type="button" className="btn btn-primary text-white">Withdraw</button>
+                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => openModal(m, Action.Supply)}>Deposit</button>
+                          <button type="button" className="btn btn-primary text-white" onClick={() => openModal(m, Action.Withdraw)}>Withdraw</button>
                       </div>
                   </div>
               </div>

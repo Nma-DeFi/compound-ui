@@ -53,11 +53,7 @@ $primary: shade-color(rgb(0, 211, 149), 5%);
 // Utilities
 @import "bootstrap/scss/utilities/api";
 
-
-$sidebar-pt: 90px;
-$sidebar-font-size: $font-size-base * 1.075;
-
-$sticky-menu-top: 8.3rem;
+@import "./constants.scss";
 
 body { 
     overflow-y: scroll; 
@@ -75,39 +71,4 @@ body {
             }
         }
     }
-}
-
-/*** Mixins ***/
-@mixin item-hover() {
-    cursor: pointer;
-    &:hover {
-        background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
-    }
-}
-
-/*** Utilities ***/
-.item-hover {
-    @include item-hover();
-}
-
-.color-primary-shaded {
-    color: shade-color($primary, 5%) !important;
-}
-
-/*** Pages ***/
-
-/* Farm */
-.asset-item {
-    @include item-hover();
-}
-
-/* Claim */
-#claim-accordion .accordion-button::after { margin-left: inherit; }
-
-/*** Components ***/
-
-/* User account */
-#user-account {
-    position: sticky;
-    top: $sticky-menu-top;
 }

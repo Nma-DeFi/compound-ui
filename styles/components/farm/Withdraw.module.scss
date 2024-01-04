@@ -1,0 +1,33 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+#withdraw-body {
+    padding-top: 1.25rem;  // default 1rem 
+    padding-bottom: 1.25rem;   
+}
+
+#withdraw-form {
+    padding-top: 2rem;   
+    padding-bottom: 2rem;   
+}
+
+#withdraw-input {
+    font-size: $h1-font-size !important;
+    font-weight: $font-weight-medium !important;
+    line-height: 1.2 !important; // line height sm 1.25 base 1.5 lg 2
+    margin-bottom: 0.2rem !important;
+    all: inherit;
+    width: 100%;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+#withdraw-input::-webkit-outer-spin-button,
+#withdraw-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#withdraw-input::placeholder {
+    color: $dark;
+}

@@ -1,12 +1,21 @@
 import { useWeb3Modal } from '@web3modal/wagmi/react';
 import { useAccount, useDisconnect } from 'wagmi';
-import { truncateAddress } from '../utils/page';
 
 export default function ConnectButton() {
 
     const { open: openWeb3Modal } = useWeb3Modal();
     const { address, isConnected } = useAccount();
     const { disconnect } = useDisconnect();
+
+    
+    const truncateAddress = (address: string) => {
+        if (!address) return 'No Account';
+        const match = address.match(
+        /^(0x[a-zA-Z0-9]{2})[a-zA-Z0-9]+([a-zA-Z0-9]{4})$/
+        );
+        if (!match) return address;
+        return `${match[1]}....${match[2]}`;
+    };
 
     return isConnected ? (
             <>

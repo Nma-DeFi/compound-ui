@@ -1,11 +1,12 @@
 import { useAccount } from 'wagmi';
+import css from '../styles/components/UserAccount.module.scss';
 
 export default function UserAccount() {
 
     const { isConnected } = useAccount();
 
     return isConnected ? (
-        <div id="user-account" className="bg-body p-4 border rounded shadow text-center rounded-4">
+        <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4">
             <h4 className="mb-4">Your account</h4>
             <div className="d-flex justify-content-between mb-3 small">
                 <div className="">

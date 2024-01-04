@@ -19,14 +19,14 @@ export default function Farm() {
 
   const [ targetMarket, setTargetMarket ] = useState(null);
 
-  const bootstrap = useBootstrap();
   const { address } = useAccount();
   const { currentChainId } = useCurrentChain();
+  const { openModal: showBsModal } = useBootstrap();
   const { isLoading, isSuccess, data } = useMarkets({ chainId: currentChainId, account: address });
 
   function openModal(market, action) {
     setTargetMarket(market);
-    bootstrap.openModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL);
+    showBsModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL);
   }
 
   return ( 

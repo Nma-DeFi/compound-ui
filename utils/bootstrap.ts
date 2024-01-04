@@ -1,9 +1,11 @@
 import { Modal } from "bootstrap";
 
-export function openModal(id) {
-    Modal.getOrCreateInstance(`#${id}`).show();
+export const BootstrapUtils = {
+    openModal: (id) => {
+        Modal.getOrCreateInstance(`#${id}`).show();
+    }, 
+    hideModal: (id) => {
+        Modal.getOrCreateInstance(`#${id}`).hide();
+    },
 }
-  
-export function hideModal(id) {
-    Modal.getOrCreateInstance(`#${id}`).hide();
-}
+ 

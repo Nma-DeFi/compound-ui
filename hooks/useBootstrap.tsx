@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { BootstrapUtils } from "../utils/bootstrap";
+import * as BootstrapUtils from "../utils/bootstrap";
 
 export function useBootstrap() {
 
@@ -9,7 +9,7 @@ export function useBootstrap() {
     });
 
     useEffect(() => {
-        import('../utils/bootstrap').then(({ BootstrapUtils }) => setBootstrap(BootstrapUtils));
+        import('../utils/bootstrap').then(bs => setBootstrap(bs));
     }, []);
 
     return bootstrap;

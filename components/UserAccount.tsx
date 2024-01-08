@@ -1,9 +1,9 @@
-import { useAccount } from 'wagmi';
 import css from '../styles/components/UserAccount.module.scss';
+import { useCurrentAccount } from '../hooks/useCurrentAccount';
 
 export default function UserAccount() {
 
-    const { isConnected } = useAccount();
+    const { isConnected } = useCurrentAccount();
 
     return isConnected ? (
         <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4">

@@ -2,8 +2,11 @@ import Head from 'next/head';
 import NavLink from './NavLink';
 import ConnectButton from './ConnectButton';
 import NetworkSelector from './NetworkSelector';
+import { useAccountInit } from '../hooks/useCurrentAccount';
 
 export default function Layout({ children }) {
+
+    useAccountInit();
 
     return (
         <> 

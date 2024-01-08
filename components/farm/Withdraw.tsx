@@ -1,13 +1,8 @@
-import { useEffect } from "react";
 import css from '../../styles/components/farm/Withdraw.module.scss';
 
 export const WITHDRAW_MODAL = 'withdraw';
 
 export default function Withdraw(market) {
-
-    useEffect(() => {
-      console.log('Withdraw Market', market); 
-    }, [market]);
 
     return (
         <div id={WITHDRAW_MODAL} className="modal" tabIndex={-1}>
@@ -31,7 +26,7 @@ export default function Withdraw(market) {
                                   <span className="px-3">{market.configuration?.baseToken.token.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Wallet : <span className="text-body-tertiary">$1.43K</span></div>
+                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">$1.43K</span></div>
                       </div>
                   </div>
                   <div className="row g-2">

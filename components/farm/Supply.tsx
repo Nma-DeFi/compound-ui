@@ -1,13 +1,8 @@
-import { useEffect } from "react";
 import css from '../../styles/components/farm/Supply.module.scss';
 
 export const SUPPLY_MODAL = 'supply';
 
 export default function Supply(market) {
-
-    useEffect(() => {
-        console.log('Supply Market', market); 
-    }, [market]);
 
     return (
         <div id={SUPPLY_MODAL} className="modal" tabIndex={-1}>

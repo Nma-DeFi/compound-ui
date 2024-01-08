@@ -15,7 +15,7 @@ export class MarketInfoService {
 
     async findAllMarkets() {
         const { markets } = await this.subgraph.AllMarkets();
-        return markets.map(m => this.extendMarket(m));
+        return markets.map(m => this.enhanceMarket(m));
     }
 
     async findAllMarketsWithSupplyPositions(account) {
@@ -35,7 +35,7 @@ export class MarketInfoService {
         });
     }
 
-    extendMarket(market) {
+    enhanceMarket(market) {
         const baseTokenDecimals =  market.configuration.baseToken.token.decimals;
         const presentTotalBaseSupply = presentBaseValue(market.accounting.totalBasePrincipalSupply, market.accounting.baseSupplyIndex);
         market.accounting.netSupplyAprScaled = Number(market.accounting.netSupplyApr) * 100;

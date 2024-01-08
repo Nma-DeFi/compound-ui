@@ -1,40 +1,45 @@
 import Head from "next/head";
 import UserAccount from "../../components/UserAccount";
-import { useCurrentChain } from "../../hooks/useCurrentChain";
 import { bnf } from "../../utils/bn";
 import { nf } from "../../utils/number";
-import { useAccount } from "wagmi";
 import { useMarkets } from "../../hooks/useMarkets";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Supply, { SUPPLY_MODAL } from "../../components/farm/Supply";
 import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw";
 import { useBootstrap } from "../../hooks/useBootstrap";
+import { useCurrentChain } from "../../hooks/useCurrentChain";
+import { useCurrentAccount } from "../../hooks/useCurrentAccount";
+import { connect } from "react-redux";
 
 const Action = {
   Supply: 0,
   Withdraw: 1,
 }
 
-export default function Farm() {
+export function Farm({ marketsList, isLoading }) {
 
   const [ targetMarket, setTargetMarket ] = useState(null);
 
-  const { address } = useAccount();
+  const { address } = useCurrentAccount();
   const { currentChainId } = useCurrentChain();
   const { openModal: showBsModal } = useBootstrap();
-  const { isLoading, isSuccess, data } = useMarkets({ chainId: currentChainId, account: address });
+  //const { isLoading, isSuccess, data } = useMarkets({ chainId: currentChainId, account: address });
 
   function openModal(market, action) {
     setTargetMarket(market);
     showBsModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL);
   }
 
+  useEffect(() => {
+    console.log('Farm marketsList', marketsList)
+  }, [marketsList]);
+
   return ( 
       <>
         <Head>
           <title>Farm</title>
         </Head>
-
+        
         <Supply {...targetMarket} />
         <Withdraw {...targetMarket} />
         
@@ -54,7 +59,7 @@ export default function Farm() {
 
             { isLoading && <div className="text-body-tertiary">Loading ...</div> }
 
-            { isSuccess && data.map(m => 
+            { /*isSuccess && data.map(m => */ marketsList?.map(m =>
               <div key={m.configuration.baseToken.token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
@@ -101,4 +106,10 @@ export default function Farm() {
       </>
     );
 }
-  
+
+const mapStateToProps = (state) => {
+  const { markets } = state.marketData
+  return { marketsList: markets }
+}
+
+export default connect(mapStateToProps)(Farm)

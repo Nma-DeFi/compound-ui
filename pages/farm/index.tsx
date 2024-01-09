@@ -2,37 +2,24 @@ import Head from "next/head";
 import UserAccount from "../../components/UserAccount";
 import { bnf } from "../../utils/bn";
 import { nf } from "../../utils/number";
-import { useMarkets } from "../../hooks/useMarkets";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Supply, { SUPPLY_MODAL } from "../../components/farm/Supply";
 import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw";
 import { useBootstrap } from "../../hooks/useBootstrap";
-import { useCurrentChain } from "../../hooks/useCurrentChain";
-import { useCurrentAccount } from "../../hooks/useCurrentAccount";
 import { connect } from "react-redux";
+import { RootState } from '../../redux/types';
 
-const Action = {
-  Supply: 0,
-  Withdraw: 1,
-}
+const Action = { Supply: 0, Withdraw: 1 }
 
-export function Farm({ marketsList, isLoading }) {
+export function Farm({ status, markets }) {
 
-  const [ targetMarket, setTargetMarket ] = useState(null);
+  const [ targetMarket, setTargetMarket ] = useState(null)
+  const { openModal } = useBootstrap()
 
-  const { address } = useCurrentAccount();
-  const { currentChainId } = useCurrentChain();
-  const { openModal: showBsModal } = useBootstrap();
-  //const { isLoading, isSuccess, data } = useMarkets({ chainId: currentChainId, account: address });
-
-  function openModal(market, action) {
-    setTargetMarket(market);
-    showBsModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL);
+  function showModal(market, action) {
+    setTargetMarket(market)
+    openModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL)
   }
-
-  useEffect(() => {
-    console.log('Farm marketsList', marketsList)
-  }, [marketsList]);
 
   return ( 
       <>
@@ -57,9 +44,9 @@ export function Farm({ marketsList, isLoading }) {
                 <div className="col text-center">Action</div>
             </div>
 
-            { isLoading && <div className="text-body-tertiary">Loading ...</div> }
+            { status === 'loading' && <div className="text-body-tertiary">Loading ...</div> }
 
-            { /*isSuccess && data.map(m => */ marketsList?.map(m =>
+            { status === 'success' && markets.map(m =>
               <div key={m.configuration.baseToken.token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
@@ -92,8 +79,8 @@ export function Farm({ marketsList, isLoading }) {
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">
-                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => openModal(m, Action.Supply)}>Deposit</button>
-                          <button type="button" className="btn btn-primary text-white" onClick={() => openModal(m, Action.Withdraw)}>Withdraw</button>
+                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(m, Action.Supply)}>Deposit</button>
+                          <button type="button" className="btn btn-primary text-white" onClick={() => showModal(m, Action.Withdraw)}>Withdraw</button>
                       </div>
                   </div>
               </div>
@@ -107,9 +94,6 @@ export function Farm({ marketsList, isLoading }) {
     );
 }
 
-const mapStateToProps = (state) => {
-  const { markets } = state.marketData
-  return { marketsList: markets }
-}
+const mapStateToProps = (state: RootState) => state.marketData
 
 export default connect(mapStateToProps)(Farm)

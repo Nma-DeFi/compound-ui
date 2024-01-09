@@ -3,11 +3,11 @@ import { marketLogicInit } from './marketLogic';
 import { marketDataInit } from './marketData';
 
 interface CurrentChainState {
-    chainId: number
+    chainId: number | undefined
 }
 
 const initialState: CurrentChainState = {
-    chainId: 0,
+    chainId: undefined,
 }
 
 export const currentChainSlice = createSlice({

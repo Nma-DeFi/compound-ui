@@ -1,36 +1,45 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { MarketInfoService } from '../../services/market-info-service';
+import { ThunkApiFields } from '../types';
 
 export const marketDataSlice = createSlice({
     name: 'marketData',
     initialState: {
-        markets: undefined
+        status: 'idle',
+        markets: undefined,
     },
-    reducers: {
-        marketDataLoaded: (state, action) => {
-            state.markets = action.payload
-        },
-    },
+    reducers: {},
+    extraReducers(builder) {
+      builder
+        .addCase(marketDataInit.pending, (state, action) => {
+          state.status = 'loading'
+          state.markets = undefined
+        })
+        .addCase(marketDataInit.fulfilled, (state, action) => {
+          state.status = 'success'
+          state.markets = action.payload
+        })
+        .addCase(marketDataInit.rejected, (state, action) => {
+          state.status = 'error'
+          state.markets = undefined
+        })
+    }
 })
   
-export const marketDataInit = () => {
-    
-    return (dispatch, getState) => {
+export const marketDataInit = createAsyncThunk<any, void, ThunkApiFields>(
+    'marketData/init',
+    async (_, { getState }) => {
         const { chainId } = getState().currentChain
         const { isConnected, address } = getState().currentAccount
-
-        console.log('marketDataInit', chainId, isConnected, address)
-
+        
         const service = new MarketInfoService({ chainId })
 
-        const fetchMarkets = isConnected 
+        const markets = isConnected 
             ? service.findAllMarketsWithSupplyPositions(address)
             : service.findAllMarkets()
 
-        fetchMarkets.then(markets => dispatch(marketDataLoaded(markets)))
+        return await markets
     }
-}
-
-export const { marketDataLoaded } = marketDataSlice.actions
+)
 
 export default marketDataSlice.reducer

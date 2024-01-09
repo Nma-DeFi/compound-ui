@@ -1,4 +1,4 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import { marketDataInit } from './marketData'
 
 export const currentAccountSlice = createSlice({
@@ -8,7 +8,7 @@ export const currentAccountSlice = createSlice({
         isConnected: false,
     },
     reducers: {
-        connected: (state, action: PayloadAction<number>) => {
+        connected: (state, action) => {
             state.address = action.payload
             state.isConnected = true
         },

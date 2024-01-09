@@ -11,7 +11,7 @@ export function useCurrentChain() {
     const dispatch = useAppDispatch();
 
     let currentChainId = useAppSelector(state => state.currentChain.chainId);
-    if (currentChainId === 0) {
+    if (currentChainId === undefined) {
         currentChainId = isConnected ? chain.id : mainnet.id
         dispatch(chainSwitched(currentChainId));
     }

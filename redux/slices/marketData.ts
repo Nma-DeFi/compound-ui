@@ -11,7 +11,7 @@ export const marketDataSlice = createSlice({
     reducers: {},
     extraReducers(builder) {
       builder
-        .addCase(marketDataInit.pending, (state, action) => {
+        .addCase(marketDataInit.pending, (state) => {
           state.status = 'loading'
           state.markets = undefined
         })
@@ -19,7 +19,7 @@ export const marketDataSlice = createSlice({
           state.status = 'success'
           state.markets = action.payload
         })
-        .addCase(marketDataInit.rejected, (state, action) => {
+        .addCase(marketDataInit.rejected, (state) => {
           state.status = 'error'
           state.markets = undefined
         })

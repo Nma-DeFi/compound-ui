@@ -1,15 +1,15 @@
-import Head from "next/head";
-import UserAccount from "../../components/UserAccount";
-import { bnf } from "../../utils/bn";
-import { nf } from "../../utils/number";
-import { useState } from "react";
-import Supply, { SUPPLY_MODAL } from "../../components/farm/Supply";
-import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw";
-import { useBootstrap } from "../../hooks/useBootstrap";
-import { connect } from "react-redux";
-import { RootState } from '../../redux/types';
+import Head from "next/head"
+import UserAccount from "../../components/UserAccount"
+import { bnf } from "../../utils/bn"
+import { nf } from "../../utils/number"
+import { useState } from "react"
+import { useBootstrap } from "../../hooks/useBootstrap"
+import { connect } from "react-redux"
+import { RootState } from '../../redux/types'
+import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
+import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
 
-const Action = { Supply: 0, Withdraw: 1 }
+const Action = { Deposit: 0, Withdraw: 1 }
 
 export function Farm({ status, markets }) {
 
@@ -18,7 +18,7 @@ export function Farm({ status, markets }) {
 
   function showModal(market, action) {
     setTargetMarket(market)
-    openModal(action === Action.Supply ? SUPPLY_MODAL : WITHDRAW_MODAL)
+    openModal(action === Action.Deposit ? DEPOSIT_MODAL : WITHDRAW_MODAL)
   }
 
   return ( 
@@ -27,7 +27,7 @@ export function Farm({ status, markets }) {
           <title>Farm</title>
         </Head>
         
-        <Supply {...targetMarket} />
+        <Deposit {...targetMarket} />
         <Withdraw {...targetMarket} />
         
         <div className="col-8 px-5">
@@ -79,7 +79,7 @@ export function Farm({ status, markets }) {
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">
-                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(m, Action.Supply)}>Deposit</button>
+                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(m, Action.Deposit)}>Deposit</button>
                           <button type="button" className="btn btn-primary text-white" onClick={() => showModal(m, Action.Withdraw)}>Withdraw</button>
                       </div>
                   </div>

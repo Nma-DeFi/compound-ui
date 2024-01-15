@@ -8,6 +8,7 @@ import { connect } from "react-redux"
 import { RootState } from '../../redux/types'
 import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
 import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
+import { baseTokenAddress, baseTokenName, baseTokenSymbol } from "../../services/market-info-service"
 
 const Action = { Deposit: 0, Withdraw: 1 }
 
@@ -47,13 +48,13 @@ export function Farm({ status, markets }) {
             { status === 'loading' && <div className="text-body-tertiary">Loading ...</div> }
 
             { status === 'success' && markets.map(m =>
-              <div key={m.configuration.baseToken.token.address} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
+              <div key={baseTokenAddress(m)} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
-                          <img src={`/images/tokens/${m.configuration.baseToken.token.symbol}.svg`} className="d-none d-sm-block me-2" alt="USDC" width="42" />
+                          <img src={`/images/tokens/${baseTokenSymbol(m)}.svg`} className="d-none d-sm-block me-2" alt="USDC" width="42" />
                           <div>
-                              <div className="mb-1">{m.configuration.baseToken.token.symbol}</div>
-                              <small className="d-none d-sm-block text-body-secondary">{m.configuration.baseToken.token.name}</small>
+                              <div className="mb-1">{baseTokenSymbol(m)}</div>
+                              <small className="d-none d-sm-block text-body-secondary">{baseTokenName(m)}</small>
                           </div>
                       </div>
                   </div>

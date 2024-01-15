@@ -25,7 +25,13 @@ export class Erc20Service {
         })
     }
 
-    async balanceOf(owner) {
+    async balanceOf(owner: Address) {
+        console.log(
+            'Erc20Service.balanceOf',
+            'chain', this.client.chain.name,
+            'erc20', this.contract.address,
+            'owner', owner
+        );
         return await this.client.readContract({
             ...this.contract,
             functionName: 'balanceOf',
@@ -33,7 +39,13 @@ export class Erc20Service {
         })
     }
 
-    async allowance(owner, spender) {
+    async allowance(owner: Address, spender: Address) {
+        console.log(
+            'Erc20Service.allowance',
+            'chain', this.client.chain.name,
+            'erc20', this.contract.address,
+            'owner', owner, 'spender', spender
+        );
         return await this.client.readContract({
             ...this.contract,
             functionName: 'allowance',

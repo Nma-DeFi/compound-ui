@@ -22,13 +22,13 @@ export class MarketInfoService {
         const markets = await this.findAllMarkets()
         const { positions } = await this.subgraph.SupplyPositionsByAccount({ address: account})
         return markets.map(m => {
-            const baseTokenDecimals =  m.configuration.baseToken.token.decimals
+            const decimals = baseTokenDecimals(m)
             const position = positions?.find(p => p.market.id === m.id)
             const userBaseBalance = position?.accounting.baseBalance || 0
             return { 
                 ...m,
                 userPosition: {
-                    balance: tokenScale(userBaseBalance, baseTokenDecimals),
+                    balance: tokenScale(userBaseBalance, decimals),
                     balanceUsd: position?.accounting.baseBalanceUsd || 0,
                 }
             }
@@ -36,11 +36,19 @@ export class MarketInfoService {
     }
 
     enhanceMarket(market) {
-        const baseTokenDecimals =  market.configuration.baseToken.token.decimals
+        const decimals = baseTokenDecimals(market)
         const presentTotalBaseSupply = presentBaseValue(market.accounting.totalBasePrincipalSupply, market.accounting.baseSupplyIndex)
         market.accounting.netSupplyAprScaled = Number(market.accounting.netSupplyApr) * 100
-        market.accounting.totalBaseSupplyScaled = tokenScale(market.accounting.totalBaseSupply, baseTokenDecimals)
-        market.accounting.totalPresentSupplyScaled = tokenScale(presentTotalBaseSupply, baseTokenDecimals)
+        market.accounting.totalBaseSupplyScaled = tokenScale(market.accounting.totalBaseSupply, decimals)
+        market.accounting.totalPresentSupplyScaled = tokenScale(presentTotalBaseSupply, decimals)
         return market
     }
-  }
+}
+
+
+export const baseToken = market => market?.configuration?.baseToken.token
+export const baseTokenSymbol = market => baseToken(market)?.symbol
+export const baseTokenName = market => baseToken(market)?.name
+export const baseTokenAddress = market => baseToken(market)?.address
+export const baseTokenDecimals = market => baseToken(market)?.decimals
+export const cometProxy = market => market?.cometProxy

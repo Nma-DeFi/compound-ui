@@ -3,10 +3,10 @@ import css from '../../styles/components/farm/Deposit.module.scss'
 import { useEffect, useRef, useState } from 'react'
 import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import BigNumber from 'bignumber.js'
-import { Zero, bn, bnf } from '../../utils/bn'
+import { Zero, bn, bnf, fromBigInt } from '../../utils/bn'
 import { baseToken, cometProxy } from '../../services/market-info-service'
-import { useTokenBalance } from '../../hooks/useTokenBalance'
-import { useTokenAllowance } from '../../hooks/useTokenAllowance'
+import { useErc20 } from '../../hooks/useErc20'
+import Spinner from './Spinner'
 
 export const DEPOSIT_MODAL = 'deposit'
 
@@ -20,20 +20,24 @@ export const Mode = {
 
 export default function Deposit(market) {
     
-    const [ mode, setMode ] = useState<string | null>(null)
+    const [ mode, setMode ] = useState<string | null>(Mode.Init)
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
+    const [ balance, setBalance ] = useState<BigNumber>(null)
+    const [ allowance, setAllowance ] = useState<BigNumber>(null)
     const [ modalOpened, setModalOpened ] = useState<boolean>(false)
 
     const inputRef = useRef(null)
 
-    const { isConnected, address } = useCurrentAccount()
+    const { isConnected, address: account } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
 
     const comet = cometProxy(market)
     const token = baseToken(market)
 
-    const balance = useTokenBalance({ chainId, token, owner: address })
-    const allowance = useTokenAllowance({ chainId, token, owner: address, spender: comet })
+    const { 
+      balanceOf: tokenBalance, 
+      allowance: tokenAllowance 
+    }  = useErc20({ chainId, erc20Contract: token?.address })
 
     useEffect(() => {
       const modal = document.getElementById(DEPOSIT_MODAL)
@@ -54,10 +58,8 @@ export default function Deposit(market) {
     }
 
     useEffect(() => {
-      if (mode === Mode.NotConnected) return
-      if (amount.isZero()) {
-        setMode(Mode.Init)
-      } else if (isInsufficientBalance()) {
+      if (mode === Mode.NotConnected || mode === Mode.Init) return
+      if (isInsufficientBalance()) {
         setMode(Mode.InsufficientBalance)
       } else if (isInsufficientAllowance()) {
         setMode(Mode.InsufficientAllowance)
@@ -65,6 +67,12 @@ export default function Deposit(market) {
         setMode(Mode.DepositReady)
       }
     }, [amount])
+    
+    useEffect(() => {
+      if (mode === Mode.DepositReady) {
+        inputRef.current.focus()
+      } 
+    }, [mode])
 
     useEffect(() => {
       if (modalOpened) {
@@ -75,16 +83,27 @@ export default function Deposit(market) {
     }, [modalOpened])
 
     function onOpen() {
+      setAmount(Zero)
+      setBalance(null)
+      setAllowance(null)
+
       if (!isConnected) {
         setMode(Mode.NotConnected)
       } else {
         setMode(Mode.Init)
+        const balancePromise = tokenBalance(account).then(value => {
+          const balance = fromBigInt(value, token.decimals)
+          setBalance(balance)
+        })
+        const allowancePromise = tokenAllowance(account, comet).then(value => {
+          const allowance = fromBigInt(value, token.decimals)
+          setAllowance(allowance)
+        })
+        Promise.all([balancePromise, allowancePromise]).then(() => setMode(Mode.DepositReady))        
       }
-      inputRef.current.focus()
     }
 
     function onHide() {
-      setAmount(Zero)
       inputRef.current.value= ''
     }
 
@@ -106,7 +125,7 @@ export default function Deposit(market) {
                   <div className="d-flex border p-3 rounded mb-2">
                       <div className="flex-grow-1">
                         <input id={css['deposit-input']} ref={inputRef} type="number" autoComplete="off" 
-                          placeholder="0" min="0" step="any" onChange={onAmountChange} />
+                          placeholder="0" min="0" step="any" onChange={onAmountChange} disabled={mode === Mode.Init}/>
                         <div className="small text-body-tertiary">$0.00</div>
                       </div>
                       <div>
@@ -129,8 +148,8 @@ export default function Deposit(market) {
                   </div>
                 </div>
                 <div className="d-grid">
-                  { (mode === Mode.Init || mode === Mode.DepositReady) &&
-                    <button className="btn btn-lg btn-primary text-white" type="button">Deposit {token?.symbol}</button>
+                  { mode === Mode.Init &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <Spinner /></button>
                   }
                   { mode === Mode.NotConnected &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
@@ -140,6 +159,9 @@ export default function Deposit(market) {
                   }
                   { mode === Mode.InsufficientAllowance &&
                     <button className="btn btn-lg btn-primary text-white" type="button">Enable {token?.symbol}</button>
+                  }
+                  { mode === Mode.DepositReady &&
+                    <button className="btn btn-lg btn-primary text-white" type="button">Deposit {token?.symbol}</button>
                   }
                 </div>
               </div>

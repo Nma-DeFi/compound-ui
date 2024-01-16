@@ -10,9 +10,8 @@ export function useTokenAllowance({ chainId, token, owner, spender }) {
     const { allowance: tokenAllowance }  = useErc20({ chainId, erc20Contract: token?.address })
 
     useEffect(() => {
-        if (!owner || !spender) {
-            setAllowance(null)
-        } else {
+        setAllowance(null)
+        if (owner && spender) {
             tokenAllowance?.(owner, spender).then(value => {
                 const allowance = fromBigInt(value, token.decimals)
                 setAllowance(allowance)

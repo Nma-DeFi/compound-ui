@@ -10,9 +10,8 @@ export function useTokenBalance({ chainId, token, owner }) {
     const { balanceOf }  = useErc20({ chainId, erc20Contract: token?.address })
 
     useEffect(() => {
-        if (!owner) {
-            setBalance(null)
-        } else {
+        setBalance(null)
+        if (owner) {
             balanceOf?.(owner).then(value => {
                 const balance = fromBigInt(value, token.decimals)
                 setBalance(balance)

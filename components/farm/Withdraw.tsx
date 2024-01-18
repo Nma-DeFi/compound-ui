@@ -26,7 +26,7 @@ export default function Withdraw(market) {
                                   <span className="px-3">{market.configuration?.baseToken.token.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">$1.43K</span></div>
+                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">1.43K</span></div>
                       </div>
                   </div>
                   <div className="row g-2">

@@ -18,6 +18,7 @@ export function useTokenBalance({ chainId, token, owner }) {
             })
         }
     }, [chainId, token, owner])
-
+    
+    // TODO useQuery
     return balance
 }

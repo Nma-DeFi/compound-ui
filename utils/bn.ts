@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 
 const DEFAULT_PRECISION = 2;
 
@@ -27,4 +27,9 @@ export function fromBigInt(bi: bigint, decimals: string | number = 18): BigNumbe
     const _decimals = Number(decimals)
     const formatted = formatUnits(bi, _decimals)
     return bn(formatted)
+}
+
+export function toBigInt(bn: BigNumber, decimals: string | number = 18): bigint {
+    const _decimals = Number(decimals)
+    return parseUnits(bn.toFixed(), _decimals)
 }

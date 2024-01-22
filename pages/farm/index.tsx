@@ -25,8 +25,8 @@ export function Farm({ status, markets }) {
   }
   
   useEffect(() => {
-    document.getElementById(DEPOSIT_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
-    document.getElementById(WITHDRAW_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+    document?.getElementById(DEPOSIT_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+    document?.getElementById(WITHDRAW_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
   }, [])
 
   return ( 

@@ -1,6 +1,7 @@
 import { bn } from "./utils/bn";
 
-export const PRICE_SCALE = 1e8;
+export const PRICE_DECIMALS = 8;
+export const PRICE_SCALE = Math.pow(10, PRICE_DECIMALS);
 
 export const BASE_INDEX_SCALE = 1e15;
 

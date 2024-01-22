@@ -2,13 +2,15 @@ import Head from "next/head"
 import UserAccount from "../../components/UserAccount"
 import { bnf } from "../../utils/bn"
 import { nf } from "../../utils/number"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useBootstrap } from "../../hooks/useBootstrap"
 import { connect } from "react-redux"
 import { RootState } from '../../redux/types'
 import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
 import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
-import { baseTokenAddress, baseTokenName, baseTokenSymbol } from "../../services/market-info-service"
+import { baseTokenAddress, baseTokenName, baseTokenSymbol, netSupplyAprScaled, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../../services/market-info-service"
+import SupplyBalance from "../../components/SupplyBalance"
+import { GrowSpinners } from "../../components/Spinner"
 
 const Action = { Deposit: 0, Withdraw: 1 }
 
@@ -21,6 +23,11 @@ export function Farm({ status, markets }) {
     setTargetMarket(market)
     openModal(action === Action.Deposit ? DEPOSIT_MODAL : WITHDRAW_MODAL)
   }
+  
+  useEffect(() => {
+    document.getElementById(DEPOSIT_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+    document.getElementById(WITHDRAW_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+  }, [])
 
   return ( 
       <>
@@ -45,43 +52,35 @@ export function Farm({ status, markets }) {
                 <div className="col text-center">Action</div>
             </div>
 
-            { status === 'loading' && <div className="text-body-tertiary">Loading ...</div> }
+            { status === 'loading' && 
+              <GrowSpinners css='py-5' />
+            }
 
-            { status === 'success' && markets.map(m =>
-              <div key={baseTokenAddress(m)} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
+            { status === 'success' && markets.map(market =>
+              <div key={baseTokenAddress(market)} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
-                          <img src={`/images/tokens/${baseTokenSymbol(m)}.svg`} className="d-none d-sm-block me-2" alt="USDC" width="42" />
+                          <img src={`/images/tokens/${baseTokenSymbol(market)}.svg`} className="d-none d-sm-block me-2" alt="USDC" width="42" />
                           <div>
-                              <div className="mb-1">{baseTokenSymbol(m)}</div>
-                              <small className="d-none d-sm-block text-body-secondary">{baseTokenName(m)}</small>
+                              <div className="mb-1">{baseTokenSymbol(market)}</div>
+                              <small className="d-none d-sm-block text-body-secondary">{baseTokenName(market)}</small>
                           </div>
                       </div>
                   </div>
                   <div className="col text-center d-none d-md-block">
-                      <div className="mb-1">{bnf(m.accounting.totalBaseSupplyScaled)}</div>
-                      <small className="text-body-secondary">${bnf(m.accounting.totalBaseSupplyUsd)}</small>
+                      <div className="mb-1">{bnf(totalBaseSupplyScaled(market))}</div>
+                      <small className="text-body-secondary">${bnf(totalBaseSupplyUsd(market))}</small>
                   </div>
                   <div className="col text-center">
-                  {m.userPosition ? (
-                    <>
-                      <div className="mb-1">{bnf(m.userPosition.balance)}</div>
-                      <small className="text-body-secondary">${bnf(m.userPosition.balanceUsd)}</small>
-                    </>
-                    ) : (
-                    <>
-                      <div className="mb-1">—</div>
-                      <small className="text-body-secondary">—</small>
-                    </>
-                  )}
+                    <SupplyBalance {...market} />
                   </div>
                   <div className="col text-center">
-                  {nf(m.accounting.netSupplyAprScaled)}<small className="text-body-secondary">%</small> <i className="bi bi-info-square text-body-tertiary ms-1 d-none d-sm-inline"></i>
+                  {bnf(netSupplyAprScaled(market))}<small className="text-body-secondary">%</small> <i className="bi bi-info-square text-body-tertiary ms-1 d-none d-sm-inline"></i>
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">
-                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(m, Action.Deposit)}>Deposit</button>
-                          <button type="button" className="btn btn-primary text-white" onClick={() => showModal(m, Action.Withdraw)}>Withdraw</button>
+                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(market, Action.Deposit)}>Deposit</button>
+                          <button type="button" className="btn btn-primary text-white" onClick={() => showModal(market, Action.Withdraw)}>Withdraw</button>
                       </div>
                   </div>
               </div>

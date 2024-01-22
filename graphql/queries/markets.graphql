@@ -11,11 +11,13 @@ query AllMarkets {
         cometProxy
         configuration {
             baseToken {
+                priceFeed
                 token {
                     name
                     symbol
                     address
                     decimals
+                    lastPriceUsd
                 }
             }
         }
@@ -38,10 +40,13 @@ query MarketsBy($where: Market_filter) {
         cometProxy
         configuration {
             baseToken {
+                priceFeed
                 token {
-                    address
                     name
                     symbol
+                    address
+                    decimals
+                    lastPriceUsd
                 }
             }
         }

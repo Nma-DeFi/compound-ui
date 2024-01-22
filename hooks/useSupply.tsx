@@ -20,5 +20,6 @@ export function useSupply({ chainId, account, comet }) {
 
     return { 
         supply: service.supply.bind(service),
+        supplyBalanceOf: service.supplyBalanceOf.bind(service),
     }
 }

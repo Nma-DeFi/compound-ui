@@ -8262,14 +8262,14 @@ export type MarketByIdQuery = { __typename?: 'Query', market?: { __typename?: 'M
 export type AllMarketsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null } } }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any } }> };
+export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null, lastPriceUsd: any } } }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any } }> };
 
 export type MarketsByQueryVariables = Exact<{
   where?: InputMaybe<Market_Filter>;
 }>;
 
 
-export type MarketsByQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', token: { __typename?: 'Token', address: any, name: string, symbol: string } } } }> };
+export type MarketsByQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null, lastPriceUsd: any } } } }> };
 
 export type SupplyPositionsByAccountQueryVariables = Exact<{
   address: Scalars['Bytes']['input'];
@@ -8301,11 +8301,13 @@ export const AllMarketsDocument = gql`
     cometProxy
     configuration {
       baseToken {
+        priceFeed
         token {
           name
           symbol
           address
           decimals
+          lastPriceUsd
         }
       }
     }
@@ -8329,10 +8331,13 @@ export const MarketsByDocument = gql`
     cometProxy
     configuration {
       baseToken {
+        priceFeed
         token {
-          address
           name
           symbol
+          address
+          decimals
+          lastPriceUsd
         }
       }
     }

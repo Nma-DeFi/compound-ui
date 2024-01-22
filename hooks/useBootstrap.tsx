@@ -5,7 +5,9 @@ export function useBootstrap() {
 
     const [ bootstrap, setBootstrap ] = useState<typeof BootstrapUtils>({
         openModal: null,
-        hideModal: null
+        hideModal: null,
+        openToast: null,
+        hideToast: null,
     });
 
     useEffect(() => {

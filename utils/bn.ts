@@ -23,13 +23,13 @@ export function bnf(value, dp = DEFAULT_PRECISION) {
     }
 }
 
-export function fromBigInt(bi: bigint, decimals: string | number = 18): BigNumber {
+export function fromBigInt(bi: bigint, decimals: string | bigint | number = 18): BigNumber {
     const _decimals = Number(decimals)
     const formatted = formatUnits(bi, _decimals)
     return bn(formatted)
 }
 
-export function toBigInt(bn: BigNumber, decimals: string | number = 18): bigint {
+export function toBigInt(bn: BigNumber, decimals: string | bigint | number = 18): bigint {
     const _decimals = Number(decimals)
     return parseUnits(bn.toFixed(), _decimals)
 }

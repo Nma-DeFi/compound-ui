@@ -1,15 +1,5 @@
-import Compound from "@compound-finance/compound-js";
-import { Abi, Address, PublicClient, WalletClient, parseAbi } from "viem";
-import { toBigInt } from "../utils/bn";
-
-const cometAbi = parseAbi([
-    'event Supply(address indexed from, address indexed dst, uint256 amount)',
-    'function supply(address asset, uint amount)',
-    'function withdraw(address asset, uint amount)',
-    'function balanceOf(address account) returns (uint256)',
-    'function borrowBalanceOf(address account) returns (uint256)',
-    'function collateralBalanceOf(address account, address asset) external view returns (uint128)',
-])
+import { cometAbi } from "../abi/cometAbi";
+import { fromBigInt, toBigInt } from "../utils/bn";
 
 export class SupplyService {
 
@@ -44,5 +34,26 @@ export class SupplyService {
             account: this.account
         })
         return await this.walletClient.writeContract(request)
+    }
+
+    
+    async supplyBalanceOf(account) {
+        const balance = await this.publicClient.readContract({
+            ...this.contract,
+            functionName: 'balanceOf',
+            args: [ account ]
+        })
+        const decimals = await this.publicClient.readContract({
+            ...this.contract,
+            functionName: 'decimals',
+        })
+        console.log(
+            'SupplyService.supplyBalanceOf',
+            'account', account,
+            'comet', this.contract.address,
+            'balance', balance,
+            'decimals', decimals,
+        )
+        return fromBigInt(balance, decimals)
     }
 }

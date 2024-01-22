@@ -10,10 +10,12 @@ import { SmallSpinner } from '../Spinner'
 import { useSupply } from '../../hooks/useSupply'
 import { useBootstrap } from '../../hooks/useBootstrap'
 import { useWaitForTransaction } from 'wagmi'
+import { Hash } from 'viem'
+import { usePrice } from '../../hooks/usePrice'
+import ResultToast, { RESULT_TOAST } from './ResultToast'
+import { openToast } from '../../utils/bootstrap'
 
-export const DEPOSIT_MODAL = 'deposit'
-
-export const Mode = {
+const Mode = {
   NotConnected: 0,
   Init: 1,
   InsufficientBalance: 2,
@@ -21,23 +23,25 @@ export const Mode = {
   ConfirmationOfApproval: 4,
   WaitingForApproval: 5,
   DepositReady: 6,
-  ConfirmationOfDeposit: 7
+  ConfirmationOfDeposit: 7,
+  WaitingForDeposit: 8,
 }
+
+export const DEPOSIT_MODAL = 'deposit'
 
 export default function Deposit(market) {
     
-    const [ mode, setMode ] = useState<number | null>(null)
-    const [ amount, setAmount ] = useState<BigNumber>(Zero)
-    const [ balance, setBalance ] = useState<BigNumber>(null)
-    const [ allowance, setAllowance ] = useState<BigNumber>(null)
-    const [ modalOpened, setModalOpened ] = useState<boolean>(false)
+    const [ mode, setMode ] = useState<number>()
+    const [ amount, setAmount ] = useState<BigNumber>()
+    const [ balance, setBalance ] = useState<BigNumber>()
+    const [ allowance, setAllowance ] = useState<BigNumber>()
+    const [ modalOpened, setModalOpened ] = useState<boolean>()
 
-    const [ approvalHash, setApprovalHash ] = useState(null)
-    const { 
-      isLoading: isWaitingApproval, 
-      isSuccess: isSuccessApproval 
-    } = useWaitForTransaction({ hash: approvalHash })
+    const [ approvalHash, setApprovalHash ] = useState<Hash>()
+    const [ supplyHash, setSupplyHash ] = useState<Hash>()
+    const [ supplyInfo, setSupplyInfo ] = useState(null)
 
+    const modalRef = useRef(null)
     const inputRef = useRef(null)
 
     const { isConnected, address: account } = useCurrentAccount()
@@ -47,55 +51,37 @@ export default function Deposit(market) {
     const token = baseToken(market)
 
     const { 
+      isSuccess: isSuccessPrice, 
+      data: price 
+    } = usePrice({ token })
+
+    const { 
       balanceOf: tokenBalance, 
       allowance: tokenAllowance,
       approve: tokenApprove,
     }  = useErc20({ chainId, account, token })
+
+    const { 
+      isLoading: isWaitingApproval, 
+      isSuccess: isSuccessApproval 
+    } = useWaitForTransaction({ hash: approvalHash })
 
     const { supply } = useSupply({ chainId, account, comet })
 
     const { hideModal } = useBootstrap()
 
     useEffect(() => {
-      const modal = document.getElementById(DEPOSIT_MODAL)
-      modal.addEventListener('show.bs.modal', () => setModalOpened(true))
-      modal.addEventListener('hide.bs.modal', () => setModalOpened(false))
+      modalRef.current.addEventListener('show.bs.modal', () => setModalOpened(true))
+      modalRef.current.addEventListener('hide.bs.modal', () => setModalOpened(false))
     }, [])
 
-    useEffect(() => { 
-      if (isWaitingApproval) {
-        console.log('isWaitingApproval')
-        setMode(Mode.WaitingForApproval)
-      } 
-      if (isSuccessApproval) {
-        console.log('isSuccessApproval')
-        tokenAllowance(account, comet).then(allowance=> {
-          console.log('Approve new allowance', allowance.toFixed())
-          setAllowance(allowance)
-        })
-      } 
-    }, [isWaitingApproval, isSuccessApproval])
-
-    function isInsufficientBalance() {
-      console.log('isInsufficientBalance', 'amount', amount.toFixed(), 'balance', balance.toFixed())
-      console.log('isInsufficientBalance', amount.isGreaterThan(balance))
-      return amount.isGreaterThan(balance)
-    }
-
-    function isInsufficientAllowance() {
-      console.log('isInsufficientAllowance', 'amount', amount.toFixed(), 'allowance', allowance.toFixed())
-      console.log('isInsufficientAllowance', amount.isGreaterThan(allowance))
-      return amount.isGreaterThan(allowance)
-    }
-
     useEffect(() => {
-      console.log('processMode')
-      if (!balance || !allowance) return
+      if (!amount || !balance || !allowance) return
       if (!mode || mode === Mode.NotConnected) return
 
-      if (isInsufficientBalance()) {
+      if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
-      } else if (isInsufficientAllowance()) {
+      } else if (amount.isGreaterThan(allowance)) {
         setMode(Mode.InsufficientAllowance)
       } else {
         setMode(Mode.DepositReady)
@@ -103,10 +89,28 @@ export default function Deposit(market) {
     }, [balance, allowance, amount])
     
     useEffect(() => {
-      if (mode === Mode.DepositReady) {
+      if ([Mode.NotConnected, Mode.DepositReady].includes(mode)) {
         inputRef.current.focus()
       } 
     }, [mode])
+
+    useEffect(() => { 
+      if (isWaitingApproval) {
+        setMode(Mode.WaitingForApproval)
+      } 
+      if (isSuccessApproval) {
+        tokenAllowance(account, comet).then(setAllowance)
+      } 
+    }, [isWaitingApproval, isSuccessApproval])
+    
+    useEffect(() => {
+      if (supplyHash && mode === Mode.ConfirmationOfDeposit) {
+        setMode(Mode.WaitingForDeposit)
+        setSupplyInfo({ token, amount, hash: supplyHash })
+        hideModal(DEPOSIT_MODAL)
+        openToast(RESULT_TOAST)
+      }
+    }, [supplyHash])
 
     useEffect(() => {
       if (modalOpened) {
@@ -117,11 +121,7 @@ export default function Deposit(market) {
     }, [modalOpened])
 
     function onOpen() {
-      setAmount(Zero)
-      setBalance(null)
-      setAllowance(null)
-      setApprovalHash(null)
-      
+      initStates()
       if (!isConnected) {
         setMode(Mode.NotConnected)
       } else {
@@ -132,7 +132,17 @@ export default function Deposit(market) {
     }
 
     function onHide() {
+      setMode(null)
       inputRef.current.value= ''
+    }
+    
+    function initStates() {
+      setAmount(Zero)
+      setBalance(null)
+      setAllowance(null)
+      setApprovalHash(null)
+      setSupplyHash(null)
+      setSupplyInfo(null)
     }
 
     function onAmountChange(event) {
@@ -140,26 +150,28 @@ export default function Deposit(market) {
       setAmount(amount)
     }
 
-    async function handleApproval() {
-      console.log('handleApproval')
+    function handleApproval() {
       setMode(Mode.ConfirmationOfApproval)
-      const hash = await tokenApprove(comet, amount)
-      console.log('Approve hash', hash)
-      setApprovalHash(hash)
+      tokenApprove(comet, balance).then(setApprovalHash)
     }
 
-    async function handleDeposit() {
-      console.log('handleDeposit')
+    function handleDeposit() {
       if (amount.isZero()) return
       setMode(Mode.ConfirmationOfDeposit)
-      const hash = await supply({ token, amount })
-      console.log('Supply hash', hash)
-      hideModal(DEPOSIT_MODAL)
+      supply({ token, amount }).then(setSupplyHash)
     }
 
+    function handleAmountPercentage(factor: number) {
+      if (!isConnected) return
+      const newAmount = balance.times(factor)
+      setAmount(newAmount)
+      inputRef.current.value = bnf(newAmount)
+    }
 
     return (
-        <div id={DEPOSIT_MODAL} className="modal" tabIndex={-1}>
+      <>
+        <ResultToast {...supplyInfo} />
+        <div id={DEPOSIT_MODAL} ref={modalRef} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div id={css['deposit-body']} className="modal-body">
@@ -172,7 +184,9 @@ export default function Deposit(market) {
                       <div className="flex-grow-1">
                         <input id={css['deposit-input']} ref={inputRef} type="number" autoComplete="off" 
                           placeholder="0" min="0" step="any" onChange={onAmountChange} disabled={mode === Mode.Init}/>
-                        <div className="small text-body-tertiary">$0.00</div>
+                        <div className="small text-body-tertiary">
+                        ${ bnf(amount && isSuccessPrice ? amount.times(price) : 0) }
+                        </div>
                       </div>
                       <div>
                           <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
@@ -187,10 +201,10 @@ export default function Deposit(market) {
                       </div>
                   </div>
                   <div className="row g-2">
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100">25%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100">50%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100">75%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100">Max</button></div>
+                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleAmountPercentage(0.25)}>25%</button></div>
+                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleAmountPercentage(0.5)}>50%</button></div>
+                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleAmountPercentage(0.75)}>75%</button></div>
+                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleAmountPercentage(1)}>Max</button></div>
                   </div>
                 </div>
                 <div className="d-grid">
@@ -220,6 +234,7 @@ export default function Deposit(market) {
             </div>
           </div>
         </div>
+      </>
     )
 }
 

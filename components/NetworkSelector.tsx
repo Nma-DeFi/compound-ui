@@ -1,12 +1,14 @@
 import { CHAINS, enhanceChain, chainIcon, chainName } from "../utils/chains";
 import styles from '../styles/components/NetworkSelector.module.scss';
 import { useCurrentChain } from "../hooks/useCurrentChain";
+import { useEffect, useState } from "react";
 
 export default function NetworkSelector() {
 
     const { currentChainId, setCurrentChainId } = useCurrentChain();
+    const [ chainList, setChainList ] = useState([])
 
-    const chainList = () => {
+    useEffect(() => {
         const comparator = (c1, c2) => {
             if (c1.isTestnet) {
                 return 1;
@@ -16,8 +18,9 @@ export default function NetworkSelector() {
                 return 0;
             }
         }
-        return CHAINS.map(enhanceChain).sort(comparator);    
-    };
+        setChainList(CHAINS.map(enhanceChain).sort(comparator)) 
+    }, [])
+
 
     return (
             <div id="network-dropdown" className="btn-group w-100" role="group">
@@ -29,7 +32,7 @@ export default function NetworkSelector() {
                     </div>
                 </button>
                 <ul id="network-menu" className="dropdown-menu w-100">
-                {chainList().map(chain => (
+                {chainList.map(chain => (
                     <li key={chain.id} className={styles['network-menu-item']} >
                         <button 
                             className="dropdown-item" 

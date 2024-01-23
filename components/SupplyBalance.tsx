@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
 import { baseToken, cometProxy } from "../services/market-info-service"
 import { useSupply } from "../hooks/useSupply"
@@ -26,7 +25,7 @@ export default function SupplyBalance(market) {
         isSuccess: isSuccessBalance, 
         data: balance 
     } = useQuery({
-        queryKey: ['supplyBalanceOf', market, account],
+        queryKey: ['supplyBalanceOf', chainId, comet, account],
         queryFn: () => supplyBalanceOf(account),
         enabled: !!(isConnected && market),
     })

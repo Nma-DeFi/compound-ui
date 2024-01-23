@@ -1,6 +1,6 @@
 import { useCurrentChain } from '../../hooks/useCurrentChain'
 import css from '../../styles/components/farm/Deposit.module.scss'
-import { useEffect, useRef, useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import BigNumber from 'bignumber.js'
 import { Zero, bn, bnf } from '../../utils/bn'
@@ -13,7 +13,14 @@ import { useWaitForTransaction } from 'wagmi'
 import { Hash } from 'viem'
 import { usePrice } from '../../hooks/usePrice'
 import ResultToast, { RESULT_TOAST } from './ResultToast'
-import { openToast } from '../../utils/bootstrap'
+
+type SupplyInfo = { 
+  token: any, 
+  amount: BigNumber, 
+  hash: Hash, 
+}
+
+type ModalEvent = 'show' | 'hide' | 'hidden'
 
 const Mode = {
   NotConnected: 0,
@@ -35,11 +42,11 @@ export default function Deposit(market) {
     const [ amount, setAmount ] = useState<BigNumber>()
     const [ balance, setBalance ] = useState<BigNumber>()
     const [ allowance, setAllowance ] = useState<BigNumber>()
-    const [ modalOpened, setModalOpened ] = useState<boolean>()
+    const [ modalEvent, setModalEvent ] = useState<ModalEvent>()
 
     const [ approvalHash, setApprovalHash ] = useState<Hash>()
     const [ supplyHash, setSupplyHash ] = useState<Hash>()
-    const [ supplyInfo, setSupplyInfo ] = useState(null)
+    const [ supplyInfo, setSupplyInfo ] = useState<SupplyInfo>()
 
     const modalRef = useRef(null)
     const inputRef = useRef(null)
@@ -68,11 +75,11 @@ export default function Deposit(market) {
 
     const { supply } = useSupply({ chainId, account, comet })
 
-    const { hideModal } = useBootstrap()
+    const { hideModal, openToast } = useBootstrap()
 
     useEffect(() => {
-      modalRef.current.addEventListener('show.bs.modal', () => setModalOpened(true))
-      modalRef.current.addEventListener('hide.bs.modal', () => setModalOpened(false))
+      modalRef.current.addEventListener('show.bs.modal', () => setModalEvent('show'))
+      modalRef.current.addEventListener('hidden.bs.modal', () => setModalEvent('hidden'))
     }, [])
 
     useEffect(() => {
@@ -108,17 +115,19 @@ export default function Deposit(market) {
         setMode(Mode.WaitingForDeposit)
         setSupplyInfo({ token, amount, hash: supplyHash })
         hideModal(DEPOSIT_MODAL)
-        openToast(RESULT_TOAST)
       }
     }, [supplyHash])
 
     useEffect(() => {
-      if (modalOpened) {
-        onOpen()
-      } else {
-        onHide()
-      }
-    }, [modalOpened])
+      switch (modalEvent) {
+        case 'show':
+          onOpen()
+          break;
+        case 'hidden':
+          onHide()
+          break;
+      } 
+    }, [modalEvent])
 
     function onOpen() {
       initStates()
@@ -134,6 +143,9 @@ export default function Deposit(market) {
     function onHide() {
       setMode(null)
       inputRef.current.value= ''
+      if (mode === Mode.WaitingForDeposit) {
+        openToast(RESULT_TOAST)
+      }
     }
     
     function initStates() {
@@ -226,7 +238,7 @@ export default function Deposit(market) {
                   { mode === Mode.DepositReady &&
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit {token?.symbol}</button>
                   }
-                  { (mode === Mode.ConfirmationOfApproval || mode === Mode.ConfirmationOfDeposit) &&
+                  { ([Mode.ConfirmationOfApproval, Mode.ConfirmationOfDeposit].includes(mode)) &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
                   }
                 </div>

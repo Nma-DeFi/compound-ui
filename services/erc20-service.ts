@@ -31,32 +31,34 @@ export class Erc20Service {
     }
 
     async balanceOf(owner: Address) {
-        console.log(
-            'Erc20Service.balanceOf',
-            'chain', this.publicClient.chain.name,
-            'erc20', this.contract.address,
-            'owner', owner
-        )
         const balance = await this.publicClient.readContract({
             ...this.contract,
             functionName: 'balanceOf',
             args: [owner]
         })
+        console.log(
+            'Erc20Service.balanceOf',
+            'chain', this.publicClient.chain.name,
+            'erc20', this.contract.address,
+            'owner', owner,
+            'balance', balance
+        )
         return this.fromBigInt(balance)
     }
 
     async allowance(owner: Address, spender: Address) {
-        console.log(
-            'Erc20Service.allowance',
-            'chain', this.publicClient.chain.name,
-            'erc20', this.contract.address,
-            'owner', owner, 'spender', spender
-        )
         const allowance = await this.publicClient.readContract({
             ...this.contract,
             functionName: 'allowance',
             args: [owner, spender]
         })
+        console.log(
+            'Erc20Service.allowance',
+            'chain', this.publicClient.chain.name,
+            'erc20', this.contract.address,
+            'owner', owner, 'spender', spender,
+            'allowance', allowance
+        )
         return this.fromBigInt(allowance)
     }
 

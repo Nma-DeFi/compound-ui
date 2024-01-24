@@ -13,9 +13,9 @@ export function SmallSpinner() {
 export function GrowSpinners({ nb = 5, css = '' }) {
 
     const loop = () => {
-        let t = []
-        for (let i = 0; i < nb; i++) { t.push(i) }
-        return t
+        let arr = []
+        for (let i = 0; i < nb; i++) { arr.push(i) }
+        return arr
     }
 
     return (

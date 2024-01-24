@@ -16,3 +16,19 @@ export function useBootstrap() {
 
     return bootstrap;
 }
+
+export type ModalEvent = 'show' | 'hide' | 'hidden'
+
+export function useModalEvent(modalId: string) {
+
+    const [ modalEvent, setModalEvent ] = useState<ModalEvent>()
+
+    useEffect(() => {
+        const modal = document.getElementById(modalId)
+        modal.addEventListener('show.bs.modal', () => setModalEvent('show'))
+        modal.addEventListener('hide.bs.modal', () => setModalEvent('hide'))
+        modal.addEventListener('hidden.bs.modal', () => setModalEvent('hidden'))
+      }, [modalId])
+
+    return modalEvent
+}

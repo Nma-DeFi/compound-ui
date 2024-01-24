@@ -1,5 +1,5 @@
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
-import { baseToken, cometProxy } from "../services/market-info-service"
+import { cometProxy, baseToken  } from "../selectors/market-selector"
 import { useSupply } from "../hooks/useSupply"
 import { useCurrentChain } from "../hooks/useCurrentChain"
 import { bnf } from "../utils/bn"

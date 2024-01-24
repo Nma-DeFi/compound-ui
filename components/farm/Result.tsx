@@ -7,7 +7,7 @@ import { marketDataInit } from "../../redux/slices/marketData";
 
 export const RESULT_TOAST = 'result-toast'
 
-export default function ResultToast({ token, amount, hash}) {
+export default function Result({ token, amount, hash}) {
 
     const dispatch = useAppDispatch()
     const { isLoading, isSuccess, data } = useWaitForTransaction({ hash })

@@ -7,7 +7,12 @@ import { connect } from "react-redux"
 import { RootState } from '../../redux/types'
 import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
 import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
-import { baseTokenAddress, baseTokenName, baseTokenSymbol, netSupplyAprScaled, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../../services/market-info-service"
+import { netSupplyAprScaled } from "../../selectors/market-selector"
+import { totalBaseSupplyUsd } from "../../selectors/market-selector"
+import { totalBaseSupplyScaled } from "../../selectors/market-selector"
+import { baseTokenAddress } from "../../selectors/market-selector"
+import { baseTokenName } from "../../selectors/market-selector"
+import { baseTokenSymbol } from "../../selectors/market-selector"
 import SupplyBalance from "../../components/SupplyBalance"
 import { GrowSpinners } from "../../components/Spinner"
 
@@ -52,7 +57,7 @@ export function Farm({ status, markets }) {
             </div>
 
             { status === 'loading' && 
-              <GrowSpinners css='py-5' />
+              <GrowSpinners css='py-5 d-flex justify-content-center' />
             }
 
             { status === 'success' && markets.map(market =>

@@ -31,3 +31,8 @@ export function enhanceChain(chain) {
         isTestnet: isTestnet(chain.id),
     }
 }
+
+export function transactionUrl({ chainId, txHash }) {
+    const blockExplorer = chainFromId(chainId).blockExplorers.default.url
+    return `${blockExplorer}/tx/${txHash}`
+  }

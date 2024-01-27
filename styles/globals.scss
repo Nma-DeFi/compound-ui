@@ -6,6 +6,8 @@
 
 // Include any default variable overrides here
 $primary: shade-color(rgb(0, 211, 149), 5%);
+$toast-background-color: rgba(var(--bs-body-bg-rgb), 1);
+$toast-header-background-color: rgba(var(--bs-body-bg-rgb), 1);
 
 @import "bootstrap/scss/variables";
 @import "bootstrap/scss/variables-dark";

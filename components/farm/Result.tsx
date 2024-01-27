@@ -4,39 +4,54 @@ import { bnf } from "../../utils/bn";
 import { useEffect } from "react";
 import { useAppDispatch } from "../../redux/hooks";
 import { marketDataInit } from "../../redux/slices/marketData";
+import { transactionUrl } from "../../utils/chains";
+import { useCurrentChain } from "../../hooks/useCurrentChain";
+import { Action } from "../../pages/farm";
 
-export const RESULT_TOAST = 'result-toast'
+export default function Result({ id, action, token, amount, hash}) {
 
-export default function Result({ token, amount, hash}) {
+    const { currentChainId: chainId } = useCurrentChain();
+    const { isLoading, isSuccess, isError, data, error } = useWaitForTransaction({ hash  })
 
     const dispatch = useAppDispatch()
-    const { isLoading, isSuccess, data } = useWaitForTransaction({ hash })
 
     useEffect(() => {
-        dispatch(marketDataInit())
+        if (isSuccess) {
+            dispatch(marketDataInit())
+        }
     }, [isSuccess])
 
+    useEffect(() => { 
+        if (isError) console.error(error) 
+    }, [isError])
+    
+    const actionLabel = () => (action === Action.Deposit) ? "Deposit" : "Withdrawal"
+
     return (
-        <div className="toast-container position-fixed bottom-0 end-0 p-3">
-            <div id={RESULT_TOAST} className="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
-                <div className="toast-header">
-                    <strong className="fs-5 me-auto">Deposit</strong>
-                    <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div className="toast-body">
-                    <div className="fs-6 text-center">
-                        {isLoading &&
-                            <>Deposing { bnf(amount) } { token?.symbol }. Wait please <SmallSpinner /></>
-                        }
-                        {isSuccess &&
+        <div className="toast-container position-fixed bottom-0 end-0 p-4">
+            <div id={id} className="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+                <div className="toast-body text-center px-0 py-4">
+                        {isLoading && (
                             <>
-                                Success !
-                                <a href={ data.transactionHash } className="text-decoration-none ps-2" target="_blank" rel="noreferrer" >
-                                    Transaction <i className="bi bi-box-arrow-up-right"></i>
-                                </a>
+                                <h4 className="mb-4">{actionLabel()} of <span className="text-body-secondary">{ bnf(amount) } { token?.symbol }</span></h4>
+                                <div className="fs-5 text-body-secondary">Wait please <SmallSpinner /></div>
                             </>
-                        }
-                    </div>
+                        )}
+                        {isSuccess && (
+                            <>
+                                <h4 className="mb-3">Success !</h4>
+                                <a href={ transactionUrl({ chainId, txHash: data.transactionHash }) } className="text-decoration-none" target="_blank" rel="noreferrer" >
+                                    <h5 className="mb-3">Transaction <i className="bi bi-box-arrow-up-right"></i></h5>
+                                </a>
+                                <button type="button" className="btn btn-link text-decoration-none" data-bs-dismiss="toast">Close</button>
+                            </>
+                        )}
+                        {isError && (
+                            <>
+                                <h3 className="text-danger mb-3">Error</h3>
+                                <button type="button" className="btn btn-link text-decoration-none" data-bs-dismiss="toast">Close</button>
+                            </>
+                        )}
                 </div>
             </div>
         </div>

@@ -1,39 +1,35 @@
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
-import { cometProxy, baseToken  } from "../selectors/market-selector"
-import { useSupply } from "../hooks/useSupply"
+import { baseToken, cometProxy  } from "../selectors/market-selector"
 import { useCurrentChain } from "../hooks/useCurrentChain"
 import { bnf } from "../utils/bn"
 import { usePrice } from "../hooks/usePrice"
-import { useQuery } from "@tanstack/react-query"
+import { useSupplyBalance } from "../hooks/useSupplyBalance"
+import { usePublicClient, useWalletClient } from "wagmi"
 
 export default function SupplyBalance(market) {
 
-    const { isConnected, address: account } = useCurrentAccount()
+    const { address: account } = useCurrentAccount()
+    const { currentChainId: chainId } = useCurrentChain()
+
+    const publicClient = usePublicClient({ chainId })
+    const { data: walletClient } = useWalletClient()
 
     const comet = cometProxy(market)
-    const token = baseToken(market)
-
-    const { currentChainId: chainId } = useCurrentChain()
-    const { supplyBalanceOf } = useSupply({ chainId, account, comet })
+    
+    const { 
+        isSuccess: isSuccessBalance, 
+        data: balance
+    } = useSupplyBalance({ comet, publicClient, walletClient, account})
 
     const { 
         isSuccess: isSuccessPrice, 
         data: price 
-    } = usePrice({ token })
-
-    const { 
-        isSuccess: isSuccessBalance, 
-        data: balance 
-    } = useQuery({
-        queryKey: ['supplyBalanceOf', chainId, comet, account],
-        queryFn: () => supplyBalanceOf(account),
-        enabled: !!(isConnected && market),
-    })
+    } = usePrice({ token: baseToken(market) })
 
     return isSuccessBalance ? (
         <>
-            <div className="mb-1">{ bnf(balance)}</div>
-            <small className="text-body-secondary">${ bnf(isSuccessPrice ? balance.times(price) : 0) }</small>
+            <div className="mb-1">{ bnf(isSuccessBalance ? balance : 0)}</div>
+            <small className="text-body-secondary">${ bnf(isSuccessBalance && isSuccessPrice ? balance.times(price) : 0) }</small>
         </>
     ) : (
         <>

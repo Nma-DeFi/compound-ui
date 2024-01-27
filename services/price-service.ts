@@ -9,15 +9,17 @@ export class PriceService {
     }
 
     async getPrice(token: string) {
-        const token_ = this.validateToken(token)
+        const token_ = this.mapToken(token)
+        const price = await this.compound.getPrice(token_)
         console.log(
             'PriceService.getPrice',
             'token', token_,
+            'price', price
         )
-        return await this.compound.getPrice(token_)
+        return price
     }
 
-    validateToken(token: string) {
+    mapToken(token: string) {
         const mapping = {
             'WETH': 'ETH',
         }

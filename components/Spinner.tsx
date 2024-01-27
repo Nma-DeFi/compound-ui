@@ -21,7 +21,7 @@ export function GrowSpinners({ nb = 5, css = '' }) {
     return (
         <div className={css}>
             {loop().map(index =>
-                <div className="spinner-grow text-primary me-3" role="status" key={index}>
+                <div className="spinner-grow text-primary mx-4" role="status" key={index}>
                     <span className="visually-hidden">Loading...</span>
                 </div>
             )}

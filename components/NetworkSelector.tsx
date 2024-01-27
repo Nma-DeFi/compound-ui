@@ -21,7 +21,6 @@ export default function NetworkSelector() {
         setChainList(CHAINS.map(enhanceChain).sort(comparator)) 
     }, [])
 
-
     return (
             <div id="network-dropdown" className="btn-group w-100" role="group">
                 <button id="network-select" type="button" className={`${styles['network-select']} btn btn-light bg-body btn-lg border shadow rounded-5 dropdown-toggle`} data-bs-toggle="dropdown" aria-expanded="false">

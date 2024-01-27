@@ -66,6 +66,8 @@ export class Erc20Service {
         const _amount = this.toBigInt(amount)
         console.log(
             'Erc20Service.approve',
+            'chain', this.publicClient.chain.name,
+            'erc20', this.contract.address,
             'spender', spender,
             'amount', _amount,
         )

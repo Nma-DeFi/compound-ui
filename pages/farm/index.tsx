@@ -15,8 +15,27 @@ import { baseTokenName } from "../../selectors/market-selector"
 import { baseTokenSymbol } from "../../selectors/market-selector"
 import SupplyBalance from "../../components/SupplyBalance"
 import { GrowSpinners } from "../../components/Spinner"
+import { Address, Hash } from "viem"
+import BigNumber from "bignumber.js"
 
-const Action = { Deposit: 0, Withdraw: 1 }
+export type Token = {
+  name: string, 
+  symbol: string, 
+  address: Address, 
+  decimals: number
+}
+
+export type ActionInfo = { 
+  action: number,
+  token: Token, 
+  amount: BigNumber, 
+  hash: Hash, 
+}
+
+export const Action = { 
+  Deposit: 0, 
+  Withdraw: 1 
+}
 
 export function Farm({ status, markets }) {
 

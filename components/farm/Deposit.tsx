@@ -5,21 +5,16 @@ import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import BigNumber from 'bignumber.js'
 import { Zero, bn, bnf } from '../../utils/bn'
 import * as MarketSelector from "../../selectors/market-selector"
-import { useErc20 } from '../../hooks/useErc20'
+import { useErc20Service } from '../../hooks/useErc20Service'
 import { SmallSpinner } from '../Spinner'
-import { useSupply } from '../../hooks/useSupply'
+import { useSupplyService } from '../../hooks/useSupplyService'
 import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap'
-import { useWaitForTransaction } from 'wagmi'
+import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi'
 import { Hash } from 'viem'
 import { usePrice } from '../../hooks/usePrice'
-import Result, { RESULT_TOAST } from './Result'
+import Result from './Result'
 import AmountInput from '../AmountInput'
-
-type SupplyInfo = { 
-  token: any, 
-  amount: BigNumber, 
-  hash: Hash, 
-}
+import { Action, ActionInfo } from '../../pages/farm'
 
 const Mode = {
   NotConnected: 0,
@@ -33,7 +28,8 @@ const Mode = {
   WaitingForDeposit: 8,
 }
 
-export const DEPOSIT_MODAL = 'deposit'
+export const DEPOSIT_MODAL = 'deposit-modal'
+export const DEPOSIT_TOAST = 'deposit-toast'
 
 export default function Deposit(market) {
     
@@ -44,26 +40,22 @@ export default function Deposit(market) {
 
     const [ approvalHash, setApprovalHash ] = useState<Hash>()
     const [ supplyHash, setSupplyHash ] = useState<Hash>()
-    const [ supplyInfo, setSupplyInfo ] = useState<SupplyInfo>()
+    const [ supplyInfo, setSupplyInfo ] = useState<ActionInfo>()
 
-    const { isConnected, address: account } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
+    const { isConnected, address: account } = useCurrentAccount()
 
     const comet = MarketSelector.cometProxy(market)
     const baseToken = MarketSelector.baseToken(market)
+    
+    const publicClient = usePublicClient({ chainId })
+    const { data: walletClient } = useWalletClient()
 
-    const { 
-      isSuccess: isSuccessPrice, 
-      data: price 
-    } = usePrice({ token: baseToken })
+    const { isSuccess: isSuccessPrice, data: price } = usePrice({ token: baseToken })
 
-    const { 
-      balanceOf: tokenBalance, 
-      allowance: tokenAllowance,
-      approve: tokenApprove,
-    }  = useErc20({ chainId, account, token: baseToken })
+    const baseTokenErc20  = useErc20Service({ token: baseToken, publicClient, walletClient, account })
 
-    const { supply } = useSupply({ chainId, account, comet })
+    const supplyService = useSupplyService({ comet, publicClient, walletClient, account })
 
     const { 
       isLoading: isWaitingApproval, 
@@ -74,9 +66,7 @@ export default function Deposit(market) {
     const modalEvent = useModalEvent(DEPOSIT_MODAL)
 
     useEffect(() => {
-      if (!amount || !balance || !allowance) return
-      if (!mode || mode === Mode.NotConnected) return
-
+      if (!isConnected || !amount || !balance || !allowance) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
       } else if (amount.isGreaterThan(allowance)) {
@@ -86,19 +76,28 @@ export default function Deposit(market) {
       }
     }, [balance, allowance, amount])
 
+    
+    useEffect(() => {
+      if (mode === Mode.Init && baseTokenErc20) {
+          baseTokenErc20.balanceOf(account).then(setBalance)
+          baseTokenErc20.allowance(account, comet).then(setAllowance)
+      }
+    }, [mode, baseTokenErc20])
+
+
     useEffect(() => { 
       if (isWaitingApproval) {
         setMode(Mode.WaitingForApproval)
       } 
       if (isSuccessApproval) {
-        tokenAllowance(account, comet).then(setAllowance)
+        baseTokenErc20.allowance(account, comet).then(setAllowance)
       } 
     }, [isWaitingApproval, isSuccessApproval])
     
     useEffect(() => {
       if (supplyHash && mode === Mode.ConfirmationOfDeposit) {
         setMode(Mode.WaitingForDeposit)
-        setSupplyInfo({ token: baseToken, amount, hash: supplyHash })
+        setSupplyInfo({ action: Action.Deposit, token: baseToken, amount, hash: supplyHash })
         hideModal(DEPOSIT_MODAL)
       }
     }, [supplyHash])
@@ -120,8 +119,6 @@ export default function Deposit(market) {
         setMode(Mode.NotConnected)
       } else {
         setMode(Mode.Init)
-        tokenBalance(account).then(setBalance)
-        tokenAllowance(account, comet).then(setAllowance)
       }
     }
 
@@ -129,7 +126,7 @@ export default function Deposit(market) {
       setMode(null)
       setInput(null)
       if (mode === Mode.WaitingForDeposit) {
-        openToast(RESULT_TOAST)
+        openToast(DEPOSIT_TOAST)
       }
     }
     
@@ -150,13 +147,13 @@ export default function Deposit(market) {
 
     function handleApproval() {
       setMode(Mode.ConfirmationOfApproval)
-      tokenApprove(comet, balance).then(setApprovalHash)
+      baseTokenErc20.approve(comet, balance).then(setApprovalHash)
     }
 
     function handleDeposit() {
       if (amount.isZero()) return
       setMode(Mode.ConfirmationOfDeposit)
-      supply({ token: baseToken, amount }).then(setSupplyHash)
+      supplyService.supply({ token: baseToken, amount }).then(setSupplyHash)
     }
 
     function handleAmountChange(event) {
@@ -164,7 +161,7 @@ export default function Deposit(market) {
       setAmount(amount)
     }
 
-    function handleWalletAmountPercent(factor: number) {
+    function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
       const newInput = bnf(newAmount)
@@ -174,7 +171,7 @@ export default function Deposit(market) {
 
     return (
       <>
-        <Result {...supplyInfo} />
+        <Result {...{id: DEPOSIT_TOAST, ...supplyInfo}} />
         <div id={DEPOSIT_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
@@ -208,10 +205,10 @@ export default function Deposit(market) {
                       </div>
                   </div>
                   <div className="row g-2">
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletAmountPercent(0.25)}>25%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletAmountPercent(0.5)}>50%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletAmountPercent(0.75)}>75%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletAmountPercent(1)}>Max</button></div>
+                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletBalancePercent(0.25)}>25%</button></div>
+                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletBalancePercent(0.5)}>50%</button></div>
+                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletBalancePercent(0.75)}>75%</button></div>
+                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletBalancePercent(1)}>Max</button></div>
                   </div>
                 </div>
                 <div className="d-grid">

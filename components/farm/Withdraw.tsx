@@ -60,13 +60,13 @@ export default function Withdraw(market) {
     const modalEvent = useModalEvent(WITHDRAW_MODAL)
 
     useEffect(() => {
-      if (!isConnected || !amount || !balance) return
+      if (!isConnected || !amount || !balance || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
       } else {
         setMode(Mode.WithdrawReady)
       }
-    }, [balance, amount])
+    }, [balance, amount, withdrawService])
 
     useEffect(() => {
       if (withdrawHash && mode === Mode.ConfirmationOfWithdraw) {

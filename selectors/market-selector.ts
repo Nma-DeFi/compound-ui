@@ -8,3 +8,6 @@ export const priceFeed = market => market?.configuration?.baseToken.priceFeed
 export const totalBaseSupplyScaled = market => market?.accounting?.totalBaseSupplyScaled
 export const totalBaseSupplyUsd = market => market?.accounting?.totalBaseSupplyUsd
 export const netSupplyAprScaled = market => market?.accounting?.netSupplyAprScaled
+export const rewardSupplyAprScaled = market => market?.accounting?.rewardSupplyAprScaled 
+export const supplyAprScaled = market => market?.accounting?.supplyAprScaled 
+

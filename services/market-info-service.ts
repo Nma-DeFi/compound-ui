@@ -40,6 +40,8 @@ export class MarketInfoService {
         const decimals = baseTokenDecimals(market)
         const presentTotalBaseSupply = presentBaseValue(market.accounting.totalBasePrincipalSupply, market.accounting.baseSupplyIndex)
         market.accounting.netSupplyAprScaled = Number(market.accounting.netSupplyApr) * 100
+        market.accounting.rewardSupplyAprScaled = Number(market.accounting.rewardSupplyApr) * 100
+        market.accounting.supplyAprScaled = Number(market.accounting.supplyApr) * 100 
         market.accounting.totalBaseSupplyScaled = tokenScale(market.accounting.totalBaseSupply, decimals)
         market.accounting.totalPresentSupplyScaled = tokenScale(presentTotalBaseSupply, decimals)
         return market

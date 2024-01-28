@@ -8,6 +8,7 @@ export function useBootstrap() {
         hideModal: null,
         openToast: null,
         hideToast: null,
+        getOrCreateTooltip: null,
     });
 
     useEffect(() => {

@@ -9,7 +9,6 @@ export class WithdrawService {
     contract
 
     constructor({ publicClient, walletClient, account, comet }) {
-        console.log('Construct withdraw-service !!!')
         this.publicClient = publicClient
         this.walletClient = walletClient
         this.account = account

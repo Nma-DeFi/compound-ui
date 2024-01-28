@@ -9,6 +9,7 @@ export default function NetworkSelector() {
     const [ chainList, setChainList ] = useState([])
 
     useEffect(() => {
+        console.log('netselect useeff', 'init')
         const comparator = (c1, c2) => {
             if (c1.isTestnet) {
                 return 1;
@@ -18,6 +19,7 @@ export default function NetworkSelector() {
                 return 0;
             }
         }
+        console.log('netselect useeff', CHAINS.map(enhanceChain).sort(comparator)) 
         setChainList(CHAINS.map(enhanceChain).sort(comparator)) 
     }, [])
 

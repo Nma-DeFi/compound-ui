@@ -82,7 +82,7 @@ export default function Deposit(market) {
           baseTokenErc20.balanceOf(account).then(setBalance)
           baseTokenErc20.allowance(account, comet).then(setAllowance)
       }
-    }, [mode, baseTokenErc20])
+    }, [baseTokenErc20])
 
 
     useEffect(() => { 

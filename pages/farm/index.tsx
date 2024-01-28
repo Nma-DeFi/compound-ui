@@ -7,7 +7,6 @@ import { connect } from "react-redux"
 import { RootState } from '../../redux/types'
 import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
 import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
-import { netSupplyAprScaled } from "../../selectors/market-selector"
 import { totalBaseSupplyUsd } from "../../selectors/market-selector"
 import { totalBaseSupplyScaled } from "../../selectors/market-selector"
 import { baseTokenAddress } from "../../selectors/market-selector"
@@ -17,6 +16,12 @@ import SupplyBalance from "../../components/SupplyBalance"
 import { GrowSpinners } from "../../components/Spinner"
 import { Address, Hash } from "viem"
 import BigNumber from "bignumber.js"
+import SupplyApr from "../../components/SupplyApr"
+
+export const Action = { 
+  Deposit: 0, 
+  Withdraw: 1 
+}
 
 export type Token = {
   name: string, 
@@ -30,11 +35,6 @@ export type ActionInfo = {
   token: Token, 
   amount: BigNumber, 
   hash: Hash, 
-}
-
-export const Action = { 
-  Deposit: 0, 
-  Withdraw: 1 
 }
 
 export function Farm({ status, markets }) {
@@ -98,7 +98,7 @@ export function Farm({ status, markets }) {
                     <SupplyBalance {...market} />
                   </div>
                   <div className="col text-center">
-                  {bnf(netSupplyAprScaled(market))}<small className="text-body-secondary">%</small> <i className="bi bi-info-square text-body-tertiary ms-1 d-none d-sm-inline"></i>
+                    <SupplyApr {...market} />
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">

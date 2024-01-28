@@ -8,6 +8,7 @@ import { WagmiConfig } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from '../redux/store'
 import { Provider as ReduxProvider } from 'react-redux'
+import { useBootstrap } from '../hooks/useBootstrap';
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
@@ -22,6 +23,8 @@ createWeb3Modal({
 const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: AppProps) {
+  
+  useBootstrap()
   
   return (
     <WagmiConfig config={wagmiConfig}>

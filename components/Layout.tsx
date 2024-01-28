@@ -6,7 +6,7 @@ import { useAccountInit } from '../hooks/useCurrentAccount';
 
 export default function Layout({ children }) {
 
-    useAccountInit();
+    useAccountInit()
 
     return (
         <> 
@@ -17,7 +17,7 @@ export default function Layout({ children }) {
             </Head>
             <nav className="navbar navbar-expand-xl sticky-top bg-white border-bottom shadow-sm px-1 py-3">
                 <div className="container-fluid">
-                    <a className="navbar-brand" href="#">
+                    <a className="navbar-brand" href="/">
                         <img src="/images/compound-logo.svg" alt="Compound" width="185" />
                     </a>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">

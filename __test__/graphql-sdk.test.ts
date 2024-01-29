@@ -42,5 +42,12 @@ it('SupplyPositionsByAccount2', async () => {
         data.positions[0].account, 
         data.positions[0].accounting, 
         data.positions[0].market);
-}, 10000)
+})
+
+it('Protocol', async () => {
+    const data = await sdk.Protocol()
+    console.log("Protocol", data)
+    expect(data.protocols).toBeDefined()
+})
+
 

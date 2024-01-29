@@ -7,7 +7,7 @@ import { connect } from "react-redux"
 import { RootState } from '../../redux/types'
 import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
 import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
-import { totalBaseSupplyUsd } from "../../selectors/market-selector"
+import { baseToken, totalBaseSupplyUsd } from "../../selectors/market-selector"
 import { totalBaseSupplyScaled } from "../../selectors/market-selector"
 import { baseTokenAddress } from "../../selectors/market-selector"
 import { baseTokenName } from "../../selectors/market-selector"
@@ -51,6 +51,14 @@ export function Farm({ status, markets }) {
     document.getElementById(DEPOSIT_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
     document.getElementById(WITHDRAW_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
   }, [])
+
+  useEffect(() => {
+    if (status === 'success') {
+      markets.forEach(market => {
+        console.log('baseToken', baseToken(market))
+      })
+    }
+  }, [status, markets])
 
   return ( 
       <>

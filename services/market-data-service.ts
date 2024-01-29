@@ -4,7 +4,7 @@ import { Sdk, getSdk } from "../graphql/generated/sdk";
 import { presentBaseValue, tokenScale } from "../comet"
 import { baseTokenDecimals } from "../selectors/market-selector";
 
-export class MarketInfoService {
+export class MarketDataService {
 
     subgraph: Sdk;
 

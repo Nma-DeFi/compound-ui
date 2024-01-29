@@ -22,14 +22,12 @@ export const currentAccountSlice = createSlice({
 export const accountConnected = address => {
     return (dispatch) => {
         dispatch(connected(address))
-        dispatch(marketDataInit())
     }
 }
 
 export const accountDisconnected = () => {
     return (dispatch) => {
         dispatch(disconnected())
-        dispatch(marketDataInit())
     }
 }
   

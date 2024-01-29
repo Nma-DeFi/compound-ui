@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { MarketInfoService } from '../../services/market-info-service';
+import { MarketDataService } from '../../services/market-data-service';
 import { ThunkApiFields } from '../types';
 
 export const marketDataSlice = createSlice({
@@ -32,7 +32,7 @@ export const marketDataInit = createAsyncThunk<any, void, ThunkApiFields>(
         const { chainId } = getState().currentChain
         const { isConnected, address } = getState().currentAccount
         
-        const service = new MarketInfoService({ chainId })
+        const service = new MarketDataService({ chainId })
 
         const markets = isConnected 
             ? service.findAllMarketsWithSupplyPositions(address)

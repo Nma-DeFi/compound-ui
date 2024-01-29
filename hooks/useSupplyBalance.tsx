@@ -11,6 +11,6 @@ export function useSupplyBalance({ comet, publicClient, walletClient, account })
     return useQuery({
         queryKey: ['supplyBalanceOf', chainId, account, comet],
         queryFn: () => supplyService.supplyBalanceOf(account),
-        enabled: !!supplyService,
+        enabled: !!(supplyService && account),
     })
 }

@@ -17,7 +17,6 @@ query AllMarkets {
                     symbol
                     address
                     decimals
-                    lastPriceUsd
                 }
             }
         }
@@ -46,7 +45,6 @@ query MarketsBy($where: Market_filter) {
                     symbol
                     address
                     decimals
-                    lastPriceUsd
                 }
             }
         }

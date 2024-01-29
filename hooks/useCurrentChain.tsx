@@ -3,11 +3,12 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { chainSwitched } from "../redux/slices/currentChain";
 import { useCurrentAccount } from "./useCurrentAccount";
 import { useEffect } from "react";
+import { isUnsupportedChain } from "../utils/chains";
 
 export function useCurrentChain() {
 
     const { isConnected } = useCurrentAccount()
-    const { chain } = useNetwork()
+    const { chain: connectedChain } = useNetwork()
     const { 
         data,
         error,
@@ -20,13 +21,13 @@ export function useCurrentChain() {
         switchNetworkAsync,
     } = useSwitchNetwork({
         onMutate(args) {
-            //console.log('onMutate', args)
+            //console.log('SwitchNetwork.onMutate', args)
         },
         onSuccess(data) {
-            //console.log('onSuccess', data)
+            //console.log('SwitchNetwork.onSuccess', data)
         },
         onError(error) {
-            //console.log('onError', error)
+            //console.log('SwitchNetwork.onError', error)
         },
     })
 
@@ -53,19 +54,28 @@ export function useCurrentChain() {
 
     let currentChainId = useAppSelector(state => state.currentChain.chainId)
     if (currentChainId === undefined) {
-        currentChainId = isConnected ? chain.id : mainnet.id
+        currentChainId = isConnected ? connectedChain.id : mainnet.id
         dispatch(chainSwitched(currentChainId))
     }
 
-    const setCurrentChainId = (id: number) => {
-        if (isConnected) { 
-            switchNetworkAsync(id)
-                .then(chain => dispatch(chainSwitched(chain.id)))
+    const setCurrentChainId = (newChainId: number) => {
+        /*console.log('setCurrentChain', 
+            'newId', newChainId, 
+            'currentId', currentChainId, 
+            'isUnsupportedChain', isUnsupportedChain(newChainId))*/
+        if (newChainId === currentChainId || isUnsupportedChain(newChainId)) return
+        //console.log('setCurrenChain', 'setting chain', newChainId, isConnected)
+        if (isConnected && (connectedChain.id !== newChainId)) { 
+            switchNetworkAsync(newChainId)
+                .then(chain => { 
+                    //console.log('setCurrenChain switched chain', chain)
+                    dispatch(chainSwitched(chain.id))
+                })
                 .catch(error => {
                     if (error.name !== 'UserRejectedRequestError') throw error
                 })
         } else {
-            dispatch(chainSwitched(id))
+            dispatch(chainSwitched(newChainId))
         }
     }
     

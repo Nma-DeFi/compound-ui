@@ -8262,14 +8262,14 @@ export type MarketByIdQuery = { __typename?: 'Query', market?: { __typename?: 'M
 export type AllMarketsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null, lastPriceUsd: any } } }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any } }> };
+export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null } } }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any } }> };
 
 export type MarketsByQueryVariables = Exact<{
   where?: InputMaybe<Market_Filter>;
 }>;
 
 
-export type MarketsByQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null, lastPriceUsd: any } } } }> };
+export type MarketsByQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null } } } }> };
 
 export type SupplyPositionsByAccountQueryVariables = Exact<{
   address: Scalars['Bytes']['input'];
@@ -8284,6 +8284,11 @@ export type PositionsByQueryVariables = Exact<{
 
 
 export type PositionsByQuery = { __typename?: 'Query', positions: Array<{ __typename?: 'Position', account: { __typename?: 'Account', address: any }, accounting: { __typename?: 'PositionAccounting', basePrincipal: any, baseBalance: any, baseBalanceUsd: any }, market: { __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', token: { __typename?: 'Token', name: string, symbol: string, address: any } } }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any } } }> };
+
+export type ProtocolQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ProtocolQuery = { __typename?: 'Query', protocols: Array<{ __typename?: 'Protocol', id: any, accounting: { __typename?: 'ProtocolAccounting', totalSupplyUsd: any, totalBorrowUsd: any, collateralBalanceUsd: any } }> };
 
 
 export const MarketByIdDocument = gql`
@@ -8307,7 +8312,6 @@ export const AllMarketsDocument = gql`
           symbol
           address
           decimals
-          lastPriceUsd
         }
       }
     }
@@ -8337,7 +8341,6 @@ export const MarketsByDocument = gql`
           symbol
           address
           decimals
-          lastPriceUsd
         }
       }
     }
@@ -8406,6 +8409,18 @@ export const PositionsByDocument = gql`
   }
 }
     `;
+export const ProtocolDocument = gql`
+    query Protocol {
+  protocols {
+    id
+    accounting {
+      totalSupplyUsd
+      totalBorrowUsd
+      collateralBalanceUsd
+    }
+  }
+}
+    `;
 
 export type SdkFunctionWrapper = <T>(action: (requestHeaders?:Record<string, string>) => Promise<T>, operationName: string, operationType?: string, variables?: any) => Promise<T>;
 
@@ -8428,6 +8443,9 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
     },
     PositionsBy(variables?: PositionsByQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<PositionsByQuery> {
       return withWrapper((wrappedRequestHeaders) => client.request<PositionsByQuery>(PositionsByDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'PositionsBy', 'query', variables);
+    },
+    Protocol(variables?: ProtocolQueryVariables, requestHeaders?: GraphQLClientRequestHeaders): Promise<ProtocolQuery> {
+      return withWrapper((wrappedRequestHeaders) => client.request<ProtocolQuery>(ProtocolDocument, variables, {...requestHeaders, ...wrappedRequestHeaders}), 'Protocol', 'query', variables);
     }
   };
 }

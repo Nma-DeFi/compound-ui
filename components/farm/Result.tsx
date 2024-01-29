@@ -41,15 +41,15 @@ export default function Result({ id, action, token, amount, hash}) {
                             <>
                                 <h4 className="mb-3">Success !</h4>
                                 <a href={ transactionUrl({ chainId, txHash: data.transactionHash }) } className="text-decoration-none" target="_blank" rel="noreferrer" >
-                                    <h5 className="mb-3">Transaction <i className="bi bi-box-arrow-up-right"></i></h5>
+                                    <h5 className="mb-4">Transaction <i className="bi bi-box-arrow-up-right"></i></h5>
                                 </a>
-                                <button type="button" className="btn btn-link text-decoration-none" data-bs-dismiss="toast">Close</button>
+                                <button type="button" className="btn btn-primary btn-sm text-white" data-bs-dismiss="toast">Close</button>
                             </>
                         )}
                         {isError && (
                             <>
-                                <h3 className="text-danger mb-3">Error</h3>
-                                <button type="button" className="btn btn-link text-decoration-none" data-bs-dismiss="toast">Close</button>
+                                <h3 className="text-danger mb-4">Error</h3>
+                                <button type="button" className="btn btn-primary btn-sm text-white" data-bs-dismiss="toast">Close</button>
                             </>
                         )}
                 </div>

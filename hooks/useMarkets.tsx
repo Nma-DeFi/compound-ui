@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { MarketInfoService } from "../services/market-info-service";
+import { MarketDataService } from "../services/market-data-service";
 
 export function useMarkets({ chainId, account }) {
     
-    const marketInfoService = new MarketInfoService({ chainId });
+    const marketInfoService = new MarketDataService({ chainId });
 
     return account ? useQuery({
         queryKey: ['AllMarketsWithSupplyPositions', chainId, account],

@@ -3,6 +3,8 @@ import { netSupplyAprScaled, rewardSupplyAprScaled, supplyAprScaled } from "../s
 import { bnf } from "../utils/bn";
 import { useBootstrap } from "../hooks/useBootstrap";
 
+const TOOLTIP_CSS = { fontSize: '110%' };
+
 export default function SupplyApr(market) {
 
     const [ apr, setApr] = useState<string>()
@@ -17,11 +19,12 @@ export default function SupplyApr(market) {
             const format = (apr: string) => `${bnf(apr)}<small>%</small>`
             setApr(netApr)
             setTooltipContent(
-                `<div class="py-3 px-3">
+                `<div class="p-3">
                     <p><strong>Total APR</strong> : ${format(netApr)}</p>
                     <p>Supply APR : ${format(supplyApr)}</p>
                     <p class="mb-0">Reward APR : ${format(rewardApr)}</p>
-                </div>`)
+                </div>`
+            )
         }
     }, [market])
 
@@ -44,7 +47,7 @@ export default function SupplyApr(market) {
                 data-bs-html="true" 
                 data-bs-title={tooltipContent} 
                 onClick={e => e.preventDefault()}>
-                <i className="bi bi-info-square text-body-tertiary ms-2 d-none d-sm-inline" style={{fontSize: '110%'}}>
+                <i className="bi bi-info-square text-body-secondary ms-2 d-none d-sm-inline" style={TOOLTIP_CSS}>
                 </i>
             </a>
         </>

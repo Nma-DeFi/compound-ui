@@ -2,11 +2,12 @@ import Head from 'next/head';
 import NavLink from './NavLink';
 import ConnectButton from './ConnectButton';
 import NetworkSelector from './NetworkSelector';
-import { useAccountInit } from '../hooks/useCurrentAccount';
+import { useNetworkEvents } from "../hooks/useNetworkEvents";
+import ProtocolStats from './ProtocolStats';
 
 export default function Layout({ children }) {
 
-    useAccountInit()
+    useNetworkEvents()
 
     return (
         <> 
@@ -32,18 +33,7 @@ export default function Layout({ children }) {
                             <li className="nav-item"><a className="nav-link" href="#">Claim</a></li>
                         </ul>
                         <div className="d-none d-xl-flex justify-content-center flex-grow-1 text-center">
-                            <div className="px-5">
-                                <div className="fw-semibold">Total collateral</div> 
-                                <div className="text-body-tertiary">$543.12M</div>
-                            </div>
-                            <div className="px-5">
-                                <div className="fw-semibold">Total borrowing</div> 
-                                <div className="text-body-tertiary">$345.78M</div>
-                            </div>
-                            <div className="px-5">
-                                <div className="fw-semibold">Total farming</div> 
-                                <div className="text-body-tertiary">$480.78M</div>
-                            </div>
+                            <ProtocolStats />
                         </div>
                         <div className="d-none d-lg-block"><ConnectButton /></div>
                     </div>

@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { MarketInfoService } from '../../services/market-info-service';
+import { MarketDataService } from '../../services/market-data-service';
 
 interface MarketLogicState {
     findAllMarkets: () => Promise<any[]>
@@ -16,7 +16,7 @@ export const marketLogicSlice = createSlice({
     initialState,
     reducers: {
         init: (state, action: PayloadAction<number>) => {
-            const service = new MarketInfoService({ chainId: action.payload })
+            const service = new MarketDataService({ chainId: action.payload })
             state.findAllMarkets = service.findAllMarkets
             state.findAllMarketsWithSupplyPositions = service.findAllMarketsWithSupplyPositions
         },

@@ -26,7 +26,7 @@ export function useNetworkEvents() {
         }
     }
 
-    useEffect(() => onChainChanged(chain), [chain])
+    //useEffect(() => onChainChanged(chain), [chain])
 
     useAccount({ onConnect, onDisconnect })
 }

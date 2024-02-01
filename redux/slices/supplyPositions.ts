@@ -4,13 +4,13 @@ import { Address } from 'viem';
 import { cometProxy } from '../../selectors/market-selector';
 import { MarketDataService } from '../../services/market-data-service';
 import { PositionsService } from '../../services/positions-service';
-import { AsyncStatus, ThunkApiFields } from '../types';
 import { bnf } from '../../utils/bn';
+import { AsyncStatusStrType, ThunkApiFields } from '../types';
 
 type SupplyPositionsData = Record<Address, BigNumber>
 
 type SupplyPositionsState = {
-    status: AsyncStatus,
+    status: AsyncStatusStrType,
     positions: SupplyPositionsData 
 }
 

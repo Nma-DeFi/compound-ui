@@ -1,15 +1,12 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { MarketDataService } from '../../services/market-data-service';
-import { AsyncStatus, ThunkApiFields } from '../types';
+import { AsyncStatus, AsyncStatusType, ThunkApiFields } from '../types';
 
-type MarketDataState = {
-  status: AsyncStatus,
-  markets: any 
-}
+type MarketDataState = { markets: any } & AsyncStatusType
 
 const initialState : MarketDataState = {
-  status: 'idle',
   markets: undefined,
+  ...AsyncStatus.Idle,
 }
 
 export const marketDataSlice = createSlice({
@@ -19,33 +16,26 @@ export const marketDataSlice = createSlice({
     extraReducers(builder) {
       builder
         .addCase(marketDataInit.pending, (state) => {
-          state.status = 'loading'
           state.markets = undefined
+          Object.assign(state, AsyncStatus.Loading)
         })
         .addCase(marketDataInit.fulfilled, (state, action) => {
-          state.status = 'success'
           state.markets = action.payload
+          Object.assign(state, AsyncStatus.Success)
         })
         .addCase(marketDataInit.rejected, (state) => {
-          state.status = 'error'
           state.markets = undefined
+          Object.assign(state, AsyncStatus.Error)
         })
     }
 })
   
 export const marketDataInit = createAsyncThunk<any, void, ThunkApiFields>(
     'marketData/init',
-    async (_, { getState }) => {
+    (_, { getState }) => {
         const { chainId } = getState().currentChain
-        const { isConnected, address } = getState().currentAccount
-        
         const service = new MarketDataService({ chainId })
-
-        const markets = isConnected 
-            ? service.findAllMarketsWithSupplyPositions(address)
-            : service.findAllMarkets()
-
-        return await markets
+        return service.findAllMarkets()
     }
 )
 

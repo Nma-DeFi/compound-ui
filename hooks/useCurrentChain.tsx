@@ -56,10 +56,11 @@ export function useCurrentChain() {
     if (currentChainId === undefined) {
         currentChainId = isConnected ? connectedChain.id : mainnet.id
         dispatch(chainSwitched(currentChainId))
-
+        console.log('currentChainId', currentChainId)
     }
 
     const setCurrentChainId = (newChainId: number) => {
+        console.log('setCurrentChainId', newChainId)
         /*console.log('setCurrentChain', 
             'newId', newChainId, 
             'currentId', currentChainId, 

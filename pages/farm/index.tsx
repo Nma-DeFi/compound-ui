@@ -33,8 +33,8 @@ export type ActionInfo = {
   hash: Hash, 
 }
 
-export function Farm({ status, markets }) {
-
+export function Farm({ isLoading, isSuccess, markets }) {
+  console.log('Farm', isLoading, isSuccess)
   const [ targetMarket, setTargetMarket ] = useState(null)
   const { openModal } = useBootstrap()
 
@@ -71,11 +71,11 @@ export function Farm({ status, markets }) {
                 <div className="col text-center">Action</div>
             </div>
 
-            { status === 'loading' && 
+            { isLoading && 
               <GrowSpinners css='py-5 d-flex justify-content-center' />
             }
 
-            { status === 'success' && markets.map(market =>
+            { isSuccess && markets.map(market =>
               <div key={baseTokenAddress(market)} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
@@ -91,7 +91,7 @@ export function Farm({ status, markets }) {
                       <small className="text-body-secondary">${bnf(totalBaseSupplyUsd(market))}</small>
                   </div>
                   <div className="col text-center">
-                    <SupplyBalance {...market} />
+                    <SupplyBalance market={market} />
                   </div>
                   <div className="col text-center">
                     <SupplyApr {...market} />

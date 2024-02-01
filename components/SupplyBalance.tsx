@@ -1,54 +1,47 @@
 import { useEffect, useState } from "react"
-import { usePublicClient } from "wagmi"
+import { connect } from "react-redux"
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
-import { useCurrentChain } from "../hooks/useCurrentChain"
 import { usePrice } from "../hooks/usePrice"
-import { useSupplyBalance } from "../hooks/useSupplyBalance"
+import { RootState } from "../redux/types"
 import { baseToken, cometProxy } from "../selectors/market-selector"
-import { bnf } from "../utils/bn"
+import { Zero, bnf } from "../utils/bn"
 
 
-export default function SupplyBalance(market) {
+export function SupplyBalance({ market, balanceStatus, balance }) {
     
-    const [ balance, setBalance] = useState<string>()
-    const [ price, setPrice] = useState<string>()
+    const [ strBalance, setStrBalance] = useState<string>()
+    const [ strPrice, setStrPrice] = useState<string>()
 
-    const { currentChainId: chainId } = useCurrentChain()
-    const { isConnected, address: account } = useCurrentAccount()
-
-    const publicClient = usePublicClient({ chainId })
-
-    const comet = cometProxy(market) 
-
-    const { 
-        isSuccess: isSuccessBalance, 
-        data: _balance
-    } = useSupplyBalance({ comet, publicClient, account })
+    const { isConnected } = useCurrentAccount()
+    
+    useEffect(() => {
+        console.log('SupplyBalance', market, balanceStatus, bnf(balance))
+    }, [market, balanceStatus, balance])
 
     const {  
         isSuccess: isSuccessPrice, 
-        data: _price 
+        data: price 
     } = usePrice({ token: baseToken(market) })
 
     useEffect(() => {
-        if (isSuccessBalance) {
-            setBalance(bnf(_balance))
+        if (balanceStatus === 'success') {
+            setStrBalance(bnf(balance))
         } else {
-            setBalance('—')
+            setStrBalance('—')
         }
-    }, [isSuccessBalance])
+    }, [balanceStatus])
 
     useEffect(() => {
-        if (isSuccessPrice && isSuccessBalance) {
-            const price = _balance.times(_price)
-            setPrice(`$${bnf(price)}`)
+        if (isSuccessPrice && balanceStatus === 'success') {
+            const _price = balance.times(price)
+            setStrPrice(`$${bnf(_price)}`)
         } else {
-            setPrice('—')
+            setStrPrice('—')
         }
-    }, [isSuccessPrice, isSuccessBalance])
+    }, [isSuccessPrice, balanceStatus])
 
     return isConnected 
-        ? <Balance balance={balance} price={price}/> 
+        ? <Balance balance={strBalance} price={strPrice}/> 
         : <Balance balance='—' price='—'/>
 }
 
@@ -59,3 +52,11 @@ const Balance = ({ balance, price }) => (
     </>
 )
 
+const mapStateToProps = (state: RootState, ownProps: { market: any }) => {
+    const { status: balanceStatus, positions } = state.supplyPositions
+    const { market } = ownProps
+    const comet = cometProxy(market) 
+    const balance = positions?.[comet] || Zero
+    return { balanceStatus, balance }
+}
+export default connect(mapStateToProps)(SupplyBalance)

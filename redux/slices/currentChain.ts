@@ -25,6 +25,7 @@ export const currentChainSlice = createSlice({
 })
 
 export const chainSwitched = chainId => {
+    console.log('chainSwitched', chainId)
     return (dispatch, getState) => {
         const { isConnected } = getState().currentAccount
         const client = createPublicClient({

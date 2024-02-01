@@ -1,14 +1,14 @@
 import { mainnet, useNetwork, useSwitchNetwork } from "wagmi";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { chainSwitched } from "../redux/slices/currentChain";
-import { useCurrentAccount } from "./useCurrentAccount";
-import { useEffect } from "react";
 import { isUnsupportedChain } from "../utils/chains";
+import { useCurrentAccount } from "./useCurrentAccount";
 
 export function useCurrentChain() {
 
     const { isConnected } = useCurrentAccount()
     const { chain: connectedChain } = useNetwork()
+
     const { 
         data,
         error,
@@ -56,6 +56,7 @@ export function useCurrentChain() {
     if (currentChainId === undefined) {
         currentChainId = isConnected ? connectedChain.id : mainnet.id
         dispatch(chainSwitched(currentChainId))
+
     }
 
     const setCurrentChainId = (newChainId: number) => {

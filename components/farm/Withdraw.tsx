@@ -47,7 +47,7 @@ export default function Withdraw(market) {
     const { 
         isSuccess: isSuccessBalance, 
         data: balance
-    } = useSupplyBalance({ comet, publicClient, walletClient, account })
+    } = useSupplyBalance({ comet, publicClient, account })
 
     const { 
       isSuccess: isSuccessPrice, 

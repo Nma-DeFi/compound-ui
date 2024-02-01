@@ -1,22 +1,18 @@
-import Head from "next/head"
-import UserAccount from "../../components/UserAccount"
-import { bnf } from "../../utils/bn"
-import { useEffect, useState } from "react"
-import { useBootstrap } from "../../hooks/useBootstrap"
-import { connect } from "react-redux"
-import { RootState } from '../../redux/types'
-import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
-import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
-import { baseToken, totalBaseSupplyUsd } from "../../selectors/market-selector"
-import { totalBaseSupplyScaled } from "../../selectors/market-selector"
-import { baseTokenAddress } from "../../selectors/market-selector"
-import { baseTokenName } from "../../selectors/market-selector"
-import { baseTokenSymbol } from "../../selectors/market-selector"
-import SupplyBalance from "../../components/SupplyBalance"
-import { GrowSpinners } from "../../components/Spinner"
-import { Address, Hash } from "viem"
 import BigNumber from "bignumber.js"
+import Head from "next/head"
+import { useEffect, useState } from "react"
+import { connect } from "react-redux"
+import { Address, Hash } from "viem"
+import { GrowSpinners } from "../../components/Spinner"
 import SupplyApr from "../../components/SupplyApr"
+import SupplyBalance from "../../components/SupplyBalance"
+import UserAccount from "../../components/UserAccount"
+import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
+import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
+import { useBootstrap } from "../../hooks/useBootstrap"
+import { RootState } from '../../redux/types'
+import { baseTokenAddress, baseTokenName, baseTokenSymbol, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../../selectors/market-selector"
+import { bnf } from "../../utils/bn"
 
 export const Action = { 
   Deposit: 0, 
@@ -51,14 +47,6 @@ export function Farm({ status, markets }) {
     document.getElementById(DEPOSIT_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
     document.getElementById(WITHDRAW_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
   }, [])
-
-  useEffect(() => {
-    if (status === 'success') {
-      markets.forEach(market => {
-        console.log('baseToken', baseToken(market))
-      })
-    }
-  }, [status, markets])
 
   return ( 
       <>
@@ -126,5 +114,4 @@ export function Farm({ status, markets }) {
 }
 
 const mapStateToProps = (state: RootState) => state.marketData
-
 export default connect(mapStateToProps)(Farm)

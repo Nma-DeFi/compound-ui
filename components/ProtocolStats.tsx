@@ -22,7 +22,7 @@ export default function ProtocolStats() {
             setTotalBorrowing(bnf(totalBorrowing))
             setTotalCollateral(bnf(totalCollateral))
         }
-    }, [isSuccess, data])
+    }, [isSuccess])
 
     return (
         <>

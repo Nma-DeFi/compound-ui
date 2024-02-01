@@ -7,6 +7,7 @@ import { marketDataInit } from "../../redux/slices/marketData";
 import { transactionUrl } from "../../utils/chains";
 import { useCurrentChain } from "../../hooks/useCurrentChain";
 import { Action } from "../../pages/farm";
+import { supplyPositionsInit } from "../../redux/slices/supplyPositions";
 
 export default function Result({ id, action, token, amount, hash}) {
 
@@ -17,6 +18,7 @@ export default function Result({ id, action, token, amount, hash}) {
 
     useEffect(() => {
         if (isSuccess) {
+            dispatch(supplyPositionsInit())
             dispatch(marketDataInit())
         }
     }, [isSuccess])

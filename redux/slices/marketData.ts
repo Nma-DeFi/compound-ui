@@ -1,13 +1,20 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { MarketDataService } from '../../services/market-data-service';
-import { ThunkApiFields } from '../types';
+import { AsyncStatus, ThunkApiFields } from '../types';
+
+type MarketDataState = {
+  status: AsyncStatus,
+  markets: any 
+}
+
+const initialState : MarketDataState = {
+  status: 'idle',
+  markets: undefined,
+}
 
 export const marketDataSlice = createSlice({
     name: 'marketData',
-    initialState: {
-        status: 'idle',
-        markets: undefined,
-    },
+    initialState,
     reducers: {},
     extraReducers(builder) {
       builder

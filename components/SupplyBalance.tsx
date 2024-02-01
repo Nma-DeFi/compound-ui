@@ -1,40 +1,61 @@
+import { useEffect, useState } from "react"
+import { usePublicClient } from "wagmi"
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
-import { baseToken, cometProxy  } from "../selectors/market-selector"
 import { useCurrentChain } from "../hooks/useCurrentChain"
-import { bnf } from "../utils/bn"
 import { usePrice } from "../hooks/usePrice"
 import { useSupplyBalance } from "../hooks/useSupplyBalance"
-import { usePublicClient, useWalletClient } from "wagmi"
+import { baseToken, cometProxy } from "../selectors/market-selector"
+import { bnf } from "../utils/bn"
+
 
 export default function SupplyBalance(market) {
+    
+    const [ balance, setBalance] = useState<string>()
+    const [ price, setPrice] = useState<string>()
 
-    const { address: account } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
+    const { isConnected, address: account } = useCurrentAccount()
 
     const publicClient = usePublicClient({ chainId })
-    const { data: walletClient } = useWalletClient()
 
-    const comet = cometProxy(market)
-    
+    const comet = cometProxy(market) 
+
     const { 
         isSuccess: isSuccessBalance, 
-        data: balance
-    } = useSupplyBalance({ comet, publicClient, walletClient, account})
+        data: _balance
+    } = useSupplyBalance({ comet, publicClient, account })
 
-    const { 
+    const {  
         isSuccess: isSuccessPrice, 
-        data: price 
+        data: _price 
     } = usePrice({ token: baseToken(market) })
 
-    return isSuccessBalance ? (
-        <>
-            <div className="mb-1">{ bnf(isSuccessBalance ? balance : 0)}</div>
-            <small className="text-body-secondary">${ bnf(isSuccessBalance && isSuccessPrice ? balance.times(price) : 0) }</small>
-        </>
-    ) : (
-        <>
-            <div className="mb-1">—</div>
-            <small className="text-body-secondary">—</small>
-        </>
-    )
+    useEffect(() => {
+        if (isSuccessBalance) {
+            setBalance(bnf(_balance))
+        } else {
+            setBalance('—')
+        }
+    }, [isSuccessBalance])
+
+    useEffect(() => {
+        if (isSuccessPrice && isSuccessBalance) {
+            const price = _balance.times(_price)
+            setPrice(`$${bnf(price)}`)
+        } else {
+            setPrice('—')
+        }
+    }, [isSuccessPrice, isSuccessBalance])
+
+    return isConnected 
+        ? <Balance balance={balance} price={price}/> 
+        : <Balance balance='—' price='—'/>
 }
+
+const Balance = ({ balance, price }) => (
+    <>
+        <div className="mb-1">{ balance }</div>
+        <small className="text-body-secondary">{price }</small>
+    </>
+)
+

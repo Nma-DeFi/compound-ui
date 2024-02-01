@@ -1,16 +1,16 @@
 import { useQuery } from "@tanstack/react-query"
-import { useSupplyService } from "./useSupplyService"
 import { useCurrentChain } from "./useCurrentChain"
+import { usePositionsService } from "./usePositionsService"
 
-export function useSupplyBalance({ comet, publicClient, walletClient, account }) {
+export function useSupplyBalance({ comet, publicClient, account }) {
 
     const { currentChainId: chainId } = useCurrentChain()
     
-    const supplyService = useSupplyService({ comet, publicClient, walletClient, account })
+    const positionsService = usePositionsService({ comet, publicClient })
 
     return useQuery({
         queryKey: ['supplyBalanceOf', chainId, account, comet],
-        queryFn: () => supplyService.supplyBalanceOf(account),
-        enabled: !!(supplyService && account),
+        queryFn: () => positionsService.supplyBalanceOf(account),
+        enabled: !!(positionsService && account),
     })
 }

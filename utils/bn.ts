@@ -10,7 +10,7 @@ export function bn(value) {
 }
 
 export function bnf(value, dp = DEFAULT_PRECISION) {
-    const val = bn(value);
+    const val = bn(value ?? 0)
 
     if (val.abs().gte(1e9)) {
         return `${val.div(1e9).toFixed(dp)}B`;

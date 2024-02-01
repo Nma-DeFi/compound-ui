@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { marketDataInit } from './marketData'
+import { supplyPositionsInit } from './supplyPositions'
 
 export const currentAccountSlice = createSlice({
     name: 'currentAccount',
@@ -22,6 +22,7 @@ export const currentAccountSlice = createSlice({
 export const accountConnected = address => {
     return (dispatch) => {
         dispatch(connected(address))
+        dispatch(supplyPositionsInit())
     }
 }
 

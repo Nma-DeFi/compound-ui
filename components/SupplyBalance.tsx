@@ -6,7 +6,6 @@ import { RootState } from "../redux/types"
 import { baseToken, cometProxy } from "../selectors/market-selector"
 import { Zero, bnf } from "../utils/bn"
 
-
 export function SupplyBalance({ market, balanceStatus, balance }) {
     
     const [ strBalance, setStrBalance] = useState<string>()
@@ -52,9 +51,8 @@ const Balance = ({ balance, price }) => (
     </>
 )
 
-const mapStateToProps = (state: RootState, ownProps: { market: any }) => {
+const mapStateToProps = (state: RootState, { market }) => {
     const { status: balanceStatus, positions } = state.supplyPositions
-    const { market } = ownProps
     const comet = cometProxy(market) 
     const balance = positions?.[comet] || Zero
     return { balanceStatus, balance }

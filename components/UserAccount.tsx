@@ -12,9 +12,9 @@ export function UserAccount({ status, positions }) {
     const [ farming, setFarming ] = useState<string>()
 
     useEffect(() => {
-        if (status === 'success' && positions) {
+        if (status === 'success') {
             const reducer = (previous: BigNumber, current: BigNumber) => previous.plus(current)
-            const farming = Object.values(positions).reduce(reducer, Zero)
+            const farming = Object.values(positions || []).reduce(reducer, Zero)
             setFarming(bnf(farming))
         }
     }, [status])

@@ -34,7 +34,7 @@ export type ActionInfo = {
 }
 
 export function Farm({ isLoading, isSuccess, markets }) {
-  console.log('Farm', isLoading, isSuccess)
+
   const [ targetMarket, setTargetMarket ] = useState(null)
   const { openModal } = useBootstrap()
 

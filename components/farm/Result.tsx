@@ -18,6 +18,7 @@ export default function Result({ id, action, token, amount, hash}) {
 
     useEffect(() => {
         if (isSuccess) {
+            console.log('TransactionReceipt', data)
             dispatch(supplyPositionsInit())
             dispatch(marketDataInit())
         }

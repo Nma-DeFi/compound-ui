@@ -23,7 +23,7 @@ export const accountConnected = address => {
     console.log('accountConnected', address)
     return (dispatch) => {
         dispatch(connected(address))
-        dispatch(supplyPositionsInit())
+        //dispatch(supplyPositionsInit())
     }
 }
 

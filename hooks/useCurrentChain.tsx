@@ -10,45 +10,12 @@ export function useCurrentChain() {
     const { chain: connectedChain } = useNetwork()
 
     const { 
-        data,
-        error,
-        isError,
-        isIdle,
-        isLoading,
-        isSuccess,
-        pendingChainId,
-        switchNetwork,
         switchNetworkAsync,
     } = useSwitchNetwork({
-        onMutate(args) {
-            //console.log('SwitchNetwork.onMutate', args)
-        },
-        onSuccess(data) {
-            //console.log('SwitchNetwork.onSuccess', data)
-        },
-        onError(error) {
-            //console.log('SwitchNetwork.onError', error)
-        },
+        onMutate(args) {},
+        onSuccess(data) {},
+        onError(error) {},
     })
-
-    /*useEffect(() => {
-        console.log('isError,isIdle,isLoading,isSuccess,pendingChainId,data,error')
-        console.log(
-            isError,
-            isIdle,
-            isLoading,
-            isSuccess,
-            pendingChainId,
-            data,
-            error,
-        )
-    }, [data,
-        error,
-        isError,
-        isIdle,
-        isLoading,
-        isSuccess,
-        pendingChainId])*/
 
     const dispatch = useAppDispatch()
 
@@ -56,21 +23,13 @@ export function useCurrentChain() {
     if (currentChainId === undefined) {
         currentChainId = isConnected ? connectedChain.id : mainnet.id
         dispatch(chainSwitched(currentChainId))
-        console.log('currentChainId', currentChainId)
     }
 
     const setCurrentChainId = (newChainId: number) => {
-        console.log('setCurrentChainId', newChainId)
-        /*console.log('setCurrentChain', 
-            'newId', newChainId, 
-            'currentId', currentChainId, 
-            'isUnsupportedChain', isUnsupportedChain(newChainId))*/
         if (newChainId === currentChainId || isUnsupportedChain(newChainId)) return
-        //console.log('setCurrenChain', 'setting chain', newChainId, isConnected)
         if (isConnected && (connectedChain.id !== newChainId)) { 
             switchNetworkAsync(newChainId)
                 .then(chain => { 
-                    //console.log('setCurrenChain switched chain', chain)
                     dispatch(chainSwitched(chain.id))
                 })
                 .catch(error => {

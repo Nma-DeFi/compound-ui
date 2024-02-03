@@ -12,7 +12,6 @@ export function useNetworkEvents() {
     const dispatch = useAppDispatch()
 
     const onConnect = ({ address, connector, isReconnected }) => {
-        //console.log('onConnect', chain, address, connector, isReconnected)
         dispatch(accountConnected(address))
         setCurrentChainId(chain.id)
     }
@@ -20,7 +19,6 @@ export function useNetworkEvents() {
     const onDisconnect = () => dispatch(accountDisconnected())
 
     const onChainChanged = (newChain: Chain) => {
-        //console.log('onChainChanged', newChain)
         if (newChain) {
             setCurrentChainId(newChain.id)
         }

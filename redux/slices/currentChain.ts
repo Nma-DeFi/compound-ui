@@ -5,6 +5,7 @@ import { marketDataInit } from './marketData';
 import { marketLogicInit } from './marketLogic';
 import { supplyPositionsInit } from './supplyPositions';
 import { publicClientUpdated } from './publicClient';
+import { goerli } from 'viem/chains';
 
 interface CurrentChainState {
     chainId: number
@@ -30,7 +31,10 @@ export const chainSwitched = chainId => {
         const { isConnected } = getState().currentAccount
         const client = createPublicClient({
             chain: chainFromId(chainId),
-            transport: http(),
+            //transport: http(),
+            transport: http(chainId === goerli.id 
+                ? process.env.NEXT_PUBLIC_GOERLI_RPC
+                : undefined),
         })
         dispatch(chainIdUpdated(chainId))
         dispatch(publicClientUpdated(client))

@@ -26,6 +26,7 @@ export class PositionsService {
                 functionName: 'decimals',
             })
             console.log(
+                Date.now(), 
                 'PositionsService.supplyBalanceOf',
                 'account', account,
                 'comet', this.contract.address,

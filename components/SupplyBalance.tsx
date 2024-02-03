@@ -14,7 +14,7 @@ export function SupplyBalance({ market, balanceStatus, balance }) {
     const { isConnected } = useCurrentAccount()
     
     useEffect(() => {
-        console.log('SupplyBalance', market, balanceStatus, bnf(balance))
+        console.log(Date.now(), 'SupplyBalance', baseToken(market)?.name, balanceStatus, bnf(balance))
     }, [market, balanceStatus, balance])
 
     const {  

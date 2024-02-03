@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import BigNumber from 'bignumber.js';
 import { Address } from 'viem';
-import { cometProxy } from '../../selectors/market-selector';
+import { baseToken, cometProxy } from '../../selectors/market-selector';
 import { MarketDataService } from '../../services/market-data-service';
 import { PositionsService } from '../../services/positions-service';
 import { bnf } from '../../utils/bn';
@@ -57,8 +57,9 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
             const positionsService = new PositionsService({comet, publicClient })
             const balance = await positionsService.supplyBalanceOf(address)
             positions = { ...positions, [comet]: balance }  
-            console.log('supplyPositions/init', comet, bnf(balance))
         }
+        console.log(Date.now(), 'supplyPositions/init store', chainId,
+          Object.keys(positions).map(k => `${k} : ${bnf(positions[k])}`))
         return positions
     }
 )

@@ -1,30 +1,29 @@
-import { Chain, useAccount, useNetwork } from "wagmi"
+import { useAccount, useNetwork } from "wagmi"
 import { useAppDispatch } from "../redux/hooks"
 import { accountConnected, accountDisconnected } from "../redux/slices/currentAccount"
+import { chainSwitched } from "../redux/slices/currentChain"
+import { supplyPositionsInit } from "../redux/slices/supplyPositions"
 import { useCurrentChain } from "./useCurrentChain"
-import { useEffect } from "react"
-
 
 export function useNetworkEvents() {
 
     const { chain } = useNetwork()
-    const { setCurrentChainId } = useCurrentChain()
+    const { currentChainId } = useCurrentChain()
     const dispatch = useAppDispatch()
 
     const onConnect = ({ address, connector, isReconnected }) => {
+        console.log('onConnect', address, chain, currentChainId)
         dispatch(accountConnected(address))
-        setCurrentChainId(chain.id)
+        dispatch(chainSwitched(chain.id))
+        dispatch(supplyPositionsInit())
     }
 
     const onDisconnect = () => dispatch(accountDisconnected())
 
-    const onChainChanged = (newChain: Chain) => {
-        if (newChain) {
-            setCurrentChainId(newChain.id)
-        }
+    /*const onChainChanged = (newChain: Chain) => {
+        if (newChain) {}
     }
-
-    //useEffect(() => onChainChanged(chain), [chain])
+    useEffect(() => onChainChanged(chain), [chain])*/
 
     useAccount({ onConnect, onDisconnect })
 }

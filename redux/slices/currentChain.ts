@@ -1,11 +1,9 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { createPublicClient, http } from 'viem';
-import { chainFromId } from '../../utils/chains';
+import { chainFromId, fixGoerliRpc, isUnsupportedChain } from '../../utils/chains';
 import { marketDataInit } from './marketData';
 import { marketLogicInit } from './marketLogic';
-import { supplyPositionsInit } from './supplyPositions';
 import { publicClientUpdated } from './publicClient';
-import { goerli } from 'viem/chains';
 
 interface CurrentChainState {
     chainId: number
@@ -25,27 +23,26 @@ export const currentChainSlice = createSlice({
     },
 })
 
-export const chainSwitched = chainId => {
-    console.log('chainSwitched', chainId)
+export const chainSwitched = newChainId => {
+    console.log('chainSwitched', newChainId)
+    if (isUnsupportedChain(newChainId)) {
+        throw Error(`Unsupported Chain : ${newChainId}`)
+    }
     return (dispatch, getState) => {
-        const { isConnected } = getState().currentAccount
-        const client = createPublicClient({
-            chain: chainFromId(chainId),
-            //transport: http(),
-            transport: http(chainId === goerli.id 
-                ? process.env.NEXT_PUBLIC_GOERLI_RPC
-                : undefined),
-        })
-        dispatch(chainIdUpdated(chainId))
-        dispatch(publicClientUpdated(client))
-        dispatch(marketLogicInit())
-        dispatch(marketDataInit())
-        if (isConnected) {
-            dispatch(supplyPositionsInit())
+        const { chainId } = getState().currentChain
+        if (newChainId !== chainId) {
+            const client = createPublicClient({
+                chain: chainFromId(newChainId),
+                transport: http(fixGoerliRpc(newChainId)),
+            })
+            dispatch(chainIdUpdated(newChainId))
+            dispatch(publicClientUpdated(client))
+            dispatch(marketLogicInit())
+            dispatch(marketDataInit())
         }
     }
 }
-  
+
 export const { chainIdUpdated } = currentChainSlice.actions
 
 export default currentChainSlice.reducer

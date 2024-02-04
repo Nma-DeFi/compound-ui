@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useCurrentChain } from "./useCurrentChain"
+import { useCurrentChain } from "../components/NetworkSelector"
 import { usePositionsService } from "./usePositionsService"
 
 export function useSupplyBalance({ comet, publicClient, account }) {

@@ -1,11 +1,13 @@
 import Compound from "@compound-finance/compound-js";
+import { mainnet } from "wagmi";
 
 export class PriceService {
 
     compound: { getPrice: (token: string) => Promise<number> }
 
     constructor() {
-        this.compound = new (Compound as any)(process.env.NEXT_PUBLIC_MAINNET_RPC)
+        const [ rpc ] = mainnet.rpcUrls.default.http
+        this.compound = new (Compound as any)(rpc)
     }
 
     async getPrice(token: string) {

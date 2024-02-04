@@ -1,12 +1,24 @@
-import { CHAINS, enhanceChain, chainIcon, chainName } from "../utils/chains";
-import styles from '../styles/components/NetworkSelector.module.scss';
-import { useCurrentChain } from "../hooks/useCurrentChain";
 import { useEffect, useState } from "react";
+import { useSwitchNetwork } from "wagmi";
+import { useCurrentAccount } from "../hooks/useCurrentAccount";
+import { useCurrentChain } from "../hooks/useCurrentChain";
+import { useAppDispatch } from "../redux/hooks";
+import { chainSwitched } from "../redux/slices/currentChain";
+import styles from '../styles/components/NetworkSelector.module.scss';
+import { CHAINS, chainIcon, chainName, enhanceChain } from "../utils/chains";
+import { supplyPositionsInit } from "../redux/slices/supplyPositions";
+
+const USER_REJECTED_TX = 'UserRejectedRequestError';
 
 export default function NetworkSelector() {
 
-    const { currentChainId, setCurrentChainId } = useCurrentChain();
+    const { currentChainId } = useCurrentChain()
+    const { isConnected } = useCurrentAccount()
+    const { switchNetworkAsync } = useSwitchNetwork()
+
     const [ chainList, setChainList ] = useState([])
+
+    const dispatch = useAppDispatch()
 
     useEffect(() => {
         const comparator = (c1, c2) => {
@@ -20,6 +32,23 @@ export default function NetworkSelector() {
         }
         setChainList(CHAINS.map(enhanceChain).sort(comparator)) 
     }, [])
+
+    function setCurrentChain(newChainId: number) {
+        if (newChainId === currentChainId) return
+        console.log('setCurrentChain', newChainId, currentChainId, isConnected)
+        if (isConnected) { 
+            switchNetworkAsync(newChainId)
+                .then(chain => { 
+                    dispatch(chainSwitched(chain.id)) 
+                    dispatch(supplyPositionsInit())
+                })
+                .catch(error => {
+                    if (error.name !== USER_REJECTED_TX) throw error
+                })
+        } else {
+            dispatch(chainSwitched(newChainId))
+        }
+    }
 
     return (
             <div id="network-dropdown" className="btn-group w-100" role="group">
@@ -36,7 +65,7 @@ export default function NetworkSelector() {
                         <button 
                             className="dropdown-item" 
                             type="button" 
-                            onClick={() => setCurrentChainId(chain.id)}>
+                            onClick={() => setCurrentChain(chain.id)}>
                             <div className="d-flex align-items-center">
                                 <img className={styles['network-menu-icon']} src={chain.icon} alt="Network icon" /> 
                                 {chain.shortName}

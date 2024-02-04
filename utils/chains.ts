@@ -39,4 +39,10 @@ export function enhanceChain(chain) {
 export function transactionUrl({ chainId, txHash }) {
     const blockExplorer = chainFromId(chainId).blockExplorers.default.url
     return `${blockExplorer}/tx/${txHash}`
-  }
+}
+
+export function fixGoerliRpc(chainId: number) {
+    return chainId === goerli.id
+        ? process.env.NEXT_PUBLIC_GOERLI_RPC
+        : undefined;
+}

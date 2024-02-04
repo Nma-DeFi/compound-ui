@@ -225,7 +225,7 @@ export default function Deposit(market) {
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleApproval}>Enable {baseToken?.symbol}</button>
                   }
                   { mode === Mode.WaitingForApproval &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Enabling {baseToken?.symbol} <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Enabling {baseToken?.symbol} ... Wait please <SmallSpinner /></button>
                   }
                   { mode === Mode.DepositReady &&
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit {baseToken?.symbol}</button>

@@ -8,11 +8,10 @@ import { useCurrentChain } from "./useCurrentChain"
 export function useNetworkEvents() {
 
     const { chain } = useNetwork()
-    const { currentChainId } = useCurrentChain()
     const dispatch = useAppDispatch()
 
     const onConnect = ({ address, connector, isReconnected }) => {
-        console.log('onConnect', address, chain, currentChainId)
+        console.log('onConnect', address, chain, isReconnected)
         dispatch(accountConnected(address))
         dispatch(chainSwitched(chain.id))
         dispatch(supplyPositionsInit())

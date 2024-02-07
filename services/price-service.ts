@@ -11,20 +11,18 @@ export class PriceService {
     }
 
     async getPrice(token: string) {
-        const token_ = this.mapToken(token)
-        const price = await this.compound.getPrice(token_)
+        const mappedToken = this.mapToken(token)
+        const price = await this.compound.getPrice(mappedToken)
         console.log(
             'PriceService.getPrice',
-            'token', token_,
+            'token', mappedToken,
             'price', price
         )
         return price
     }
 
     mapToken(token: string) {
-        const mapping = {
-            'WETH': 'ETH',
-        }
+        const mapping = { 'WETH': 'ETH' }
         return mapping[token] || token
     }
 }

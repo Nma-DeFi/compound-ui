@@ -1,5 +1,5 @@
 import { useCurrentChain } from '../../hooks/useCurrentChain'
-import css from '../../styles/components/farm/Deposit.module.scss'
+import css from '../../styles/components/farm/DepositErc20.module.scss'
 import { useState, useEffect } from 'react'
 import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import BigNumber from 'bignumber.js'
@@ -15,6 +15,7 @@ import { usePrice } from '../../hooks/usePrice'
 import Result from './Result'
 import AmountInput from '../AmountInput'
 import { Action, ActionInfo } from '../../pages/farm'
+import AmountPercent from '../AmountPercent'
 
 const Mode = {
   NotConnected: 0,
@@ -28,15 +29,17 @@ const Mode = {
   WaitingForDeposit: 8,
 }
 
-export const DEPOSIT_MODAL = 'deposit-modal'
-export const DEPOSIT_TOAST = 'deposit-toast'
+const AMOUNT_PRECISION = 4
 
-export default function Deposit(market) {
+export const DEPOSIT_ERC20_TOKEN_MODAL = 'deposit-erc20-modal'
+export const DEPOSIT_ERC20_TOKEN_TOAST = 'deposit-erc20-toast'
+
+export default function DepositErc20Token(market) {
     
     const [ mode, setMode ] = useState<number>()
-    const [ amount, setAmount ] = useState<BigNumber>()
     const [ balance, setBalance ] = useState<BigNumber>()
     const [ allowance, setAllowance ] = useState<BigNumber>()
+    const [ amount, setAmount ] = useState<BigNumber>(Zero)
 
     const [ approvalHash, setApprovalHash ] = useState<Hash>()
     const [ supplyHash, setSupplyHash ] = useState<Hash>()
@@ -51,11 +54,11 @@ export default function Deposit(market) {
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
 
-    const { isSuccess: isSuccessPrice, data: price } = usePrice({ token: baseToken })
+    const { isSuccess: isPrice, data: price } = usePrice({ token: baseToken })
 
     const baseTokenErc20  = useErc20Service({ token: baseToken, publicClient, walletClient, account })
 
-    const supplyService = useSupplyService({ comet, publicClient, walletClient, account })
+    const supplyService = useSupplyService({ chainId, publicClient, walletClient, account, comet })
 
     const { 
       isLoading: isWaitingApproval, 
@@ -63,10 +66,10 @@ export default function Deposit(market) {
     } = useWaitForTransaction({ hash: approvalHash })
 
     const { hideModal, openToast } = useBootstrap()
-    const modalEvent = useModalEvent(DEPOSIT_MODAL)
+    const modalEvent = useModalEvent(DEPOSIT_ERC20_TOKEN_MODAL)
 
     useEffect(() => {
-      if (!isConnected || !amount || !balance || !allowance) return
+      if (!isConnected || !balance || !allowance) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
       } else if (amount.isGreaterThan(allowance)) {
@@ -98,7 +101,7 @@ export default function Deposit(market) {
       if (supplyHash && mode === Mode.ConfirmationOfDeposit) {
         setMode(Mode.WaitingForDeposit)
         setSupplyInfo({ action: Action.Deposit, token: baseToken, amount, hash: supplyHash })
-        hideModal(DEPOSIT_MODAL)
+        hideModal(DEPOSIT_ERC20_TOKEN_MODAL)
       }
     }, [supplyHash])
 
@@ -123,15 +126,15 @@ export default function Deposit(market) {
     }
 
     function onHide() {
-      setMode(null)
-      setInput(null)
       if (mode === Mode.WaitingForDeposit) {
-        openToast(DEPOSIT_TOAST)
+        openToast(DEPOSIT_ERC20_TOKEN_TOAST)
       }
+      setMode(null)
     }
     
     function initState() {
       setAmount(Zero)
+      setInput(null)
       setBalance(null)
       setAllowance(null)
       setApprovalHash(null)
@@ -153,7 +156,7 @@ export default function Deposit(market) {
     function handleDeposit() {
       if (amount.isZero()) return
       setMode(Mode.ConfirmationOfDeposit)
-      supplyService.supply({ token: baseToken, amount }).then(setSupplyHash)
+      supplyService.supplyErc20Token({ token: baseToken, amount }).then(setSupplyHash)
     }
 
     function handleAmountChange(event) {
@@ -164,15 +167,15 @@ export default function Deposit(market) {
     function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount)
+      const newInput = bnf(newAmount, AMOUNT_PRECISION)
       setAmount(newAmount)
       setInput(newInput)
     }
 
     return (
       <>
-        <Result {...{id: DEPOSIT_TOAST, ...supplyInfo}} />
-        <div id={DEPOSIT_MODAL} className="modal" tabIndex={-1}>
+        <Result {...{id: DEPOSIT_ERC20_TOKEN_TOAST, ...supplyInfo}} />
+        <div id={DEPOSIT_ERC20_TOKEN_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div id={css['deposit-body']} className="modal-body">
@@ -189,7 +192,7 @@ export default function Deposit(market) {
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                        ${ bnf(amount && isSuccessPrice ? amount.times(price) : 0) }
+                        ${ bnf(amount && isPrice ? amount.times(price) : 0) }
                         </div>
                       </div>
                       <div>
@@ -200,15 +203,12 @@ export default function Deposit(market) {
                               </div>
                           </button>
                           <div className="text-center text-body-secondary small">
-                            Wallet : <span className="text-body-tertiary">{ bnf(balance || 0) }</span>
+                            Wallet : <span className="text-body-tertiary">{ bnf(balance || 0, AMOUNT_PRECISION) }</span>
                           </div>
                       </div>
                   </div>
                   <div className="row g-2">
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletBalancePercent(0.25)}>25%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletBalancePercent(0.5)}>50%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletBalancePercent(0.75)}>75%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleWalletBalancePercent(1)}>Max</button></div>
+                    <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
                 <div className="d-grid">

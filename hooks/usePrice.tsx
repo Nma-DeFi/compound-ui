@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 
 export function usePrice({ token }) {
 
-    const [ priceService, setPriceService ] = useState(null)
+    const [ priceService, setPriceService ] = useState<PriceService>()
 
     useEffect(() => {
-        const priceService = new PriceService()
-        setPriceService(priceService)
-    }, [])
+        if (token) {
+            const priceService = new PriceService()
+            setPriceService(priceService)
+        } else {
+            setPriceService(null)
+        }
+    }, [token])
     
     return useQuery({
         queryKey: ['getPrice', token?.symbol],

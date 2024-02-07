@@ -1,8 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { createPublicClient, http } from 'viem';
 import { chainFromId, fixGoerliRpc, isUnsupportedChain } from '../../utils/chains';
-import { marketDataInit } from './marketData';
-import { marketLogicInit } from './marketLogic';
 import { publicClientUpdated } from './publicClient';
 
 interface CurrentChainState {
@@ -24,7 +22,6 @@ export const currentChainSlice = createSlice({
 })
 
 export const chainSwitched = newChainId => {
-    console.log('chainSwitched', newChainId)
     if (isUnsupportedChain(newChainId)) {
         throw Error(`Unsupported Chain : ${newChainId}`)
     }
@@ -37,8 +34,6 @@ export const chainSwitched = newChainId => {
             })
             dispatch(chainIdUpdated(newChainId))
             dispatch(publicClientUpdated(client))
-            dispatch(marketLogicInit())
-            dispatch(marketDataInit())
         }
     }
 }

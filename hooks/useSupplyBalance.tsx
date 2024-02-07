@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js"
 import { useEffect, useState } from "react"
 import { AsyncStatus, AsyncStatusType } from "../redux/types"
-import { Zero, bnf } from "../utils/bn"
+import { Zero } from "../utils/bn"
 import { usePositionsService } from "./usePositionsService"
 
 type BalanceData = { data: BigNumber } & AsyncStatusType
@@ -16,15 +16,6 @@ export function useSupplyBalance({ comet, publicClient, account }) {
     const [ balance, setBalance ] = useState<BalanceData>(IdleBalance)
 
     const positionsService = usePositionsService({ comet, publicClient })
-
-    useEffect(() => {
-        console.log('update balance', 
-        'idle', balance.isIdle,
-        'loading', balance.isLoading,
-        'success', balance.isSuccess,
-        'error', balance.isError,
-        bnf(balance.data))
-    }, [balance])
 
     useEffect(() => {
         if (positionsService && account) {

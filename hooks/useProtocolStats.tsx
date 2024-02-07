@@ -8,5 +8,6 @@ export function useProtocolStats({ chainId }) {
     return useQuery({
         queryKey: ['Protocol', chainId],
         queryFn: () => protocolDataService.fetchProtocol(),
+        staleTime: (3 * 60 * 1000),
     })
 }

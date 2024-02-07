@@ -1,7 +1,7 @@
-import { COMPOUND_CONFIG } from '../compound-config';
+import { CompoundConfig } from '../compound-config';
 import { arbitrum, goerli } from 'wagmi/chains';
 
-export const CHAINS = Object.values(COMPOUND_CONFIG).map(cfg => cfg.chain)
+export const CHAINS = Object.values(CompoundConfig).map(cfg => cfg.chain)
 
 const CHAIN_ICON_PATH = '/images/networks'
 const ARB_SHORT_NAME = 'Arbitrum'
@@ -27,6 +27,14 @@ export function isUnsupportedChain(id: number) {
     return !chainFromId(id)
 }
 
+export function nativeCurrency(id: number) {
+    return chainFromId(id).nativeCurrency
+}
+
+export function wrappedNativeToken(id: number) {
+    return CompoundConfig[id].contracts.wrappedNativeToken
+}
+
 export function enhanceChain(chain) {
     return {
         ...chain,
@@ -44,5 +52,5 @@ export function transactionUrl({ chainId, txHash }) {
 export function fixGoerliRpc(chainId: number) {
     return chainId === goerli.id
         ? process.env.NEXT_PUBLIC_GOERLI_RPC
-        : undefined;
+        : undefined
 }

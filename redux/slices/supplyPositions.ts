@@ -46,7 +46,6 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
         const { address } = getState().currentAccount
         const { chainId } = getState().currentChain
         const { publicClient } = getState().publicClient
-        console.log('supplyPositionsInit', address, chainId)
 
         const marketDataService = new MarketDataService({ chainId })
         const markets = await marketDataService.findAllMarkets()
@@ -59,7 +58,7 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
             const balance = await positionsService.supplyBalanceOf(address)
             positions = { ...positions, [comet]: balance }  
         }
-        console.log(Date.now(), 'supplyPositions/init store', chainId,
+        console.log(Date.now(), 'supplyPositions/init', chainId,
           Object.keys(positions).map(k => `${k} : ${bnf(positions[k])}`))
         return positions
     }

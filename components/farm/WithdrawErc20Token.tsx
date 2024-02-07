@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
-import css from '../../styles/components/farm/Withdraw.module.scss';
+import css from '../../styles/components/farm/WithdrawErc20.module.scss';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import BigNumber from 'bignumber.js';
 import { Zero, bn, bnf } from '../../utils/bn';
@@ -15,6 +15,7 @@ import { useWithdrawService } from '../../hooks/useWithdrawService';
 import { Hash } from 'viem';
 import { Action, ActionInfo } from '../../pages/farm';
 import Result from './Result';
+import AmountPercent from '../AmountPercent';
 
 const Mode = {
   NotConnected: 0,
@@ -25,13 +26,13 @@ const Mode = {
   WaitingForWithdraw: 5
 }
 
-export const WITHDRAW_MODAL = 'withdraw-modal'
-export const WITHDRAW_TOAST = 'withdraw-toast'
+export const WITHDRAW_ERC20_TOKEN_MODAL = 'withdraw-erc20-modal'
+export const WITHDRAW_ERC20_TOKEN_TOAST = 'withdraw-erc20-toast'
 
-export default function Withdraw(market) {
+export default function WithdrawErc20Token(market) {
 
     const [ mode, setMode ] = useState<number>()
-    const [ amount, setAmount ] = useState<BigNumber>()
+    const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ withdrawHash, setWithdrawHash ] = useState<Hash>()
     const [ withdrawInfo, setWithdrawInfo ] = useState<ActionInfo>()
 
@@ -45,22 +46,22 @@ export default function Withdraw(market) {
     const { data: walletClient } = useWalletClient()
     
     const { 
-        isSuccess: isSuccessBalance, 
+        isSuccess: isBalance, 
         data: balance
     } = useSupplyBalance({ comet, publicClient, account })
 
     const { 
-      isSuccess: isSuccessPrice, 
+      isSuccess: isPrice, 
       data: price 
     } = usePrice({ token: baseToken })
 
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
 
     const { hideModal, openToast } = useBootstrap()
-    const modalEvent = useModalEvent(WITHDRAW_MODAL)
+    const modalEvent = useModalEvent(WITHDRAW_ERC20_TOKEN_MODAL)
 
     useEffect(() => {
-      if (!isConnected || !amount || !balance || !withdrawService) return
+      if (!isConnected || !balance || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
       } else {
@@ -72,7 +73,7 @@ export default function Withdraw(market) {
       if (withdrawHash && mode === Mode.ConfirmationOfWithdraw) {
         setMode(Mode.WaitingForWithdraw)
         setWithdrawInfo({ action: Action.Withdraw, token: baseToken, amount, hash: withdrawHash })
-        hideModal(WITHDRAW_MODAL)
+        hideModal(WITHDRAW_ERC20_TOKEN_MODAL)
       }
     }, [withdrawHash])
 
@@ -97,15 +98,15 @@ export default function Withdraw(market) {
     }
 
     function onHide() {
-      setMode(null)
-      setInput(null)
       if (mode === Mode.WaitingForWithdraw) {
-        openToast(WITHDRAW_TOAST)
+        openToast(WITHDRAW_ERC20_TOKEN_TOAST)
       }
+      setMode(null)
     }
 
     function initState() {
       setAmount(Zero)
+      setInput(null)
       setWithdrawHash(null)
       setWithdrawInfo(null)
     }
@@ -137,8 +138,8 @@ export default function Withdraw(market) {
 
     return (
       <>
-        <Result {...{id: WITHDRAW_TOAST, ...withdrawInfo}} />
-        <div id={WITHDRAW_MODAL} className="modal" tabIndex={-1}>
+        <Result {...{id: WITHDRAW_ERC20_TOKEN_TOAST, ...withdrawInfo}} />
+        <div id={WITHDRAW_ERC20_TOKEN_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div id={css['withdraw-body']} className="modal-body">
@@ -155,7 +156,7 @@ export default function Withdraw(market) {
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                        ${ bnf(amount && isSuccessPrice ? amount.times(price) : 0) }
+                        ${ bnf(amount && isPrice ? amount.times(price) : 0) }
                         </div>
                       </div>
                       <div>
@@ -165,14 +166,11 @@ export default function Withdraw(market) {
                                   <span className="px-3">{baseToken?.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">{ bnf(isSuccessBalance ? balance : 0) }</span></div>
+                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">{ bnf(isBalance ? balance : 0) }</span></div>
                       </div>
                   </div>
                   <div className="row g-2">
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleBalancePercent(0.25)}>25%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleBalancePercent(0.5)}>50%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleBalancePercent(0.75)}>75%</button></div>
-                      <div className="col"><button type="button" className="btn btn-light btn-sm text-secondary w-100" onClick={() => handleBalancePercent(1)}>Max</button></div>
+                    <AmountPercent handler={handleBalancePercent} />
                   </div>
                 </div>
                 <div className="d-grid">

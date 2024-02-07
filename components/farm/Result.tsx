@@ -1,13 +1,14 @@
-import { SmallSpinner } from "../Spinner";
-import { useWaitForTransaction } from "wagmi";
-import { bnf } from "../../utils/bn";
 import { useEffect } from "react";
-import { useAppDispatch } from "../../redux/hooks";
-import { marketDataInit } from "../../redux/slices/marketData";
-import { transactionUrl } from "../../utils/chains";
+import { useWaitForTransaction } from "wagmi";
 import { useCurrentChain } from "../../hooks/useCurrentChain";
 import { Action } from "../../pages/farm";
+import { useAppDispatch } from "../../redux/hooks";
 import { supplyPositionsInit } from "../../redux/slices/supplyPositions";
+import { bnf } from "../../utils/bn";
+import { transactionUrl } from "../../utils/chains";
+import { SmallSpinner } from "../Spinner";
+
+const AMOUNT_DECIMALS = 4;
 
 export default function Result({ id, action, token, amount, hash}) {
 
@@ -18,9 +19,7 @@ export default function Result({ id, action, token, amount, hash}) {
 
     useEffect(() => {
         if (isSuccess) {
-            console.log('TransactionReceipt', data)
             dispatch(supplyPositionsInit())
-            dispatch(marketDataInit())
         }
     }, [isSuccess])
 
@@ -36,7 +35,7 @@ export default function Result({ id, action, token, amount, hash}) {
                 <div className="toast-body text-center px-0 py-4">
                         {isLoading && (
                             <>
-                                <h4 className="mb-4">{actionLabel()} of <span className="text-body-secondary">{ bnf(amount) } { token?.symbol }</span></h4>
+                                <h4 className="mb-4">{actionLabel()} of <span className="text-body-secondary">{ bnf(amount, AMOUNT_DECIMALS) } { token?.symbol }</span></h4>
                                 <div className="fs-5 text-body-secondary">Wait please <SmallSpinner /></div>
                             </>
                         )}

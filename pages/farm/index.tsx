@@ -1,51 +1,67 @@
 import BigNumber from "bignumber.js"
 import Head from "next/head"
 import { useEffect, useState } from "react"
-import { connect } from "react-redux"
-import { Address, Hash } from "viem"
+import { Hash } from "viem"
 import { GrowSpinners } from "../../components/Spinner"
 import SupplyApr from "../../components/SupplyApr"
 import SupplyBalance from "../../components/SupplyBalance"
 import UserAccount from "../../components/UserAccount"
-import Deposit, { DEPOSIT_MODAL } from "../../components/farm/Deposit"
-import Withdraw, { WITHDRAW_MODAL } from "../../components/farm/Withdraw"
+import DepositErc20Token, { DEPOSIT_ERC20_TOKEN_MODAL } from "../../components/farm/DepositErc20Token"
+import DepositNativeCurrency, { DEPOSIT_NATIVE_CURRENCY_MODAL } from "../../components/farm/DepositNativeCurrency"
+import WithdrawErc20Token, { WITHDRAW_ERC20_TOKEN_MODAL } from "../../components/farm/WithdrawErc20Token"
+import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from "../../components/farm/WithdrawNativeCurrency"
 import { useBootstrap } from "../../hooks/useBootstrap"
-import { RootState } from '../../redux/types'
-import { baseTokenAddress, baseTokenName, baseTokenSymbol, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../../selectors/market-selector"
+import { useCurrentChain } from "../../hooks/useCurrentChain"
+import { useMarkets } from "../../hooks/useMarkets"
+import { baseTokenAddress, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../../selectors/market-selector"
+import { Token } from "../../types"
 import { bnf } from "../../utils/bn"
+import { isNativeCurrencyMarket, unWrappedNativeToken } from "../../utils/markets"
 
 export const Action = { 
   Deposit: 0, 
   Withdraw: 1 
 }
 
-export type Token = {
-  name: string, 
-  symbol: string, 
-  address: Address, 
-  decimals: number
-}
-
 export type ActionInfo = { 
   action: number,
-  token: Token, 
+  token: Omit<Token, 'address'>, 
   amount: BigNumber, 
   hash: Hash, 
 }
 
-export function Farm({ isLoading, isSuccess, markets }) {
+export default function Farm() {
+
+  const { currentChainId: chainId } = useCurrentChain()
+  const { isLoading, isSuccess, data: markets } = useMarkets({ chainId })
 
   const [ targetMarket, setTargetMarket ] = useState(null)
   const { openModal } = useBootstrap()
 
   function showModal(market, action) {
+    let modal
+    if (action === Action.Deposit) {
+      if (isNativeCurrencyMarket(market, chainId)) {
+        modal = DEPOSIT_NATIVE_CURRENCY_MODAL
+      } else {
+        modal = DEPOSIT_ERC20_TOKEN_MODAL
+      }
+    } else  {
+      if (isNativeCurrencyMarket(market, chainId)) {
+        modal = WITHDRAW_NATIVE_CURRENCY_MODAL
+      } else {
+        modal = WITHDRAW_ERC20_TOKEN_MODAL
+      }
+    }
     setTargetMarket(market)
-    openModal(action === Action.Deposit ? DEPOSIT_MODAL : WITHDRAW_MODAL)
+    openModal(modal)
   }
-  
+
   useEffect(() => {
-    document.getElementById(DEPOSIT_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
-    document.getElementById(WITHDRAW_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+    document.getElementById(DEPOSIT_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+    document.getElementById(DEPOSIT_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+    document.getElementById(WITHDRAW_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+    document.getElementById(WITHDRAW_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
   }, [])
 
   return ( 
@@ -54,8 +70,10 @@ export function Farm({ isLoading, isSuccess, markets }) {
           <title>Farm</title>
         </Head>
         
-        <Deposit {...targetMarket} />
-        <Withdraw {...targetMarket} />
+        <DepositErc20Token {...targetMarket} />
+        <DepositNativeCurrency {...targetMarket} />
+        <WithdrawErc20Token {...targetMarket} />
+        <WithdrawNativeCurrency {...targetMarket} />
         
         <div className="col-8 px-5">
             <div className="row g-0 align-items-center p-4 mb-5 bg-body border rounded shadow mb-5">
@@ -79,10 +97,10 @@ export function Farm({ isLoading, isSuccess, markets }) {
               <div key={baseTokenAddress(market)} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
-                          <img src={`/images/tokens/${baseTokenSymbol(market)}.svg`} className="d-none d-sm-block me-2" alt="USDC" width="42" />
+                          <img src={`/images/tokens/${unWrappedNativeToken(market, chainId)?.symbol}.svg`} className="d-none d-sm-block me-2" alt={unWrappedNativeToken(market, chainId)?.symbol} width="42" />
                           <div>
-                              <div className="mb-1">{baseTokenSymbol(market)}</div>
-                              <small className="d-none d-sm-block text-body-secondary">{baseTokenName(market)}</small>
+                              <div className="mb-1">{unWrappedNativeToken(market, chainId)?.symbol}</div>
+                              <small className="d-none d-sm-block text-body-secondary">{unWrappedNativeToken(market, chainId)?.name}</small>
                           </div>
                       </div>
                   </div>
@@ -113,5 +131,3 @@ export function Farm({ isLoading, isSuccess, markets }) {
     );
 }
 
-const mapStateToProps = (state: RootState) => state.marketData
-export default connect(mapStateToProps)(Farm)

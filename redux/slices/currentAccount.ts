@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { supplyPositionsInit } from './supplyPositions'
 
 export const currentAccountSlice = createSlice({
     name: 'currentAccount',
@@ -23,7 +22,6 @@ export const accountConnected = address => {
     console.log('accountConnected', address)
     return (dispatch) => {
         dispatch(connected(address))
-        //dispatch(supplyPositionsInit())
     }
 }
 

@@ -1,19 +1,36 @@
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
-import { useModalEvent } from '../../hooks/useBootstrap';
+import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi';
+import { CompoundConfig } from '../../compound-config';
+import { useAllowService } from '../../hooks/useAllowService';
+import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
-import { ActionInfo } from '../../pages/farm';
+import { useCurrentChain } from '../../hooks/useCurrentChain';
+import { useSupplyBalance } from '../../hooks/useSupplyBalance';
+import { useWithdrawService } from '../../hooks/useWithdrawService';
+import { Action, ActionInfo } from '../../pages/farm';
 import * as MarketSelector from "../../selectors/market-selector";
 import css from '../../styles/components/farm/WithdrawNative.module.scss';
-import { Zero, bn } from '../../utils/bn';
+import { AsyncData, IdleData, asyncExec } from '../../utils/async';
+import { Zero, bn, bnf } from '../../utils/bn';
+import * as ChainUtils from '../../utils/chains';
 import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
 import { SmallSpinner } from '../Spinner';
 import Result from './Result';
+import { usePrice } from '../../hooks/usePrice';
+import { Hash } from 'viem';
 
 const Mode = {
   NotConnected: 0,
   Init: 1,
+  InsufficientBalance: 2,
+  BulkerNotApproved: 3,
+  ConfirmationOfBulkerApproval: 4,
+  WaitingForBulkerApproval: 5,
+  WithdrawReady: 6,
+  ConfirmationOfWithdrawal: 7,
+  WaitingForWithdrawal: 8,
 }
 
 export const WITHDRAW_NATIVE_CURRENCY_MODAL = 'withdraw-native-modal'
@@ -21,15 +38,83 @@ export const WITHDRAW_NATIVE_CURRENCY_TOAST = 'withdraw-native-toast'
 
 export default function WithdrawNativeCurrency(market) {
 
+    const AMOUNT_DECIMALS = 4;
+
+    const { currentChainId: chainId } = useCurrentChain()
+    const { isConnected, address: account } = useCurrentAccount()
+
+    const publicClient = usePublicClient({ chainId })
+    const { data: walletClient } = useWalletClient()
+
     const [ mode, setMode ] = useState<number>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
-    const [ withdrawInfo, setWithdrawInfo ] = useState<ActionInfo>()
+    const [ bulkerApprovalHash, setBulkerApprovalHash ] = useState<Hash>()
+    const [ withdrawHash, setWithdrawHash ] = useState<Hash>()
+    const [ withdrawInfo, setWithdrawInfo ] = useState<ActionInfo>()    
+    const [ 
+      { 
+        isSuccess: isBulkerPermission, 
+        data: isBulkerApproved 
+      }, 
+      setBulkerPermission 
+    ] = useState<AsyncData<boolean>>(IdleData)
 
-    const { isConnected } = useCurrentAccount()
+    const comet = MarketSelector.cometProxy(market)
+    const nativeCurrency = ChainUtils.nativeCurrency(chainId)
 
-    const baseToken = MarketSelector.baseToken(market)
-
+    const { hideModal, openToast } = useBootstrap()
     const modalEvent = useModalEvent(WITHDRAW_NATIVE_CURRENCY_MODAL)
+
+    const { isSuccess: isBalance, data: balance } = useSupplyBalance({ comet, publicClient, account })
+    const { isSuccess: isPrice, data: price } = usePrice({ token: nativeCurrency })
+
+    const allowService = useAllowService({ comet, publicClient, walletClient, account })
+    const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
+
+    const { 
+      isLoading: isWaitingBulkerApproval, 
+      isSuccess: isSuccessBulkerApproval 
+    } = useWaitForTransaction({ hash: bulkerApprovalHash })
+
+    const { bulker } = CompoundConfig[chainId].contracts
+
+    useEffect(() => {
+      if (!isConnected || !isBalance || !isBulkerPermission || !withdrawService) return
+      if (amount.isGreaterThan(balance)) {
+        setMode(Mode.InsufficientBalance)
+      } else if (amount.isGreaterThan(Zero) && !isBulkerApproved) {
+        setMode(Mode.BulkerNotApproved)
+      } else {
+        setMode(Mode.WithdrawReady)
+      }
+
+    }, [amount, isBalance, isBulkerPermission, withdrawService])
+
+    useEffect(() => {
+      if (withdrawHash && mode === Mode.ConfirmationOfWithdrawal) {
+        setMode(Mode.WaitingForWithdrawal)
+        setWithdrawInfo({ action: Action.Withdraw, token: nativeCurrency, amount, hash: withdrawHash })
+        hideModal(WITHDRAW_NATIVE_CURRENCY_MODAL)
+      }
+    }, [withdrawHash])
+
+    useEffect(() => { 
+      if (isWaitingBulkerApproval) {
+        setMode(Mode.WaitingForBulkerApproval)
+      } 
+    }, [isWaitingBulkerApproval])
+    
+    useEffect(() => { 
+      if (isSuccessBulkerApproval) {
+        loadBulkerPermission()
+      } 
+    }, [isSuccessBulkerApproval])
+    
+    useEffect(() => {
+      if (mode === Mode.Init && allowService) {
+          loadBulkerPermission()
+      }
+    }, [allowService])
 
     useEffect(() => {
       switch (modalEvent) {
@@ -52,12 +137,24 @@ export default function WithdrawNativeCurrency(market) {
     }
 
     function onHide() {
-      setInput(null)
+      if (mode === Mode.WaitingForWithdrawal) {
+        openToast(WITHDRAW_NATIVE_CURRENCY_TOAST)
+      }
+      setMode(null)
+    }
+
+    function loadBulkerPermission() {
+      const promise = allowService.hasPermission(account, bulker);
+      asyncExec(promise, setBulkerPermission);
     }
 
     function initState() {
       setAmount(Zero)
-      setMode(null)
+      setInput(null)
+      setWithdrawInfo(null)
+      setBulkerApprovalHash(null)
+      setBulkerPermission(IdleData)
+      setWithdrawHash(null)
       setWithdrawInfo(null)
     }
     
@@ -75,6 +172,20 @@ export default function WithdrawNativeCurrency(market) {
 
     function handleBalancePercent(factor: number) {
       if (!isConnected) return
+      const newAmount = balance.times(factor)
+      const newInput = bnf(newAmount, AMOUNT_DECIMALS)
+      setAmount(newAmount)
+      setInput(newInput)
+    }
+
+    function handleBulkerApproval() {
+      allowService.allow(bulker, true).then(setBulkerApprovalHash)
+    }
+
+    function handleWithdraw() {
+      if (amount.isZero()) return
+      setMode(Mode.ConfirmationOfWithdrawal)
+      withdrawService.withdrawNativeCurrency({ amount }).then(setWithdrawHash)
     }
 
     return (
@@ -95,19 +206,20 @@ export default function WithdrawNativeCurrency(market) {
                           id={css['withdraw-native-input']} 
                           onChange={handleAmountChange} 
                           disabled={Mode.Init === mode} 
-                          focused={true} />
+                          focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)}
+                        />
                         <div className="small text-body-tertiary">
-                        $0.000
+                        ${ bnf(amount && isPrice ? amount.times(price) : 0) }
                         </div>
                       </div>
                       <div>
                           <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
                               <div className="d-flex align-items-center">
-                                  <img src={`/images/tokens/${baseToken?.symbol}.svg`} alt={baseToken?.symbol} width="30" /> 
-                                  <span className="px-3">{baseToken?.symbol}</span> 
+                                  <img src={`/images/tokens/${nativeCurrency.symbol}.svg`} alt={nativeCurrency.symbol} width="30" /> 
+                                  <span className="px-3">{nativeCurrency.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">0.00</span></div>
+                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">{ bnf(isBalance ? balance : 0) }</span></div>
                       </div>
                   </div>
                   <div className="row g-2">
@@ -120,6 +232,21 @@ export default function WithdrawNativeCurrency(market) {
                   }
                   { mode === Mode.NotConnected &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
+                  }
+                  { mode === Mode.InsufficientBalance &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>
+                  }
+                  { mode === Mode.BulkerNotApproved &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBulkerApproval}>Activate withdrawal</button>
+                  }
+                  { mode === Mode.WaitingForBulkerApproval &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Activating withdrawal ... Wait please <SmallSpinner /></button>
+                  }
+                  { mode === Mode.WithdrawReady &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw {nativeCurrency.symbol}</button>
+                  }
+                  { [Mode.ConfirmationOfBulkerApproval, Mode.ConfirmationOfWithdrawal].includes(mode) &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
                   }
                 </div>
               </div>

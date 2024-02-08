@@ -5,19 +5,32 @@ import { connect } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { Zero, bnf } from '../utils/bn';
 import BigNumber from 'bignumber.js';
+import { PriceService } from '../services/price-service';
+import { SupplyPositionsState } from '../redux/slices/supplyPositions';
 
-export function UserAccount({ status, positions }) {
+export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
 
     const { isConnected } = useCurrentAccount()
     const [ farming, setFarming ] = useState<string>()
 
     useEffect(() => {
-        if (status === 'success') {
-            const reducer = (previous: BigNumber, current: BigNumber) => previous.plus(current)
-            const farming = Object.values(positions || []).reduce(reducer, Zero)
-            setFarming(bnf(farming))
+        if (isSuccess) {
+            const priceService = new PriceService()
+            const positions = Object.values(data)
+            const pricesPromise = positions
+                .map(({ baseToken }) => baseToken.symbol)
+                .map(symbol => priceService.getPrice(symbol))
+            Promise.all(pricesPromise).then(prices => {
+                let totalFarming: BigNumber = Zero
+                for (let index = 0; index < prices.length; index++) {
+                    const price = prices[index]
+                    const balance = positions[index].supplyBalance
+                    totalFarming = totalFarming.plus(balance.times(price))
+                }
+                setFarming(bnf(totalFarming))
+            })    
         }
-    }, [status])
+    }, [isSuccess])
 
     return isConnected ? (
         <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4">
@@ -35,7 +48,7 @@ export function UserAccount({ status, positions }) {
             <div className="d-flex justify-content-between mb-2 small">
                 <div className="">
                     <div className="fw-semibold">Farming</div> 
-                    { status === 'success' ? (
+                    { isSuccess ? (
                         <div className="text-body-secondary">${ farming }</div>
                     ) : (
                         <div className="text-body-secondary">—</div>

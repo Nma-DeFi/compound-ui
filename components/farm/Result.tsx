@@ -8,9 +8,9 @@ import { bnf } from "../../utils/bn";
 import { transactionUrl } from "../../utils/chains";
 import { SmallSpinner } from "../Spinner";
 
-const AMOUNT_DECIMALS = 4;
-
 export default function Result({ id, action, token, amount, hash}) {
+
+    const AMOUNT_DECIMALS = 4;
 
     const { currentChainId: chainId } = useCurrentChain();
     const { isLoading, isSuccess, isError, data, error } = useWaitForTransaction({ hash  })

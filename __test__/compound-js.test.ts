@@ -8,6 +8,10 @@ it('Compound JS SDK', () => {
     console.log(Compound.comet.getSupportedDeployments())
 })
 
+it('Compound JS Abi', () => {
+    console.log(Compound.util.getAbi('Comet'))
+})
+
 it('Compound JS Price', async () => {
     const compound = new (Compound as any)()
     console.log('Compound JS Price', 'COMP', await compound.getPrice('COMP'))   

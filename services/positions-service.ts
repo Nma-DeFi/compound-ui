@@ -15,28 +15,23 @@ export class PositionsService {
     }
 
     async supplyBalanceOf(account) {
-        try {
-            const balance = await this.publicClient.readContract({
-                ...this.contract,
-                functionName: 'balanceOf',
-                args: [ account ],
-            })
-            const decimals = await this.publicClient.readContract({
-                ...this.contract,
-                functionName: 'decimals',
-            })
-            console.log(
-                Date.now(), 
-                'PositionsService.supplyBalanceOf',
-                'account', account,
-                'comet', this.contract.address,
-                'balance', balance,
-                'decimals', decimals,
-            )
-            return fromBigInt(balance, decimals)
-        } catch (e) {
-            console.error('supplyBalanceOf err', e)
-            throw e
-        }
+        const balance = await this.publicClient.readContract({
+            ...this.contract,
+            functionName: 'balanceOf',
+            args: [ account ],
+        })
+        const decimals = await this.publicClient.readContract({
+            ...this.contract,
+            functionName: 'decimals',
+        })
+        console.log(
+            Date.now(), 
+            'PositionsService.supplyBalanceOf',
+            'account', account,
+            'comet', this.contract.address,
+            'balance', balance,
+            'decimals', decimals,
+        )
+        return fromBigInt(balance, decimals)
     }
 }

@@ -33,10 +33,14 @@ export type ActionInfo = {
 export default function Farm() {
 
   const { currentChainId: chainId } = useCurrentChain()
-  const { isLoading, isSuccess, data: markets } = useMarkets({ chainId })
+  const { isLoading, isError, isSuccess, data: markets, error } = useMarkets({ chainId })
 
   const [ targetMarket, setTargetMarket ] = useState(null)
   const { openModal } = useBootstrap()
+
+  useEffect(() => { 
+    if (isError) console.error(error) 
+  }, [isError])
 
   function showModal(market, action) {
     let modal
@@ -88,6 +92,10 @@ export default function Farm() {
                 <div className="col text-center">APR</div>
                 <div className="col text-center">Action</div>
             </div>
+
+            { isError && 
+              <p>Data currently unavailable ...</p>
+            }
 
             { isLoading && 
               <GrowSpinners css='py-5 d-flex justify-content-center' />

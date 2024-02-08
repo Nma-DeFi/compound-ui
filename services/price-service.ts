@@ -11,14 +11,18 @@ export class PriceService {
     }
 
     async getPrice(token: string) {
-        const mappedToken = this.mapToken(token)
-        const price = await this.compound.getPrice(mappedToken)
-        console.log(
-            'PriceService.getPrice',
-            'token', mappedToken,
-            'price', price
-        )
-        return price
+        try {
+            const mappedToken = this.mapToken(token)
+            const price = await this.compound.getPrice(mappedToken)
+            console.log(
+                'PriceService.getPrice',
+                'token', mappedToken,
+                'price', price
+            )
+            return price
+        } catch(e) {
+            return 0 // FIXME
+        }
     }
 
     mapToken(token: string) {

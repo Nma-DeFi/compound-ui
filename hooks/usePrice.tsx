@@ -7,13 +7,9 @@ export function usePrice({ token }) {
     const [ priceService, setPriceService ] = useState<PriceService>()
 
     useEffect(() => {
-        if (token) {
-            const priceService = new PriceService()
-            setPriceService(priceService)
-        } else {
-            setPriceService(null)
-        }
-    }, [token])
+        const priceService = new PriceService()
+        setPriceService(priceService)
+    }, [])
     
     return useQuery({
         queryKey: ['getPrice', token?.symbol],

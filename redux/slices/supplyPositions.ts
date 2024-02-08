@@ -1,67 +1,74 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import BigNumber from 'bignumber.js';
 import { Address } from 'viem';
-import { cometProxy } from '../../selectors/market-selector';
+import * as MarketSelector from '../../selectors/market-selector';
 import { MarketDataService } from '../../services/market-data-service';
 import { PositionsService } from '../../services/positions-service';
+import { Token } from '../../types';
+import { AsyncData, AsyncStatus, IdleData } from '../../utils/async';
 import { bnf } from '../../utils/bn';
-import { AsyncStatusStrType, ThunkApiFields } from '../types';
+import { ThunkApiFields } from '../types';
 
-type SupplyPositionsData = Record<Address, BigNumber>
+export type SupplyPositionsData = Record<Address, {
+  baseToken: Token,
+  supplyBalance: BigNumber,
+}>
 
-type SupplyPositionsState = {
-    status: AsyncStatusStrType,
-    positions: SupplyPositionsData 
-}
+export type SupplyPositionsState = AsyncData<SupplyPositionsData>
 
-const initialState : SupplyPositionsState = {
-    status: 'idle',
-    positions: undefined,
-}
+const initialState : SupplyPositionsState = IdleData
 
 export const supplyPositionsSlice = createSlice({
-    name: 'supplyPositions',
-    initialState,
-    reducers: {},
-    extraReducers(builder) {
-        builder
-          .addCase(supplyPositionsInit.pending, (state) => {
-            state.status = 'loading'
-            state.positions = undefined
-          })
-          .addCase(supplyPositionsInit.fulfilled, (state, action) => {
-            state.status = 'success'
-            state.positions = action.payload
-          })
-          .addCase(supplyPositionsInit.rejected, (state) => {
-            state.status = 'error'
-            state.positions = undefined
-          })
-      }
+  name: 'supplyPositions',
+  initialState,
+  reducers: {
+    supplyPositionsReset: (state) => {
+      state.data = undefined
+      Object.assign(state, AsyncStatus.Idle)
+    }
+  },
+  extraReducers(builder) {
+      builder
+        .addCase(supplyPositionsInit.pending, (state) => {
+          state.data = undefined
+          Object.assign(state, AsyncStatus.Loading)
+        })
+        .addCase(supplyPositionsInit.fulfilled, (state, action) => {
+          state.data = action.payload
+          Object.assign(state, AsyncStatus.Success)
+        })
+        .addCase(supplyPositionsInit.rejected, (state) => {
+          state.data = undefined
+          Object.assign(state, AsyncStatus.Error)
+        })
+    }
 })
 
 export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
-    'supplyPositions/init',
-    async (_, { getState }) => {
-        const { address } = getState().currentAccount
-        const { chainId } = getState().currentChain
-        const { publicClient } = getState().publicClient
+  'supplyPositions/init',
+  async (_, { getState }) => {
+      const { address } = getState().currentAccount
+      const { chainId } = getState().currentChain
+      const { publicClient } = getState().publicClient
 
-        const marketDataService = new MarketDataService({ chainId })
-        const markets = await marketDataService.findAllMarkets()
+      const marketDataService = new MarketDataService({ chainId })
+      const markets = await marketDataService.findAllMarkets()
 
-        let positions: SupplyPositionsData = {}
+      let positions: SupplyPositionsData = {}
 
-        for (const market of markets) {
-            const comet = cometProxy(market)
-            const positionsService = new PositionsService({comet, publicClient })
-            const balance = await positionsService.supplyBalanceOf(address)
-            positions = { ...positions, [comet]: balance }  
-        }
-        console.log(Date.now(), 'supplyPositions/init', chainId,
-          Object.keys(positions).map(k => `${k} : ${bnf(positions[k])}`))
-        return positions
-    }
+      for (const market of markets) {
+          const comet = MarketSelector.cometProxy(market)
+          const baseToken = MarketSelector.baseToken(market)
+          const positionsService = new PositionsService({comet, publicClient })
+          const supplyBalance = await positionsService.supplyBalanceOf(address)
+          positions = { ...positions, [comet]: { baseToken, supplyBalance } }  
+      }
+      const formatter = ({baseToken, supplyBalance}) => `${baseToken.name} : ${bnf(supplyBalance)}`
+      console.log(Date.now(), 'supplyPositions/init', chainId, Object.values(positions).map(formatter))
+      return positions
+  }
 )
+
+export const { supplyPositionsReset } = supplyPositionsSlice.actions
 
 export default supplyPositionsSlice.reducer

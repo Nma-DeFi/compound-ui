@@ -7,14 +7,12 @@ import { nativeCurrency } from "../utils/chains";
 
 export class SupplyService {
 
-    chainId
     publicClient
     walletClient
     account
     cometContract
 
-    constructor({ chainId, publicClient, walletClient, account, comet }) {
-        this.chainId = chainId
+    constructor({ publicClient, walletClient, account, comet }) {
         this.publicClient = publicClient
         this.walletClient = walletClient
         this.account = account
@@ -43,8 +41,9 @@ export class SupplyService {
     }
 
     async supplyNativeCurrency({ amount }) {
-        const { symbol, decimals } = nativeCurrency(this.chainId)
-        const { bulker: bulkerAddress } = CompoundConfig[this.chainId].contracts
+        const chainId = await this.publicClient.getChainId()
+        const { symbol, decimals } = nativeCurrency(chainId)
+        const { bulker: bulkerAddress } = CompoundConfig[chainId].contracts
         const bulkerContract = { address: bulkerAddress, abi: bulkerAbi }
         const supplyAmount = toBigInt(amount, decimals)
 

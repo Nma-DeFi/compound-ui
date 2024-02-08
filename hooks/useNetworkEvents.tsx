@@ -2,8 +2,7 @@ import { useAccount, useNetwork } from "wagmi"
 import { useAppDispatch } from "../redux/hooks"
 import { accountConnected, accountDisconnected } from "../redux/slices/currentAccount"
 import { chainSwitched } from "../redux/slices/currentChain"
-import { supplyPositionsInit } from "../redux/slices/supplyPositions"
-import { useCurrentChain } from "./useCurrentChain"
+import { supplyPositionsInit, supplyPositionsReset } from "../redux/slices/supplyPositions"
 
 export function useNetworkEvents() {
 
@@ -17,7 +16,10 @@ export function useNetworkEvents() {
         dispatch(supplyPositionsInit())
     }
 
-    const onDisconnect = () => dispatch(accountDisconnected())
+    const onDisconnect = () => {
+        dispatch(accountDisconnected())
+        dispatch(supplyPositionsReset())
+    }
 
     /*const onChainChanged = (newChain: Chain) => {
         if (newChain) {}

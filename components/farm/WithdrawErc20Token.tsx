@@ -22,8 +22,8 @@ const Mode = {
   Init: 1,
   InsufficientBalance: 2,
   WithdrawReady: 3,
-  ConfirmationOfWithdraw: 4,
-  WaitingForWithdraw: 5
+  ConfirmationOfWithdrawal: 4,
+  WaitingForWithdrawal: 5
 }
 
 export const WITHDRAW_ERC20_TOKEN_MODAL = 'withdraw-erc20-modal'
@@ -70,8 +70,8 @@ export default function WithdrawErc20Token(market) {
     }, [balance, amount, withdrawService])
 
     useEffect(() => {
-      if (withdrawHash && mode === Mode.ConfirmationOfWithdraw) {
-        setMode(Mode.WaitingForWithdraw)
+      if (withdrawHash && mode === Mode.ConfirmationOfWithdrawal) {
+        setMode(Mode.WaitingForWithdrawal)
         setWithdrawInfo({ action: Action.Withdraw, token: baseToken, amount, hash: withdrawHash })
         hideModal(WITHDRAW_ERC20_TOKEN_MODAL)
       }
@@ -98,7 +98,7 @@ export default function WithdrawErc20Token(market) {
     }
 
     function onHide() {
-      if (mode === Mode.WaitingForWithdraw) {
+      if (mode === Mode.WaitingForWithdrawal) {
         openToast(WITHDRAW_ERC20_TOKEN_TOAST)
       }
       setMode(null)
@@ -122,10 +122,10 @@ export default function WithdrawErc20Token(market) {
       setAmount(amount)
     }
 
-    function handleWithDraw() {
+    function handleWithdraw() {
       if (amount.isZero()) return
-      setMode(Mode.ConfirmationOfWithdraw)
-      withdrawService.withdraw({ token: baseToken, amount }).then(setWithdrawHash)
+      setMode(Mode.ConfirmationOfWithdrawal)
+      withdrawService.withdrawErc20Token({ token: baseToken, amount }).then(setWithdrawHash)
     }
 
     function handleBalancePercent(factor: number) {
@@ -184,9 +184,9 @@ export default function WithdrawErc20Token(market) {
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {baseToken?.symbol} Balance</button>
                   }
                   { mode === Mode.WithdrawReady &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithDraw}>Withdraw {baseToken?.symbol}</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw {baseToken?.symbol}</button>
                   }
-                  { mode === Mode.ConfirmationOfWithdraw &&
+                  { mode === Mode.ConfirmationOfWithdrawal &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
                   }
                 </div>

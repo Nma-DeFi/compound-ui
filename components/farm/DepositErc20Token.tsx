@@ -29,12 +29,12 @@ const Mode = {
   WaitingForDeposit: 8,
 }
 
-const AMOUNT_PRECISION = 4
-
 export const DEPOSIT_ERC20_TOKEN_MODAL = 'deposit-erc20-modal'
 export const DEPOSIT_ERC20_TOKEN_TOAST = 'deposit-erc20-toast'
 
 export default function DepositErc20Token(market) {
+
+    const AMOUNT_PRECISION = 4
     
     const [ mode, setMode ] = useState<number>()
     const [ balance, setBalance ] = useState<BigNumber>()
@@ -58,7 +58,7 @@ export default function DepositErc20Token(market) {
 
     const baseTokenErc20  = useErc20Service({ token: baseToken, publicClient, walletClient, account })
 
-    const supplyService = useSupplyService({ chainId, publicClient, walletClient, account, comet })
+    const supplyService = useSupplyService({ publicClient, walletClient, account, comet })
 
     const { 
       isLoading: isWaitingApproval, 
@@ -79,23 +79,24 @@ export default function DepositErc20Token(market) {
       }
     }, [balance, allowance, amount])
 
-    
+    useEffect(() => { 
+      if (isWaitingApproval) {
+        setMode(Mode.WaitingForApproval)
+      } 
+    }, [isWaitingApproval])
+
+    useEffect(() => { 
+      if (isSuccessApproval) {
+        baseTokenErc20.allowance(account, comet).then(setAllowance)
+      } 
+    }, [isSuccessApproval])
+
     useEffect(() => {
       if (mode === Mode.Init && baseTokenErc20) {
           baseTokenErc20.balanceOf(account).then(setBalance)
           baseTokenErc20.allowance(account, comet).then(setAllowance)
       }
     }, [baseTokenErc20])
-
-
-    useEffect(() => { 
-      if (isWaitingApproval) {
-        setMode(Mode.WaitingForApproval)
-      } 
-      if (isSuccessApproval) {
-        baseTokenErc20.allowance(account, comet).then(setAllowance)
-      } 
-    }, [isWaitingApproval, isSuccessApproval])
     
     useEffect(() => {
       if (supplyHash && mode === Mode.ConfirmationOfDeposit) {

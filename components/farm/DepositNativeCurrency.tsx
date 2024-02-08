@@ -26,13 +26,13 @@ const Mode = {
   WaitingForDeposit: 5,
 }
 
-const AMOUNT_PRECISION = 4
-
 export const DEPOSIT_NATIVE_CURRENCY_MODAL = 'deposit-native-modal'
 export const DEPOSIT_NATIVE_CURRENCY_TOAST = 'deposit-native-toast'
 
 export default function DepositNativeCurrency(market) {
-    
+
+    const AMOUNT_PRECISION = 4
+
     const { currentChainId: chainId } = useCurrentChain()
     const publicClient = usePublicClient({ chainId })
 
@@ -54,7 +54,7 @@ export default function DepositNativeCurrency(market) {
 
     const { isSuccess: isPrice, data: price } = usePrice({ token: nativeCurrency })
 
-    const supplyService = useSupplyService({ chainId, publicClient, walletClient, account: address, comet })
+    const supplyService = useSupplyService({ publicClient, walletClient, account: address, comet })
 
     useEffect(() => {
       if (!isConnected || !balance) return

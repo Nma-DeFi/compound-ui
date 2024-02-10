@@ -56,7 +56,7 @@ export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
                         <div className="text-body-secondary">—</div>
                     )}
                 </div>
-                <div className="">
+                <div>
                     <div className="fw-semibold text-primary">Rewards</div> 
                     <div>— <span className={css['comp-label']}>COMP</span></div>
                 </div>

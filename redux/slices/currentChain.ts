@@ -2,6 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { createPublicClient, http } from 'viem';
 import { chainFromId, fixGoerliRpc, isUnsupportedChain } from '../../utils/chains';
 import { publicClientUpdated } from './publicClient';
+import { createCustomPublicClient } from '../../hooks/useNetworkEvents';
 
 interface CurrentChainState {
     chainId: number
@@ -28,10 +29,7 @@ export const chainSwitched = newChainId => {
     return (dispatch, getState) => {
         const { chainId } = getState().currentChain
         if (newChainId !== chainId) {
-            const client = createPublicClient({
-                chain: chainFromId(newChainId),
-                transport: http(fixGoerliRpc(newChainId)),
-            })
+            const client = createCustomPublicClient(newChainId)
             dispatch(chainIdUpdated(newChainId))
             dispatch(publicClientUpdated(client))
         }

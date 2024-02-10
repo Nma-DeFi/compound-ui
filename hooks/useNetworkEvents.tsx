@@ -1,21 +1,19 @@
+import { useEffect } from "react"
+import { createPublicClient, http } from "viem"
 import { Address, useAccount, useNetwork } from "wagmi"
 import { useAppDispatch } from "../redux/hooks"
 import { accountConnected, accountDisconnected } from "../redux/slices/currentAccount"
 import { chainSwitched } from "../redux/slices/currentChain"
-import { supplyPositionsInit, supplyPositionsReset } from "../redux/slices/supplyPositions"
-import { useEffect } from "react"
+import { supplyPositionsInitFromParam, supplyPositionsReset } from "../redux/slices/supplyPositions"
+import { chainFromId, fixGoerliRpc } from "../utils/chains"
 
 export function useNetworkEvents() {
 
     const { chain } = useNetwork()
     const dispatch = useAppDispatch()
 
-
-    const onConnect = ({ address, connector, isReconnected }) => {
-        console.log('onConnect', address, chain, isReconnected)
+    const onConnect = () => {
         dispatch(chainSwitched(chain.id))
-        dispatch(accountConnected(address))
-        dispatch(supplyPositionsInit())
     }
 
     const onDisconnect = () => {
@@ -25,12 +23,20 @@ export function useNetworkEvents() {
 
     const { address } = useAccount({ onConnect, onDisconnect })
 
-    const onAccountChanged = (address: Address) => {
-        console.log('onAccountChanged', address, chain?.id)
+    const onAccountChanged = (newAccount: Address) => {
+        if (newAccount) {
+            const publicClient = createCustomPublicClient(chain.id)
+            dispatch(accountConnected(newAccount))
+            dispatch(supplyPositionsInitFromParam({address: newAccount, chainId: chain.id, publicClient }))
+        }
     }
+    
     useEffect(() => onAccountChanged(address), [address])
+}
 
-    /*const onChainChanged = (newChain: Chain) => {
-    }
-    useEffect(() => onChainChanged(chain), [chain])*/
+export function createCustomPublicClient(chainId: number) {
+    return createPublicClient({
+        chain: chainFromId(chainId),
+        transport: http(fixGoerliRpc(chainId)),
+    })
 }

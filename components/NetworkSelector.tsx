@@ -51,15 +51,15 @@ export default function NetworkSelector() {
     }
 
     return (
-            <div id="network-dropdown" className="btn-group w-100" role="group">
-                <button id="network-select" type="button" className={`${styles['network-select']} btn btn-light bg-body btn-lg border shadow rounded-5 dropdown-toggle`} data-bs-toggle="dropdown" aria-expanded="false">
+            <div className="network-dropdown btn-group w-100" role="group">
+                <button type="button" className={`${styles['network-select']} network-selector btn btn-light bg-body btn-lg border shadow rounded-5 dropdown-toggle`} data-bs-toggle="dropdown" aria-expanded="false">
                     <div className="d-flex justify-content-around fs-5">
                         <img className={`${styles['icon']} d-none d-xl-inline`} src={chainIcon(currentChainId)} alt="networks" />
                         <div>{chainName(currentChainId)}</div>
                         <div className={styles['chevron']}><i className="bi bi-chevron-down"></i></div>
                     </div>
                 </button>
-                <ul id="network-menu" className="dropdown-menu w-100">
+                <ul className="dropdown-menu w-100">
                 {chainList.map(chain => (
                     <li key={chain.id} className={styles['network-menu-item']} >
                         <button 

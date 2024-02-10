@@ -1,26 +1,34 @@
 import BigNumber from "bignumber.js";
 import { formatUnits, parseUnits } from "viem";
 
-const DEFAULT_PRECISION = 2;
-
 export const Zero = bn(0);
+
+export const DecimalPrecision = 2;
 
 export function bn(value) {
     return new BigNumber(value);
 }
 
-export function bnf(value, dp = DEFAULT_PRECISION) {
-    const val = bn(value ?? 0)
+export function bnf(value, dp = DecimalPrecision, trimZeros = true) {
 
-    if (val.abs().gte(1e9)) {
-        return `${val.div(1e9).toFixed(dp)}B`;
-    } else if (val.abs().gte(1e6)) {
-        return `${val.div(1e6).toFixed(dp)}M`;
-    } else if (val.abs().gte(1e3)) {
-        return `${val.div(1e3).toFixed(dp)}K`;
+    let result: string | BigNumber = bn(value ?? 0)
+
+    if (result.abs().gte(1e9)) {
+        result = `${result.div(1e9).toFixed(dp)}B`
+    } else if (result.abs().gte(1e6)) {
+        result = `${result.div(1e6).toFixed(dp)}M`
+    } else if (result.abs().gte(1e3)) {
+        result = `${result.div(1e3).toFixed(dp)}K`
     } else {
-        return val.toFixed(dp);
+        result = result.toFixed(dp)
     }
+
+    if (trimZeros && result.includes('.')) {
+        result = result.replace(/0+$/, '')
+        result = result.replace(/\.$/, '')
+    }
+
+    return result
 }
 
 export function fromBigInt(bi: bigint, decimals: string | bigint | number = 18): BigNumber {

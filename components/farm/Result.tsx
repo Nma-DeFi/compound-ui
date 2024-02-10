@@ -7,10 +7,9 @@ import { supplyPositionsInit } from "../../redux/slices/supplyPositions";
 import { bnf } from "../../utils/bn";
 import { transactionUrl } from "../../utils/chains";
 import { SmallSpinner } from "../Spinner";
+import Amount from "../Amount";
 
 export default function Result({ id, action, token, amount, hash}) {
-
-    const AMOUNT_DECIMALS = 4;
 
     const { currentChainId: chainId } = useCurrentChain();
     const { isLoading, isSuccess, isError, data, error } = useWaitForTransaction({ hash  })
@@ -35,7 +34,7 @@ export default function Result({ id, action, token, amount, hash}) {
                 <div className="toast-body text-center px-0 py-4">
                         {isLoading && (
                             <>
-                                <h4 className="mb-4">{actionLabel()} of <span className="text-body-secondary">{ bnf(amount, AMOUNT_DECIMALS) } { token?.symbol }</span></h4>
+                                <h4 className="mb-4">{actionLabel()} of <span className="text-body-secondary"><Amount value={amount} /> { token?.symbol }</span></h4>
                                 <div className="fs-5 text-body-secondary">Wait please <SmallSpinner /></div>
                             </>
                         )}

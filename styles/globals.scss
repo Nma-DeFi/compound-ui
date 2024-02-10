@@ -65,12 +65,12 @@ body {
         #menu-column {
             position: sticky; 
             top: $sticky-menu-top;
-            #network-select::after {
-                display: none;
-            }
             #pages-navigation {
                 margin-bottom: 2.5rem;
             }
         }
+    }
+    .network-selector::after {
+        display: none;
     }
 }

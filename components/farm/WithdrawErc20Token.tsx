@@ -1,21 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
-import css from '../../styles/components/farm/WithdrawErc20.module.scss';
-import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import BigNumber from 'bignumber.js';
-import { Zero, bn, bnf } from '../../utils/bn';
-import AmountInput from '../AmountInput';
-import { useSupplyBalance } from '../../hooks/useSupplyBalance';
-import { useCurrentChain } from '../../hooks/useCurrentChain';
-import * as MarketSelector from "../../selectors/market-selector"
-import { SmallSpinner } from '../Spinner';
-import { usePrice } from '../../hooks/usePrice';
-import { usePublicClient, useWalletClient } from 'wagmi';
-import { useWithdrawService } from '../../hooks/useWithdrawService';
+import { useEffect, useState } from 'react';
 import { Hash } from 'viem';
+import { usePublicClient, useWalletClient } from 'wagmi';
+import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
+import { useCurrentAccount } from '../../hooks/useCurrentAccount';
+import { useCurrentChain } from '../../hooks/useCurrentChain';
+import { useSupplyBalance } from '../../hooks/useSupplyBalance';
+import { useWithdrawService } from '../../hooks/useWithdrawService';
 import { Action, ActionInfo } from '../../pages/farm';
-import Result from './Result';
+import * as MarketSelector from "../../selectors/market-selector";
+import css from '../../styles/components/farm/WithdrawErc20.module.scss';
+import { Zero, bn, bnf } from '../../utils/bn';
+import Amount from '../Amount';
+import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
+import Price from '../Price';
+import { SmallSpinner } from '../Spinner';
+import Result from './Result';
 
 const Mode = {
   NotConnected: 0,
@@ -45,15 +46,7 @@ export default function WithdrawErc20Token(market) {
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
     
-    const { 
-        isSuccess: isBalance, 
-        data: balance
-    } = useSupplyBalance({ comet, publicClient, account })
-
-    const { 
-      isSuccess: isPrice, 
-      data: price 
-    } = usePrice({ token: baseToken })
+    const { isSuccess: isBalance, data: balance} = useSupplyBalance({ comet, publicClient, account })
 
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
 
@@ -61,7 +54,7 @@ export default function WithdrawErc20Token(market) {
     const modalEvent = useModalEvent(WITHDRAW_ERC20_TOKEN_MODAL)
 
     useEffect(() => {
-      if (!isConnected || !balance || !withdrawService) return
+      if (!isConnected || !isBalance || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
       } else {
@@ -123,9 +116,10 @@ export default function WithdrawErc20Token(market) {
     }
 
     function handleWithdraw() {
-      if (amount.isZero()) return
-      setMode(Mode.ConfirmationOfWithdrawal)
-      withdrawService.withdrawErc20Token({ token: baseToken, amount }).then(setWithdrawHash)
+      if (amount.isGreaterThan(Zero)) {
+        setMode(Mode.ConfirmationOfWithdrawal)
+        withdrawService.withdrawErc20Token({ token: baseToken, amount }).then(setWithdrawHash)
+      }
     }
 
     function handleBalancePercent(factor: number) {
@@ -156,7 +150,7 @@ export default function WithdrawErc20Token(market) {
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                        ${ bnf(amount && isPrice ? amount.times(price) : 0) }
+                          <Price asset={baseToken} amount={amount} />
                         </div>
                       </div>
                       <div>
@@ -166,7 +160,7 @@ export default function WithdrawErc20Token(market) {
                                   <span className="px-3">{baseToken?.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">{ bnf(isBalance ? balance : 0) }</span></div>
+                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary"><Amount value={balance} /></span></div>
                       </div>
                   </div>
                   <div className="row g-2">

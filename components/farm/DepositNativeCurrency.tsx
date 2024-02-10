@@ -5,15 +5,16 @@ import { usePublicClient, useWalletClient } from 'wagmi'
 import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap'
 import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import { useCurrentChain } from '../../hooks/useCurrentChain'
-import { usePrice } from '../../hooks/usePrice'
 import { useSupplyService } from '../../hooks/useSupplyService'
 import { Action, ActionInfo } from '../../pages/farm'
 import * as MarketSelector from "../../selectors/market-selector"
 import css from '../../styles/components/farm/DepositNative.module.scss'
 import { Zero, bn, bnf, fromBigInt } from '../../utils/bn'
 import * as ChainUtils from '../../utils/chains'
+import Amount, { AmountDecimalPrecision } from '../Amount'
 import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
+import Price from '../Price'
 import { SmallSpinner } from '../Spinner'
 import Result from './Result'
 
@@ -30,8 +31,6 @@ export const DEPOSIT_NATIVE_CURRENCY_MODAL = 'deposit-native-modal'
 export const DEPOSIT_NATIVE_CURRENCY_TOAST = 'deposit-native-toast'
 
 export default function DepositNativeCurrency(market) {
-
-    const AMOUNT_PRECISION = 4
 
     const { currentChainId: chainId } = useCurrentChain()
     const publicClient = usePublicClient({ chainId })
@@ -51,8 +50,6 @@ export default function DepositNativeCurrency(market) {
 
     const comet = MarketSelector.cometProxy(market)
     const nativeCurrency = ChainUtils.nativeCurrency(chainId)
-
-    const { isSuccess: isPrice, data: price } = usePrice({ token: nativeCurrency })
 
     const supplyService = useSupplyService({ publicClient, walletClient, account: address, comet })
 
@@ -124,15 +121,16 @@ export default function DepositNativeCurrency(market) {
     }
 
     function handleDeposit() {
-      if (amount.isZero()) return
-      setMode(Mode.ConfirmationOfDeposit)
-      supplyService.supplyNativeCurrency({ amount }).then(setSupplyHash)
+      if (amount.isGreaterThan(Zero)) {
+        setMode(Mode.ConfirmationOfDeposit)
+        supplyService.supplyNativeCurrency({ amount }).then(setSupplyHash)
+      }
     }
 
     function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount, AMOUNT_PRECISION)
+      const newInput = bnf(newAmount, AmountDecimalPrecision)
       setAmount(newAmount)
       setInput(newInput)
     }
@@ -157,7 +155,7 @@ export default function DepositNativeCurrency(market) {
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                        ${ bnf(amount && isPrice ? amount.times(price) : 0) }
+                          <Price asset={nativeCurrency} amount={amount} />
                         </div>
                       </div>
                       <div>
@@ -168,7 +166,7 @@ export default function DepositNativeCurrency(market) {
                               </div>
                           </button>
                           <div className="text-center text-body-secondary small">
-                            Wallet : <span className="text-body-tertiary">{ bnf(balance || 0, AMOUNT_PRECISION) }</span>
+                            Wallet : <span className="text-body-tertiary"><Amount value={balance} /></span>
                           </div>
                       </div>
                   </div>

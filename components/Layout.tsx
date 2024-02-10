@@ -5,6 +5,15 @@ import NetworkSelector from './NetworkSelector';
 import { useNetworkEvents } from "../hooks/useNetworkEvents";
 import ProtocolStats from './ProtocolStats';
 
+export const Path = {
+    Index: '/',
+    Borrow: '/borrow',
+    Farm: '/farm',
+    Claim: '/claim',
+} 
+
+export const NoData = '—'
+
 export default function Layout({ children }) {
 
     useNetworkEvents()
@@ -18,24 +27,25 @@ export default function Layout({ children }) {
             </Head>
             <nav className="navbar navbar-expand-xl sticky-top bg-white border-bottom shadow-sm px-1 py-3">
                 <div className="container-fluid">
-                    <a className="navbar-brand" href="/">
+                    <a className="navbar-brand" href={Path.Index}>
                         <img src="/images/compound-logo.svg" alt="Compound" width="185" />
                     </a>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                     </button>
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul className="navbar-nav d-flex d-lg-none">
-                            <li className="nav-item">
-                                <a className="nav-link active" aria-current="page" href="#">Borrow</a>
-                            </li>
-                            <li className="nav-item"><a className="nav-link" href="#">Farm</a></li>
-                            <li className="nav-item"><a className="nav-link" href="#">Claim</a></li>
+                        <ul className="navbar-nav d-flex d-xl-none py-3">
+                            <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
+                            <li className="nav-item"><NavLink href={Path.Farm}><i className="bi bi-flower2 me-1"></i> Farm</NavLink></li>
+                            <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-stars me-1"></i> Claim</NavLink></li>
                         </ul>
                         <div className="d-none d-xl-flex justify-content-center flex-grow-1 text-center">
                             <ProtocolStats />
                         </div>
-                        <div className="d-none d-lg-block"><ConnectButton /></div>
+                        <div>
+                            <ConnectButton />
+                            <div className="d-block d-xl-none mt-4"><NetworkSelector /></div>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -46,9 +56,9 @@ export default function Layout({ children }) {
                             <NetworkSelector />
                             <div id="pages-navigation" className="bg-body px-3 py-4 border rounded-4 shadow">
                                 <ul className="nav nav-pills flex-column mb-auto">
-                                    <li className="nav-item"><NavLink href="/borrow"><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
-                                    <li className="nav-item"><NavLink href="/farm"><i className="bi bi-flower2 me-1"></i> Farm</NavLink></li>
-                                    <li className="nav-item"><NavLink href="/claim"><i className="bi bi-stars me-1"></i> Claim</NavLink></li>
+                                    <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
+                                    <li className="nav-item"><NavLink href={Path.Farm}><i className="bi bi-flower2 me-1"></i> Farm</NavLink></li>
+                                    <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-stars me-1"></i> Claim</NavLink></li>
                                 </ul>
                             </div>
                             <div className="d-flex justify-content-around fs-4 text-primary">

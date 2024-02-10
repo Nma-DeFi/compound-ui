@@ -7,6 +7,7 @@ import { Zero, bnf } from '../utils/bn';
 import BigNumber from 'bignumber.js';
 import { PriceService } from '../services/price-service';
 import { SupplyPositionsState } from '../redux/slices/supplyPositions';
+import { PriceDecimalPrecision } from './Price';
 
 export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
 
@@ -27,7 +28,8 @@ export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
                     const balance = positions[index].supplyBalance
                     totalFarming = totalFarming.plus(balance.times(price))
                 }
-                setFarming(bnf(totalFarming))
+                const totalFarmingUsd = bnf(totalFarming, PriceDecimalPrecision, false)
+                setFarming(`$${totalFarmingUsd}`)
             })    
         }
     }, [isSuccess])
@@ -35,7 +37,7 @@ export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
     return isConnected ? (
         <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4">
             <h4 className="mb-4">Your account</h4>
-            <div className="d-flex justify-content-between mb-3 small">
+            <div className="d-flex justify-content-around justify-content-xl-between mb-3 small">
                 <div className="">
                     <div className="fw-semibold">Collateral</div> 
                     <div className="text-body-secondary">—</div>
@@ -45,11 +47,11 @@ export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
                     <div className="text-body-secondary">—</div>
                 </div>
             </div>
-            <div className="d-flex justify-content-between mb-2 small">
+            <div className="d-flex justify-content-around justify-content-xl-between mb-2 small">
                 <div className="">
                     <div className="fw-semibold">Farming</div> 
                     { isSuccess ? (
-                        <div className="text-body-secondary">${ farming }</div>
+                        <div className="text-body-secondary">{ farming }</div>
                     ) : (
                         <div className="text-body-secondary">—</div>
                     )}

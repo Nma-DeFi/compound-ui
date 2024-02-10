@@ -74,12 +74,13 @@ export default function Farm() {
           <title>Farm</title>
         </Head>
         
-        <DepositErc20Token {...targetMarket} />
-        <DepositNativeCurrency {...targetMarket} />
-        <WithdrawErc20Token {...targetMarket} />
-        <WithdrawNativeCurrency {...targetMarket} />
-        
-        <div className="col-8 px-5">
+        <div className="col-12 col-xl-8 px-xl-5">
+
+            <DepositErc20Token {...targetMarket} />
+            <DepositNativeCurrency {...targetMarket} />
+            <WithdrawErc20Token {...targetMarket} />
+            <WithdrawNativeCurrency {...targetMarket} />
+
             <div className="row g-0 align-items-center p-4 mb-5 bg-body border rounded shadow mb-5">
                 <div className="col-12 col-sm-4"><h2 className="mb-3 mb-sm-0">Farm</h2></div>
                 <div className="col-12 col-sm-8 text-start text-sm-end text-body-tertiary fs-5">Deposit your assets and earn fees</div>
@@ -94,7 +95,7 @@ export default function Farm() {
             </div>
 
             { isError && 
-              <p>Data currently unavailable ...</p>
+              <p className="p-3">Data currently unavailable</p>
             }
 
             { isLoading && 

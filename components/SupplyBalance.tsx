@@ -1,56 +1,40 @@
-import { useEffect, useState } from "react"
 import { connect } from "react-redux"
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
-import { usePrice } from "../hooks/usePrice"
 import { RootState } from "../redux/types"
 import { baseToken, cometProxy } from "../selectors/market-selector"
-import { Zero, bnf } from "../utils/bn"
+import Amount from "./Amount"
+import Price from "./Price"
 
-export function SupplyBalance({ market, isSuccessBalance, balance }) {
-    
-    const [ strBalance, setStrBalance] = useState<string>()
-    const [ strPrice, setStrPrice] = useState<string>()
+
+export function SupplyBalance({ market, balance }) {
 
     const { isConnected } = useCurrentAccount()
     
-    const {  
-        isSuccess: isSuccessPrice, 
-        data: price 
-    } = usePrice({ token: baseToken(market) })
-
-    useEffect(() => {
-        if (isSuccessBalance) {
-            setStrBalance(bnf(balance))
-        } else {
-            setStrBalance('—')
-        }
-    }, [isSuccessBalance])
-
-    useEffect(() => {
-        if (isSuccessPrice && isSuccessBalance) {
-            const priceValue = balance.times(price)
-            setStrPrice(`$${bnf(priceValue)}`)
-        } else {
-            setStrPrice('—')
-        }
-    }, [isSuccessPrice, isSuccessBalance])
-
     return isConnected 
-        ? <Balance balance={strBalance} price={strPrice}/> 
-        : <Balance balance='—' price='—'/>
+        ? <Balance amount={balance} token={baseToken(market)} /> 
+        : <NoBalance />
 }
 
-const Balance = ({ balance, price }) => (
+const Balance = ({ amount, token }) => (
     <>
-        <div className="mb-1">{ balance }</div>
-        <small className="text-body-secondary">{price }</small>
+        <div className="mb-1"><Amount value={amount} config={{ dp: 2, trimZeros: false}} /></div>
+        <small className="text-body-secondary"><Price asset={token} amount={amount} /></small>
+    </>
+)
+
+const NoBalance = () => (
+    <>
+        <div className="mb-1">—</div>
+        <small className="text-body-secondary">—</small>
     </>
 )
 
 const mapStateToProps = (state: RootState, { market }) => {
-    const { isSuccess: isSuccessBalance, data: positions } = state.supplyPositions
+    const { data: positions } = state.supplyPositions
     const comet = cometProxy(market) 
-    const balance = positions?.[comet].supplyBalance || Zero
-    return { isSuccessBalance, balance }
+    const balance = positions?.[comet].supplyBalance
+    return { balance }
 }
 export default connect(mapStateToProps)(SupplyBalance)
+
+

@@ -14,7 +14,7 @@ export const AsyncStatus = {
     Error: { isIdle: false, isLoading: false, isSuccess: false, isError: true },
 }
 
-export const IdleData = {
+export const IdleData : AsyncData<any> = {
     data: undefined,
     ...AsyncStatus.Idle
 }

@@ -1,21 +1,22 @@
-import { useCurrentChain } from '../../hooks/useCurrentChain'
-import css from '../../styles/components/farm/DepositErc20.module.scss'
-import { useState, useEffect } from 'react'
-import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import BigNumber from 'bignumber.js'
-import { Zero, bn, bnf } from '../../utils/bn'
-import * as MarketSelector from "../../selectors/market-selector"
-import { useErc20Service } from '../../hooks/useErc20Service'
-import { SmallSpinner } from '../Spinner'
-import { useSupplyService } from '../../hooks/useSupplyService'
-import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap'
-import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi'
+import { useEffect, useState } from 'react'
 import { Hash } from 'viem'
-import { usePrice } from '../../hooks/usePrice'
-import Result from './Result'
-import AmountInput from '../AmountInput'
+import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi'
+import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap'
+import { useCurrentAccount } from '../../hooks/useCurrentAccount'
+import { useCurrentChain } from '../../hooks/useCurrentChain'
+import { useErc20Service } from '../../hooks/useErc20Service'
+import { useSupplyService } from '../../hooks/useSupplyService'
 import { Action, ActionInfo } from '../../pages/farm'
+import * as MarketSelector from "../../selectors/market-selector"
+import css from '../../styles/components/farm/DepositErc20.module.scss'
+import { Zero, bn, bnf } from '../../utils/bn'
+import Amount, { AmountDecimalPrecision } from '../Amount'
+import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
+import Price from '../Price'
+import { SmallSpinner } from '../Spinner'
+import Result from './Result'
 
 const Mode = {
   NotConnected: 0,
@@ -33,8 +34,6 @@ export const DEPOSIT_ERC20_TOKEN_MODAL = 'deposit-erc20-modal'
 export const DEPOSIT_ERC20_TOKEN_TOAST = 'deposit-erc20-toast'
 
 export default function DepositErc20Token(market) {
-
-    const AMOUNT_PRECISION = 4
     
     const [ mode, setMode ] = useState<number>()
     const [ balance, setBalance ] = useState<BigNumber>()
@@ -53,8 +52,6 @@ export default function DepositErc20Token(market) {
     
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
-
-    const { isSuccess: isPrice, data: price } = usePrice({ token: baseToken })
 
     const baseTokenErc20  = useErc20Service({ token: baseToken, publicClient, walletClient, account })
 
@@ -155,9 +152,10 @@ export default function DepositErc20Token(market) {
     }
 
     function handleDeposit() {
-      if (amount.isZero()) return
-      setMode(Mode.ConfirmationOfDeposit)
-      supplyService.supplyErc20Token({ token: baseToken, amount }).then(setSupplyHash)
+      if (amount.isGreaterThan(Zero)) {
+        setMode(Mode.ConfirmationOfDeposit)
+        supplyService.supplyErc20Token({ token: baseToken, amount }).then(setSupplyHash)
+      }
     }
 
     function handleAmountChange(event) {
@@ -168,7 +166,7 @@ export default function DepositErc20Token(market) {
     function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount, AMOUNT_PRECISION)
+      const newInput = bnf(newAmount, AmountDecimalPrecision)
       setAmount(newAmount)
       setInput(newInput)
     }
@@ -193,7 +191,7 @@ export default function DepositErc20Token(market) {
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                        ${ bnf(amount && isPrice ? amount.times(price) : 0) }
+                        <Price asset={baseToken} amount={amount} />
                         </div>
                       </div>
                       <div>
@@ -204,7 +202,7 @@ export default function DepositErc20Token(market) {
                               </div>
                           </button>
                           <div className="text-center text-body-secondary small">
-                            Wallet : <span className="text-body-tertiary">{ bnf(balance || 0, AMOUNT_PRECISION) }</span>
+                            Wallet : <span className="text-body-tertiary"><Amount value={balance} /></span>
                           </div>
                       </div>
                   </div>

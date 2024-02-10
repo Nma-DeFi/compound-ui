@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
+import { Hash } from 'viem';
 import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi';
 import { CompoundConfig } from '../../compound-config';
 import { useAllowService } from '../../hooks/useAllowService';
@@ -14,12 +15,12 @@ import css from '../../styles/components/farm/WithdrawNative.module.scss';
 import { AsyncData, IdleData, asyncExec } from '../../utils/async';
 import { Zero, bn, bnf } from '../../utils/bn';
 import * as ChainUtils from '../../utils/chains';
+import Amount, { AmountDecimalPrecision } from '../Amount';
 import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
+import Price from '../Price';
 import { SmallSpinner } from '../Spinner';
 import Result from './Result';
-import { usePrice } from '../../hooks/usePrice';
-import { Hash } from 'viem';
 
 const Mode = {
   NotConnected: 0,
@@ -38,8 +39,6 @@ export const WITHDRAW_NATIVE_CURRENCY_TOAST = 'withdraw-native-toast'
 
 export default function WithdrawNativeCurrency(market) {
 
-    const AMOUNT_DECIMALS = 4;
-
     const { currentChainId: chainId } = useCurrentChain()
     const { isConnected, address: account } = useCurrentAccount()
 
@@ -53,7 +52,7 @@ export default function WithdrawNativeCurrency(market) {
     const [ withdrawInfo, setWithdrawInfo ] = useState<ActionInfo>()    
     const [ 
       { 
-        isSuccess: isBulkerPermission, 
+        isSuccess: isBulkerChecked, 
         data: isBulkerApproved 
       }, 
       setBulkerPermission 
@@ -66,7 +65,6 @@ export default function WithdrawNativeCurrency(market) {
     const modalEvent = useModalEvent(WITHDRAW_NATIVE_CURRENCY_MODAL)
 
     const { isSuccess: isBalance, data: balance } = useSupplyBalance({ comet, publicClient, account })
-    const { isSuccess: isPrice, data: price } = usePrice({ token: nativeCurrency })
 
     const allowService = useAllowService({ comet, publicClient, walletClient, account })
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
@@ -79,7 +77,7 @@ export default function WithdrawNativeCurrency(market) {
     const { bulker } = CompoundConfig[chainId].contracts
 
     useEffect(() => {
-      if (!isConnected || !isBalance || !isBulkerPermission || !withdrawService) return
+      if (!isConnected || !isBalance || !isBulkerChecked || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
       } else if (amount.isGreaterThan(Zero) && !isBulkerApproved) {
@@ -88,7 +86,7 @@ export default function WithdrawNativeCurrency(market) {
         setMode(Mode.WithdrawReady)
       }
 
-    }, [amount, isBalance, isBulkerPermission, withdrawService])
+    }, [amount, isBalance, isBulkerChecked, withdrawService])
 
     useEffect(() => {
       if (withdrawHash && mode === Mode.ConfirmationOfWithdrawal) {
@@ -173,7 +171,7 @@ export default function WithdrawNativeCurrency(market) {
     function handleBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount, AMOUNT_DECIMALS)
+      const newInput = bnf(newAmount, AmountDecimalPrecision)
       setAmount(newAmount)
       setInput(newInput)
     }
@@ -183,9 +181,10 @@ export default function WithdrawNativeCurrency(market) {
     }
 
     function handleWithdraw() {
-      if (amount.isZero()) return
-      setMode(Mode.ConfirmationOfWithdrawal)
-      withdrawService.withdrawNativeCurrency({ amount }).then(setWithdrawHash)
+      if (amount.isGreaterThan(Zero)) {
+        setMode(Mode.ConfirmationOfWithdrawal)
+        withdrawService.withdrawNativeCurrency({ amount }).then(setWithdrawHash)
+      }
     }
 
     return (
@@ -209,7 +208,7 @@ export default function WithdrawNativeCurrency(market) {
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)}
                         />
                         <div className="small text-body-tertiary">
-                        ${ bnf(amount && isPrice ? amount.times(price) : 0) }
+                          <Price asset={nativeCurrency} amount={amount} />
                         </div>
                       </div>
                       <div>
@@ -219,7 +218,7 @@ export default function WithdrawNativeCurrency(market) {
                                   <span className="px-3">{nativeCurrency.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary">{ bnf(isBalance ? balance : 0) }</span></div>
+                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary"><Amount value={balance} /></span></div>
                       </div>
                   </div>
                   <div className="row g-2">

@@ -1,14 +1,11 @@
 import { Address } from "viem"
 
-export type Token = {
+export type Asset = {
   name: string, 
   symbol: string, 
-  address: Address, 
   decimals: number
 }
 
-export type NativeCurrency = { 
-  name: string, 
-  symbol: string, 
-  decimals: number 
-}
+export type Token = Asset & { address: Address }
+
+export type NativeCurrency = Asset

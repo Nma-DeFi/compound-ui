@@ -37,7 +37,8 @@ export const supplyPositionsSlice = createSlice({
           state.data = action.payload
           Object.assign(state, AsyncStatus.Success)
         })
-        .addCase(supplyPositionsInit.rejected, (state) => {
+        .addCase(supplyPositionsInit.rejected, (state, action) => {
+          console.error(action)
           state.data = undefined
           Object.assign(state, AsyncStatus.Error)
         })

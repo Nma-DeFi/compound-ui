@@ -20,6 +20,7 @@ import { isNativeCurrencyMarket, unWrappedNativeToken } from "../../utils/market
 import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useAppDispatch } from "../../redux/hooks"
 import { supplyPositionsInit } from "../../redux/slices/supplyPositions"
+import { useCurrentAccount } from "../../hooks/useCurrentAccount"
 
 export const Action = { 
   Deposit: 0, 
@@ -35,6 +36,7 @@ export type ActionInfo = {
 
 export default function Farm() {
 
+  const { isConnected } = useCurrentAccount()
   const { currentChainId: chainId } = useCurrentChain()
   const { isLoading, isError, isSuccess, data: markets, error } = useMarkets({ chainId })
   const { isIdle: isNoSupplyPositions } = useSupplyPositions()
@@ -49,10 +51,10 @@ export default function Farm() {
   }, [isError])
 
   useEffect(() => { 
-    if (isNoSupplyPositions) {
+    if (isConnected && isNoSupplyPositions) {
       dispatch(supplyPositionsInit())
     } 
-  }, [isNoSupplyPositions])
+  }, [isConnected, isNoSupplyPositions])
 
   function showModal(market, action) {
     let modal

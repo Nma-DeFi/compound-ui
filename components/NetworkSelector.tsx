@@ -45,9 +45,9 @@ export default function NetworkSelector() {
 
     return (
             <div className="network-dropdown btn-group w-100" role="group">
-                <button type="button" className={`${styles['network-select']} network-selector btn btn-light bg-body btn-lg border shadow rounded-5 dropdown-toggle`} data-bs-toggle="dropdown" aria-expanded="false">
+                <button type="button" className={`${styles['network-select']} network-combo btn btn-light bg-body btn-lg border shadow rounded-5 dropdown-toggle`} data-bs-toggle="dropdown" aria-expanded="false">
                     <div className="d-flex justify-content-around fs-5">
-                        <img className={`${styles['icon']} d-none d-xl-inline`} src={chainIcon(currentChainId)} alt="networks" />
+                        <img className={`${styles['icon']} d-inline`} src={chainIcon(currentChainId)} alt="networks" />
                         <div>{chainName(currentChainId)}</div>
                         <div className={styles['chevron']}><i className="bi bi-chevron-down"></i></div>
                     </div>

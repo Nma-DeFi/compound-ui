@@ -71,7 +71,16 @@ body {
             }
         }
     }
-    .network-selector::after {
+    .network-combo {
+        margin-bottom: 0.5rem;
+    }
+    @include media-breakpoint-up(xl) {
+        .network-combo {
+            margin-bottom: 2rem;
+        }
+    }
+    .network-combo::after {
         display: none;
     }
 }
+

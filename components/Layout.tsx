@@ -34,7 +34,7 @@ export default function Layout({ children }) {
                     <span className="navbar-toggler-icon"></span>
                     </button>
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul className="navbar-nav d-flex d-xl-none py-3">
+                        <ul className="navbar-nav d-flex d-xl-none py-4 fs-5">
                             <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
                             <li className="nav-item"><NavLink href={Path.Farm}><i className="bi bi-flower2 me-1"></i> Farm</NavLink></li>
                             <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-stars me-1"></i> Claim</NavLink></li>

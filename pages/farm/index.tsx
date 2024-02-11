@@ -39,7 +39,7 @@ export default function Farm() {
   const { isConnected } = useCurrentAccount()
   const { currentChainId: chainId } = useCurrentChain()
   const { isLoading, isError, isSuccess, data: markets, error } = useMarkets({ chainId })
-  const { isIdle: isNoSupplyPositions } = useSupplyPositions()
+  const { isIdle: isNoSupplyPositions, isError: isLoadingPositionsError } = useSupplyPositions()
 
   const dispatch = useAppDispatch()
 
@@ -108,8 +108,8 @@ export default function Farm() {
                 <div className="col text-center">Action</div>
             </div>
 
-            { isError && 
-              <p className="p-3">Data currently unavailable</p>
+            { (isError || (isConnected && isLoadingPositionsError)) &&
+              <p className="text-warning p-3">Data currently unavailable</p>
             }
 
             { isLoading && 

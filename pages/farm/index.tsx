@@ -124,9 +124,9 @@ export default function Farm() {
                       <div className="d-flex justify-content-start">
                         { unWrappedNativeToken(market, chainId) &&
                           <>
-                            <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className="d-none d-sm-block me-2" alt={unWrappedNativeToken(market, chainId)?.symbol} width="42" />
+                            <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className="d-none d-sm-block me-3" alt={unWrappedNativeToken(market, chainId)?.symbol} width="42" />
                             <div>
-                                <div className="mb-1">{unWrappedNativeToken(market, chainId).symbol}</div>
+                                <div className="fs-5">{unWrappedNativeToken(market, chainId).symbol}</div>
                                 <small className="d-none d-sm-block text-body-secondary">{unWrappedNativeToken(market, chainId).name}</small>
                             </div>
                           </>

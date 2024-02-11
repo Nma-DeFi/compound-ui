@@ -103,7 +103,9 @@ export default function Farm() {
             <div className="row g-0 text-body-secondary px-3 mb-3">
                 <div className="col text-start">Asset</div>
                 <div className="col text-center d-none d-md-block">Total deposits</div>
+                { isConnected &&
                 <div className="col text-center">Your balance</div>                            
+                }
                 <div className="col text-center">APR</div>
                 <div className="col text-center">Action</div>
             </div>
@@ -135,11 +137,13 @@ export default function Farm() {
                       <div className="mb-1">{bnf(totalBaseSupplyScaled(market))}</div>
                       <small className="text-body-secondary">${bnf(totalBaseSupplyUsd(market))}</small>
                   </div>
+                  { isConnected &&
                   <div className="col text-center">
                     <SupplyBalance market={market} />
                   </div>
+                  }
                   <div className="col text-center">
-                    <SupplyApr {...market} />
+                    <SupplyApr market={market} />
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">

@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { netSupplyAprScaled, rewardSupplyAprScaled, supplyAprScaled } from "../selectors/market-selector";
 import { bnf } from "../utils/bn";
 import { useBootstrap } from "../hooks/useBootstrap";
+import css from '../styles/components/SupplyApr.module.scss';
 
-const TOOLTIP_CSS = { fontSize: '110%' };
-
-export default function SupplyApr(market) {
+export default function SupplyApr({ market }) {
 
     const [ apr, setApr] = useState<string>()
     const [ tooltipContent, setTooltipContent] = useState<string>()
@@ -47,8 +46,7 @@ export default function SupplyApr(market) {
                 data-bs-html="true" 
                 data-bs-title={tooltipContent} 
                 onClick={e => e.preventDefault()}>
-                <i className="bi bi-info-square text-body-secondary ms-2 d-none d-sm-inline" style={TOOLTIP_CSS}>
-                </i>
+                <i className={`bi bi-info-square text-body-secondary ms-2 d-none d-sm-inline ${css['tooltip-icon']}`}></i>
             </a>
         </>
     )

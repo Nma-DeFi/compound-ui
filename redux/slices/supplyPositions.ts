@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import BigNumber from 'bignumber.js';
 import { Address } from 'viem';
-import { PublicClient } from 'wagmi';
 import * as MarketSelector from '../../selectors/market-selector';
 import { MarketDataService } from '../../services/market-data-service';
 import { PositionsService } from '../../services/positions-service';
@@ -9,12 +8,6 @@ import { Token } from '../../types';
 import { AsyncData, AsyncStatus, IdleData } from '../../utils/async';
 import { bnf } from '../../utils/bn';
 import { ThunkApiFields } from '../types';
-
-type PositionInitParam = {
-  address: Address;
-  chainId: number;
-  publicClient: PublicClient;
-}
 
 export type SupplyPositionsData = Record<Address, {
   baseToken: Token,
@@ -36,15 +29,15 @@ export const supplyPositionsSlice = createSlice({
   },
   extraReducers(builder) {
       builder
-        .addCase(supplyPositionsInitFromParam.pending, (state) => {
+        .addCase(supplyPositionsInit.pending, (state) => {
           state.data = undefined
           Object.assign(state, AsyncStatus.Loading)
         })
-        .addCase(supplyPositionsInitFromParam.fulfilled, (state, action) => {
+        .addCase(supplyPositionsInit.fulfilled, (state, action) => {
           state.data = action.payload
           Object.assign(state, AsyncStatus.Success)
         })
-        .addCase(supplyPositionsInitFromParam.rejected, (state) => {
+        .addCase(supplyPositionsInit.rejected, (state) => {
           state.data = undefined
           Object.assign(state, AsyncStatus.Error)
         })
@@ -53,41 +46,6 @@ export const supplyPositionsSlice = createSlice({
 
 export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
   'supplyPositions/init',
-  async (_, { getState, dispatch }) => {
-      const { address } = getState().currentAccount
-      const { chainId } = getState().currentChain
-      const { publicClient } = getState().publicClient
-
-    dispatch(supplyPositionsInitFromParam({address, chainId, publicClient }))
-  }
-)
-
-export const supplyPositionsInitFromParam = createAsyncThunk<any, PositionInitParam, ThunkApiFields>(
-  'supplyPositions/initFromParam',
-  async ({ address, chainId, publicClient }) => {
-    
-    const marketDataService = new MarketDataService({ chainId })
-    const markets = await marketDataService.findAllMarkets()
-
-    let positions: SupplyPositionsData = {}
-
-    for (const market of markets) {
-        const comet = MarketSelector.cometProxy(market)
-        const baseToken = MarketSelector.baseToken(market)
-        const positionsService = new PositionsService({comet, publicClient })
-        const supplyBalance = await positionsService.supplyBalanceOf(address)
-        positions = { ...positions, [comet]: { baseToken, supplyBalance } }  
-    }
-    const formatter = ({baseToken, supplyBalance}) => `${baseToken.name} : ${bnf(supplyBalance)}`
-    console.log(Date.now(), 'supplyPositions/initFromParam', chainId, Object.values(positions).map(formatter))
-    return positions
-  }
-)
-
-
-
-/*export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
-  'supplyPositions/init',
   async (_, { getState }) => {
       const { address } = getState().currentAccount
       const { chainId } = getState().currentChain
@@ -95,9 +53,9 @@ export const supplyPositionsInitFromParam = createAsyncThunk<any, PositionInitPa
 
       const marketDataService = new MarketDataService({ chainId })
       const markets = await marketDataService.findAllMarkets()
-
+  
       let positions: SupplyPositionsData = {}
-
+  
       for (const market of markets) {
           const comet = MarketSelector.cometProxy(market)
           const baseToken = MarketSelector.baseToken(market)
@@ -108,8 +66,8 @@ export const supplyPositionsInitFromParam = createAsyncThunk<any, PositionInitPa
       const formatter = ({baseToken, supplyBalance}) => `${baseToken.name} : ${bnf(supplyBalance)}`
       console.log(Date.now(), 'supplyPositions/init', chainId, Object.values(positions).map(formatter))
       return positions
-  }
-)*/
+    }
+)
 
 export const { supplyPositionsReset } = supplyPositionsSlice.actions
 

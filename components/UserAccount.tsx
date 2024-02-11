@@ -1,17 +1,18 @@
-import css from '../styles/components/UserAccount.module.scss';
-import { useCurrentAccount } from '../hooks/useCurrentAccount';
-import { RootState } from '../redux/types';
-import { connect } from 'react-redux';
-import { useEffect, useState } from 'react';
-import { Zero, bnf } from '../utils/bn';
 import BigNumber from 'bignumber.js';
-import { PriceService } from '../services/price-service';
+import { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
+import { useCurrentAccount } from '../hooks/useCurrentAccount';
 import { SupplyPositionsState } from '../redux/slices/supplyPositions';
+import { RootState } from '../redux/types';
+import { PriceService } from '../services/price-service';
+import css from '../styles/components/UserAccount.module.scss';
+import { Zero, bnf } from '../utils/bn';
 import { PriceDecimalPrecision } from './Price';
 
 export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
 
     const { isConnected } = useCurrentAccount()
+
     const [ farming, setFarming ] = useState<string>()
 
     useEffect(() => {

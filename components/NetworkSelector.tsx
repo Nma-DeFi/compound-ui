@@ -6,7 +6,6 @@ import { useAppDispatch } from "../redux/hooks";
 import { chainSwitched } from "../redux/slices/currentChain";
 import styles from '../styles/components/NetworkSelector.module.scss';
 import { CHAINS, chainIcon, chainName, enhanceChain } from "../utils/chains";
-import { supplyPositionsInit } from "../redux/slices/supplyPositions";
 
 const USER_REJECTED_TX = 'UserRejectedRequestError';
 
@@ -35,14 +34,8 @@ export default function NetworkSelector() {
 
     function setCurrentChain(newChainId: number) {
         if (newChainId === currentChainId) return
-        console.log('setCurrentChain', newChainId, currentChainId, isConnected)
         if (isConnected) { 
-            switchNetworkAsync(newChainId)
-                .then(chain => { 
-                    dispatch(chainSwitched(chain.id)) 
-                    dispatch(supplyPositionsInit())
-                })
-                .catch(error => {
+            switchNetworkAsync(newChainId).catch(error => {
                     if (error.name !== USER_REJECTED_TX) throw error
                 })
         } else {

@@ -17,6 +17,9 @@ import { baseTokenAddress, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../
 import { Token } from "../../types"
 import { bnf } from "../../utils/bn"
 import { isNativeCurrencyMarket, unWrappedNativeToken } from "../../utils/markets"
+import { useSupplyPositions } from "../../hooks/useSupplyPositions"
+import { useAppDispatch } from "../../redux/hooks"
+import { supplyPositionsInit } from "../../redux/slices/supplyPositions"
 
 export const Action = { 
   Deposit: 0, 
@@ -34,6 +37,9 @@ export default function Farm() {
 
   const { currentChainId: chainId } = useCurrentChain()
   const { isLoading, isError, isSuccess, data: markets, error } = useMarkets({ chainId })
+  const { isIdle: isNoSupplyPositions } = useSupplyPositions()
+
+  const dispatch = useAppDispatch()
 
   const [ targetMarket, setTargetMarket ] = useState(null)
   const { openModal } = useBootstrap()
@@ -41,6 +47,12 @@ export default function Farm() {
   useEffect(() => { 
     if (isError) console.error(error) 
   }, [isError])
+
+  useEffect(() => { 
+    if (isNoSupplyPositions) {
+      dispatch(supplyPositionsInit())
+    } 
+  }, [isNoSupplyPositions])
 
   function showModal(market, action) {
     let modal
@@ -106,11 +118,15 @@ export default function Farm() {
               <div key={baseTokenAddress(market)} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
-                          <img src={`/images/tokens/${unWrappedNativeToken(market, chainId)?.symbol}.svg`} className="d-none d-sm-block me-2" alt={unWrappedNativeToken(market, chainId)?.symbol} width="42" />
-                          <div>
-                              <div className="mb-1">{unWrappedNativeToken(market, chainId)?.symbol}</div>
-                              <small className="d-none d-sm-block text-body-secondary">{unWrappedNativeToken(market, chainId)?.name}</small>
-                          </div>
+                        { unWrappedNativeToken(market, chainId) &&
+                          <>
+                            <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className="d-none d-sm-block me-2" alt={unWrappedNativeToken(market, chainId)?.symbol} width="42" />
+                            <div>
+                                <div className="mb-1">{unWrappedNativeToken(market, chainId).symbol}</div>
+                                <small className="d-none d-sm-block text-body-secondary">{unWrappedNativeToken(market, chainId).name}</small>
+                            </div>
+                          </>
+                        }
                       </div>
                   </div>
                   <div className="col text-center d-none d-md-block">

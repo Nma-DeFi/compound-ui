@@ -9,7 +9,7 @@ import css from '../styles/components/UserAccount.module.scss';
 import { Zero, bnf } from '../utils/bn';
 import { PriceDecimalPrecision } from './Price';
 
-export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
+export function UserAccount({ isLoading, isSuccess, data } : SupplyPositionsState) {
 
     const { isConnected } = useCurrentAccount()
 
@@ -36,29 +36,31 @@ export function UserAccount({ isSuccess, data } : SupplyPositionsState) {
     }, [isSuccess])
 
     return isConnected ? (
-        <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4">
-            <h4 className="mb-4">Your account</h4>
+        <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4 mt-4 mt-xl-0">
+            <h4 className={css['title']}>Your account</h4>
             <div className="d-flex justify-content-around justify-content-xl-between mb-3 small">
-                <div className="">
-                    <div className="fw-semibold">Collateral</div> 
+                <div>
+                    <div className="fw-semibold mb-1">Collateral</div> 
                     <div className="text-body-secondary">—</div>
                 </div>
-                <div className="">
-                    <div className="fw-semibold">Borrowing</div> 
+                <div>
+                    <div className="fw-semibold mb-1">Borrowing</div> 
                     <div className="text-body-secondary">—</div>
                 </div>
             </div>
             <div className="d-flex justify-content-around justify-content-xl-between mb-2 small">
                 <div className="">
-                    <div className="fw-semibold">Farming</div> 
-                    { isSuccess ? (
+                    <div className="fw-semibold mb-1">Farming</div> 
+                    { isLoading ? (
+                        <div className="placeholder bg-secondary-subtle col-10"></div>
+                    ) : isSuccess ? (
                         <div className="text-body-secondary">{ farming }</div>
                     ) : (
                         <div className="text-body-secondary">—</div>
                     )}
                 </div>
                 <div>
-                    <div className="fw-semibold text-primary">Rewards</div> 
+                    <div className="fw-semibold text-primary  mb-1">Rewards</div> 
                     <div>— <span className={css['comp-label']}>COMP</span></div>
                 </div>
             </div>

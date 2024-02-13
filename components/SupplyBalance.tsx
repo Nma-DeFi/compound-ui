@@ -7,19 +7,30 @@ import { NoData } from "./Layout"
 import Price from "./Price"
 
 
-export function SupplyBalance({ market, supplyBalance }) {
+export function SupplyBalance({ market, isLoading, isSuccess, supplyBalance }) {
 
     const { isConnected } = useCurrentAccount()
     
     return isConnected 
-        ? <SupplyBalanceAmount amount={supplyBalance} token={baseToken(market)} /> 
+        ? <SupplyBalanceAmount {...{ isLoading, isSuccess, amount: supplyBalance, token: baseToken(market) }} /> 
         : <NoSupplyBalance />
 }
 
-const SupplyBalanceAmount = ({ amount, token }) => (
+const SupplyBalanceAmount = ({ isLoading, isSuccess, amount, token }) => (
     <>
-        <div className="mb-1"><Amount value={amount} config={{ dp: 2, trimZeros: false}} /></div>
-        <small className="text-body-secondary"><Price asset={token} amount={amount} /></small>
+        { isLoading ? (
+            <>
+                <div className="mb-1"><div className="placeholder bg-secondary-subtle col-5"></div></div>
+                <div className="placeholder placeholder-sm bg-secondary-subtle col-5"></div>
+            </>
+        ) : isSuccess ? (
+            <>
+                <div className="mb-1"><Amount value={amount} config={{ dp: 2, trimZeros: false}} /></div>
+                <small className="text-body-secondary"><Price asset={token} amount={amount} /></small>
+            </>
+        ) : (
+            <NoSupplyBalance />
+        )}
     </>
 )
 
@@ -31,10 +42,10 @@ const NoSupplyBalance = () => (
 )
 
 const mapStateToProps = (state: RootState, { market }) => {
-    const { data: positions } = state.supplyPositions
+    const { isLoading, isSuccess, data: positions } = state.supplyPositions
     const comet = cometProxy(market) 
     const supplyBalance = positions?.[comet].supplyBalance
-    return { supplyBalance }
+    return { isLoading, isSuccess, supplyBalance }
 }
 export default connect(mapStateToProps)(SupplyBalance)
 

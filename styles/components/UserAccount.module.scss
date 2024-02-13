@@ -3,5 +3,7 @@
 #user-account {
     position: sticky;
     top: $sticky-menu-top;
+    margin-bottom: 2rem;
+    .title { margin-bottom: 2rem }
     .comp-label { font-size: 75%;}
 }

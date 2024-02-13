@@ -4,7 +4,7 @@ import { Path } from "./Layout";
 
 export default function NavLink({ href, children }) {
 
-    const { pathname } = useRouter();
+    const { pathname } = useRouter()
     
     const active = () => {
         const isActive = pathname === href || (pathname === Path.Index && href === Path.Borrow)

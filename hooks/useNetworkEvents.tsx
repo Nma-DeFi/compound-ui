@@ -18,7 +18,6 @@ export function useNetworkEvents() {
     const { address } = useAccount({ onDisconnect })
 
     const onAccountChanged = (newAccount: Address) => {
-        console.log('onAccountChanged', newAccount)
         if (newAccount) {
             dispatch(accountConnected(newAccount))
             dispatch(supplyPositionsReset())
@@ -27,9 +26,8 @@ export function useNetworkEvents() {
     useEffect(() => onAccountChanged(address), [address])
 
     const onChainChanged = (newChain: Chain) => {
-        console.log('onChainChanged', newChain)
         if (newChain) {
-            dispatch(chainSwitched(chain.id))
+            dispatch(chainSwitched(newChain.id))
             dispatch(supplyPositionsReset())
         }
     }

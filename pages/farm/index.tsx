@@ -104,7 +104,10 @@ export default function Farm() {
                 <div className="col text-start">Asset</div>
                 <div className="col text-center d-none d-md-block">Total deposits</div>
                 { isConnected &&
-                <div className="col text-center">Your balance</div>                            
+                  <div className="col text-center">
+                    <div className="d-inline d-sm-none">Balance</div>
+                    <div className="d-none d-sm-inline">Your balance</div>
+                  </div>                            
                 }
                 <div className="col text-center">APR</div>
                 <div className="col text-center">Action</div>
@@ -126,7 +129,12 @@ export default function Farm() {
                           <>
                             <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className="d-none d-sm-block me-3" alt={unWrappedNativeToken(market, chainId)?.symbol} width="42" />
                             <div>
-                                <div className="fs-5">{unWrappedNativeToken(market, chainId).symbol}</div>
+                                <div className="d-flex fs-5">
+                                  {!isConnected &&
+                                    <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className="d-block d-sm-none me-2" alt={unWrappedNativeToken(market, chainId)?.symbol} width="25" /> 
+                                  }
+                                  {unWrappedNativeToken(market, chainId).symbol}
+                                </div>
                                 <small className="d-none d-sm-block text-body-secondary">{unWrappedNativeToken(market, chainId).name}</small>
                             </div>
                           </>
@@ -138,9 +146,9 @@ export default function Farm() {
                       <small className="text-body-secondary">${bnf(totalBaseSupplyUsd(market))}</small>
                   </div>
                   { isConnected &&
-                  <div className="col text-center">
-                    <SupplyBalance market={market} />
-                  </div>
+                    <div className="col text-center">
+                      <SupplyBalance market={market} />
+                    </div>
                   }
                   <div className="col text-center">
                     <SupplyApr market={market} />

@@ -3,6 +3,7 @@ import { useCurrentChain } from "../hooks/useCurrentChain"
 import { useProtocolStats } from "../hooks/useProtocolStats"
 import { collateralBalanceUsd, totalBorrowUsd, totalSupplyUsd } from "../selectors/protocol-selector"
 import { bnf } from "../utils/bn"
+import { NoData } from "./Layout"
 
 export default function ProtocolStats() {
 
@@ -11,7 +12,7 @@ export default function ProtocolStats() {
     const [ totalBorrowing, setTotalBorrowing ] = useState<string>()
 
     const { currentChainId: chainId } = useCurrentChain()
-    const { isSuccess, data } = useProtocolStats({ chainId })
+    const { isLoading, isSuccess, data } = useProtocolStats({ chainId })
 
     useEffect(() => {
         if (isSuccess) {
@@ -26,31 +27,24 @@ export default function ProtocolStats() {
 
     return (
         <>
-            <div className="px-5">
-                <div className="fw-semibold">Total collateral</div> 
-                {isSuccess ? (
-                    <div className="text-body-tertiary">${totalCollateral}</div>
-                ) : (
-                    <div className="text-body-tertiary">—</div>
-                )}
-            </div>
-            <div className="px-5">
-                <div className="fw-semibold">Total borrowing</div> 
-                {isSuccess ? (
-                    <div className="text-body-tertiary">${totalBorrowing}</div>
-                ) : (
-                    <div className="text-body-tertiary">—</div>
-                )}
-            </div>
-            <div className="px-5">
-                <div className="fw-semibold">Total farming</div> 
-                {isSuccess ? (
-                    <div className="text-body-tertiary">${totalFarming}</div>
-                ) : (
-                    <div className="text-body-tertiary">—</div>
-                )}
-
-            </div>
+            <Stat {...{ isLoading, isSuccess, name: 'Total collateral', value: totalCollateral }}/>
+            <Stat {...{ isLoading, isSuccess, name: 'Total borrowing', value: totalBorrowing }}/>
+            <Stat {...{ isLoading, isSuccess, name: 'Total farming', value: totalFarming }}/>
         </>
+    )
+}
+
+function Stat({ isLoading, isSuccess, name, value}) {
+    return (
+        <div className="placeholder-glow px-5">
+            <div className="fw-semibold mb-1">{name}</div> 
+            { isLoading ? (
+                <div className="placeholder bg-secondary-subtle col-12"></div>
+            ) : isSuccess ? (
+                <div className="text-body-tertiary">${value}</div>
+            ) : (
+                <div className="text-body-tertiary">{NoData}</div>
+            )}
+        </div>
     )
 }

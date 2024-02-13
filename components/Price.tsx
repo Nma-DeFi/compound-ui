@@ -16,13 +16,13 @@ export default function Price({ asset, amount } : PriceParam) {
 
     const [price, setPrice] = useState<string>()
 
-    const { isSuccess: isPrice, data: priceData } = usePrice({ token: asset })
+    const { isSuccess: isPrice, data: usdPrice } = usePrice({ token: asset })
 
     useEffect(() => {
         if (amount === undefined || amount === null || !isPrice) {
             setPrice(NoData)
         } else {
-            const price = bnf(amount.times(priceData), PriceDecimalPrecision, false) 
+            const price = bnf(amount.times(usdPrice), PriceDecimalPrecision, false) 
             setPrice(`$${price}`)
         }
     }, [asset, amount, isPrice])

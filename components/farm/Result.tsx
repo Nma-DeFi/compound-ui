@@ -44,9 +44,9 @@ export default function Result({ id, action, token, amount, hash}) {
                         )}
                         {isSuccess && (
                             <div className="toast-body text-center px-0 py-4">
-                                <h4 className="mb-3">Success !</h4>
-                                <a href={ transactionUrl({ chainId, txHash: data.transactionHash }) } className="text-decoration-none" target="_blank" rel="noreferrer" >
-                                    <h5 className="mb-4">Transaction <i className="bi bi-box-arrow-up-right"></i></h5>
+                                <h4 className="text-primary mb-3">Success !</h4>
+                                <a href={ transactionUrl({ chainId, txHash: data.transactionHash }) } className="link-dark text-decoration-none" target="_blank" rel="noreferrer" >
+                                    <p className="fs-5 mb-4">Transaction <i className="bi bi-box-arrow-up-right"></i></p>
                                 </a>
                                 <button type="button" className="btn btn-primary btn-sm text-white" data-bs-dismiss="toast">Close</button>
                             </div>

@@ -21,6 +21,7 @@ import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useAppDispatch } from "../../redux/hooks"
 import { supplyPositionsInit } from "../../redux/slices/supplyPositions"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
+import css from '../../styles/pages/Farm.module.scss'
 
 export const Action = { 
   Deposit: 0, 
@@ -131,7 +132,7 @@ export default function Farm() {
                             <div>
                                 <div className="d-flex fs-5">
                                   {!isConnected &&
-                                    <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className="d-block d-sm-none me-2" alt={unWrappedNativeToken(market, chainId)?.symbol} width="25" /> 
+                                    <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className={`d-block d-sm-none ${css['token-icon-xs']}`} alt={unWrappedNativeToken(market, chainId)?.symbol} width="25" /> 
                                   }
                                   {unWrappedNativeToken(market, chainId).symbol}
                                 </div>

@@ -1,11 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+export const NotConnected = {
+    address: undefined,
+    isConnected: false,
+}
+
 export const currentAccountSlice = createSlice({
     name: 'currentAccount',
-    initialState: {
-        address: undefined,
-        isConnected: false,
-    },
+    initialState: NotConnected,
     reducers: {
         connected: (state, action) => {
             state.address = action.payload

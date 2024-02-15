@@ -6,14 +6,18 @@ import { accountConnected, accountDisconnected } from "../redux/slices/currentAc
 import { chainSwitched } from "../redux/slices/currentChain"
 import { supplyPositionsReset } from "../redux/slices/supplyPositions"
 
+export const resetConnectedAccount = (dispatch) => {
+    dispatch(accountDisconnected())
+    dispatch(supplyPositionsReset())
+}
+
 export function useNetworkEvents() {
 
     const { chain } = useNetwork()
     const dispatch = useAppDispatch()
 
     const onDisconnect = () => {
-        dispatch(accountDisconnected())
-        dispatch(supplyPositionsReset())
+        resetConnectedAccount(dispatch)
     }
     const { address } = useAccount({ onDisconnect })
 

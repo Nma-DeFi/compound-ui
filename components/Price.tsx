@@ -10,7 +10,7 @@ type PriceParam = {
     amount: BigNumber
 }
 
-export const PriceDecimalPrecision = 2
+export const PRICE_DP = 2
 
 export default function Price({ asset, amount } : PriceParam) {
 
@@ -22,7 +22,7 @@ export default function Price({ asset, amount } : PriceParam) {
         if (amount === undefined || amount === null || !isPrice) {
             setPrice(NoData)
         } else {
-            const price = bnf(amount.times(usdPrice), PriceDecimalPrecision, false) 
+            const price = bnf(amount.times(usdPrice), PRICE_DP, false) 
             setPrice(`$${price}`)
         }
     }, [asset, amount, isPrice])

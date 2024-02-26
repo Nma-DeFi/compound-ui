@@ -1,5 +1,7 @@
+import { Address, isAddressEqual } from 'viem';
 import { CompoundConfig } from '../compound-config';
 import { arbitrum, goerli } from 'wagmi/chains';
+import { Token } from '../types';
 
 export const CHAINS = Object.values(CompoundConfig).map(cfg => cfg.chain)
 
@@ -33,6 +35,14 @@ export function nativeCurrency(id: number) {
 
 export function wrappedNativeToken(id: number) {
     return CompoundConfig[id].contracts.wrappedNativeToken
+}
+
+export function isWrappedNativeToken(id: number, token: Token) {
+    return isAddressEqual(wrappedNativeToken(id), token.address)
+}
+
+export function getTokenOrNativeCurrency(id: number, token: Token) {
+    return isWrappedNativeToken(id, token) ? nativeCurrency(id) : token
 }
 
 export function enhanceChain(chain) {

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { bnf } from "../utils/bn";
 import { NoData } from "./Layout";
 
-export const AmountDecimalPrecision = 4
+export const AMOUNT_DP = 4
 
 type AmountConfig = {
     dp?: number
@@ -16,7 +16,7 @@ type AmountParam = {
 }
 
 const DefaultConfig: AmountConfig = {
-    dp: AmountDecimalPrecision,
+    dp: AMOUNT_DP,
     trimZeros: true,
 }
 

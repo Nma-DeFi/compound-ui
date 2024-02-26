@@ -6,6 +6,17 @@ export type Asset = {
   decimals: number
 }
 
+export type NativeCurrency = Asset
+
 export type Token = Asset & { address: Address }
 
-export type NativeCurrency = Asset
+export enum WithdrawType { 
+  BaseToken, 
+  Collateral 
+}
+
+export type WithdrawParam = {
+  comet: Address,
+  token: Token,
+  withdrawType: WithdrawType
+}

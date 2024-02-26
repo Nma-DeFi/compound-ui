@@ -2,12 +2,12 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { useCurrentAccount } from '../hooks/useCurrentAccount';
-import { SupplyPositionsState } from '../redux/slices/supplyPositions';
+import { SupplyPositionsState } from '../redux/slices/positions/supplyPositions';
 import { RootState } from '../redux/types';
 import { PriceService } from '../services/price-service';
 import css from '../styles/components/UserAccount.module.scss';
 import { Zero, bnf } from '../utils/bn';
-import { PriceDecimalPrecision } from './Price';
+import { PRICE_DP } from './Price';
 
 export function UserAccount({ isLoading, isSuccess, data } : SupplyPositionsState) {
 
@@ -29,7 +29,7 @@ export function UserAccount({ isLoading, isSuccess, data } : SupplyPositionsStat
                     const balance = positions[index].supplyBalance
                     totalFarming = totalFarming.plus(balance.times(price))
                 }
-                const totalFarmingUsd = bnf(totalFarming, PriceDecimalPrecision, false)
+                const totalFarmingUsd = bnf(totalFarming, PRICE_DP, false)
                 setFarming(`$${totalFarmingUsd}`)
             })    
         }

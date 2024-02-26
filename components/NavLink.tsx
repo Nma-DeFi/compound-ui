@@ -7,7 +7,7 @@ export default function NavLink({ href, children }) {
     const { pathname } = useRouter()
     
     const active = () => {
-        const isActive = pathname === href || (pathname === Path.Index && href === Path.Borrow)
+        const isActive = pathname.startsWith(href) || (pathname === Path.Index && href === Path.Borrow)
         return isActive ? 'active' : ''
     }
 

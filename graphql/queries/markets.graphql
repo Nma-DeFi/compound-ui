@@ -19,6 +19,19 @@ query AllMarkets {
                     decimals
                 }
             }
+            collateralTokens {
+                token {
+                    name
+                    symbol
+                    decimals
+                    address
+                }
+                borrowCollateralFactor
+                liquidateCollateralFactor
+                liquidationFactor
+                supplyCap
+                priceFeed
+            }
         }
         accounting {
             baseSupplyIndex

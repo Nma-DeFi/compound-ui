@@ -1,55 +1,42 @@
-import BigNumber from "bignumber.js"
 import Head from "next/head"
 import { useEffect, useState } from "react"
-import { Hash } from "viem"
 import { GrowSpinners } from "../../components/Spinner"
 import SupplyApr from "../../components/SupplyApr"
 import SupplyBalance from "../../components/SupplyBalance"
 import UserAccount from "../../components/UserAccount"
-import DepositErc20Token, { DEPOSIT_ERC20_TOKEN_MODAL } from "../../components/farm/DepositErc20Token"
-import DepositNativeCurrency, { DEPOSIT_NATIVE_CURRENCY_MODAL } from "../../components/farm/DepositNativeCurrency"
-import WithdrawErc20Token, { WITHDRAW_ERC20_TOKEN_MODAL } from "../../components/farm/WithdrawErc20Token"
-import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from "../../components/farm/WithdrawNativeCurrency"
+import { DEPOSIT_ERC20_TOKEN_MODAL } from "../../components/deposit/DepositErc20Token"
+import { DEPOSIT_NATIVE_CURRENCY_MODAL } from "../../components/deposit/DepositNativeCurrency"
+import WithdrawBaseTokenErc20 from "../../components/pages/farm/WithdrawBaseTokenErc20"
+import WithdrawBaseTokenNative from "../../components/pages/farm/WithdrawBaseTokenNative"
 import { useBootstrap } from "../../hooks/useBootstrap"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
 import { useMarkets } from "../../hooks/useMarkets"
 import { baseTokenAddress, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../../selectors/market-selector"
-import { Token } from "../../types"
 import { bnf } from "../../utils/bn"
-import { isNativeCurrencyMarket, unWrappedNativeToken } from "../../utils/markets"
+import { isNativeCurrencyMarket, getBaseTokenOrNativeCurrency } from "../../utils/markets"
 import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useAppDispatch } from "../../redux/hooks"
-import { supplyPositionsInit } from "../../redux/slices/supplyPositions"
+import { supplyPositionsInit } from "../../redux/slices/positions/supplyPositions"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
 import css from '../../styles/pages/Farm.module.scss'
-
-export const Action = { 
-  Deposit: 0, 
-  Withdraw: 1 
-}
-
-export type ActionInfo = { 
-  action: number,
-  token: Omit<Token, 'address'>, 
-  amount: BigNumber, 
-  hash: Hash, 
-}
+import TokenIcon from "../../components/TokenIcon"
+import DepositBaseTokenErc20 from "../../components/pages/farm/DepositBaseTokenErc20"
+import DepositBaseTokenNative from "../../components/pages/farm/DepositBaseTokenNative"
+import { Action } from "../../components/ResultToast"
+import { WITHDRAW_NATIVE_CURRENCY_MODAL } from "../../components/withdraw/WithdrawNativeCurrency"
+import { WITHDRAW_ERC20_TOKEN_MODAL } from "../../components/withdraw/WithdrawErc20Token"
 
 export default function Farm() {
 
   const { isConnected } = useCurrentAccount()
   const { currentChainId: chainId } = useCurrentChain()
-  const { isLoading, isError, isSuccess, data: markets, error } = useMarkets({ chainId })
+  const { isLoading, isError, isSuccess, data: markets } = useMarkets({ chainId })
   const { isIdle: isNoSupplyPositions } = useSupplyPositions()
 
   const dispatch = useAppDispatch()
 
   const [ targetMarket, setTargetMarket ] = useState(null)
   const { openModal } = useBootstrap()
-
-  useEffect(() => { 
-    if (isError) console.error(error) 
-  }, [isError])
 
   useEffect(() => { 
     if (isConnected && isNoSupplyPositions) {
@@ -91,10 +78,10 @@ export default function Farm() {
         
         <div className="col-12 col-xl-8 px-xl-5">
 
-            <DepositErc20Token {...targetMarket} />
-            <DepositNativeCurrency {...targetMarket} />
-            <WithdrawErc20Token {...targetMarket} />
-            <WithdrawNativeCurrency {...targetMarket} />
+            <DepositBaseTokenErc20 {...targetMarket} />
+            <DepositBaseTokenNative {...targetMarket} />
+            <WithdrawBaseTokenErc20 {...targetMarket} />
+            <WithdrawBaseTokenNative {...targetMarket} />
 
             <div className="row g-0 align-items-center p-4 mb-5 bg-body border rounded shadow mb-5">
                 <div className="col-12 col-sm-4"><h2 className="mb-3 mb-sm-0">Farm</h2></div>
@@ -126,17 +113,17 @@ export default function Farm() {
               <div key={baseTokenAddress(market)} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
                       <div className="d-flex justify-content-start">
-                        { unWrappedNativeToken(market, chainId) &&
+                        { getBaseTokenOrNativeCurrency(market, chainId) &&
                           <>
-                            <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className="d-none d-sm-block me-3" alt={unWrappedNativeToken(market, chainId)?.symbol} width="42" />
+                            <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} css="d-none d-sm-block me-3" width="42" />
                             <div>
                                 <div className="d-flex fs-5">
                                   {!isConnected &&
-                                    <img src={`/images/tokens/${unWrappedNativeToken(market, chainId).symbol}.svg`} className={`d-block d-sm-none ${css['token-icon-xs']}`} alt={unWrappedNativeToken(market, chainId)?.symbol} width="25" /> 
+                                    <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} css={`d-block d-sm-none ${css['token-icon-xs']}`} width="25" />
                                   }
-                                  {unWrappedNativeToken(market, chainId).symbol}
+                                  {getBaseTokenOrNativeCurrency(market, chainId).symbol}
                                 </div>
-                                <small className="d-none d-sm-block text-body-secondary">{unWrappedNativeToken(market, chainId).name}</small>
+                                <small className="d-none d-sm-block text-body-secondary">{getBaseTokenOrNativeCurrency(market, chainId).name}</small>
                             </div>
                           </>
                         }
@@ -168,6 +155,6 @@ export default function Farm() {
           <UserAccount />
         </div>
       </>
-    );
+    )
 }
 

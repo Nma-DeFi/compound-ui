@@ -15,14 +15,19 @@ export class PositionsService {
     }
 
     async supplyBalanceOf(account) {
-        const balance = await this.publicClient.readContract({
-            ...this.contract,
-            functionName: 'balanceOf',
-            args: [ account ],
-        })
-        const decimals = await this.publicClient.readContract({
-            ...this.contract,
-            functionName: 'decimals',
+        const [ balance, decimals ] = await this.publicClient.multicall({
+            contracts: [
+                {
+                    ...this.contract,
+                    functionName: 'balanceOf',
+                    args: [ account ],
+                },
+                {
+                    ...this.contract,
+                    functionName: 'decimals',
+                }
+            ],
+            allowFailure: false,
         })
         console.log(
             Date.now(), 
@@ -33,5 +38,61 @@ export class PositionsService {
             'decimals', decimals,
         )
         return fromBigInt(balance, decimals)
+    }
+
+    async collateralBalanceOf({ account, token }) {
+        console.log(
+            Date.now(), 
+            'PositionsService.collateralBalanceOf',
+            'account', account,
+            'token', token,
+            'comet', this.contract.address
+        )
+        const { symbol, address, decimals } = token
+        let balance
+        try {
+            balance = await this.publicClient.readContract({
+                ...this.contract,
+                functionName: 'collateralBalanceOf',
+                args: [ account, address ],
+            })
+        } catch(e) {
+            console.error('collateralBalanceOf', e)
+        }
+        console.log(
+            Date.now(), 
+            'PositionsService.collateralBalanceOf',
+            'account', account,
+            'token', symbol,
+            'comet', this.contract.address,
+            'balance', balance,
+        )
+        return fromBigInt(balance, decimals)
+    }
+
+    async collateralBalancesOf({ account, tokens }) {
+        const contracts = tokens.map(token => { 
+            return {
+                ...this.contract,
+                functionName: 'collateralBalanceOf',
+                args: [ account, token.address ], 
+            }
+        })
+        const balances = await this.publicClient.multicall({ contracts, allowFailure: false })
+        let result = {}
+        for (let index = 0; index < tokens.length; index++) {
+            const token = tokens[index]
+            const balance = fromBigInt(balances[index], token.decimals)
+            result = { ...result,  [token.address]: { token, balance } }
+        }
+        console.log(
+            Date.now(), 
+            'PositionsService.collateralBalancesOf',
+            'account', account,
+            'tokens', tokens,
+            'comet', this.contract.address,
+            'result', result,
+        )
+        return result
     }
 }

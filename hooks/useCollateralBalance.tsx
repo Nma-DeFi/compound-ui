@@ -5,20 +5,20 @@ import { usePositionsService } from "./usePositionsService"
 
 type BalanceData = AsyncData<BigNumber>
 
-export function useSupplyBalance({ comet, publicClient, account }) {
+export function useCollateralBalance({ comet, publicClient, account, token }) {
     
     const [ balance, setBalance ] = useState<BalanceData>(IdleData)
 
     const positionsService = usePositionsService({ comet, publicClient })
 
     useEffect(() => {
-        if (positionsService && account) {
-            const promise = positionsService.supplyBalanceOf(account)
+        if (positionsService && account && token) {
+            const promise = positionsService.collateralBalanceOf({ account, token })
             loadAsyncData(promise, setBalance)
         } else {
             setBalance(IdleData)
         }
-    }, [positionsService, account])
+    }, [positionsService, account, token])
 
     return balance
 }

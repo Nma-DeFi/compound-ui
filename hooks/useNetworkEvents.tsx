@@ -4,11 +4,18 @@ import { Address, useAccount, useNetwork } from "wagmi"
 import { useAppDispatch } from "../redux/hooks"
 import { accountConnected, accountDisconnected } from "../redux/slices/currentAccount"
 import { chainSwitched } from "../redux/slices/currentChain"
-import { supplyPositionsReset } from "../redux/slices/supplyPositions"
+import { supplyPositionsReset } from "../redux/slices/positions/supplyPositions"
+import { collateralPositionsReset } from "../redux/slices/positions/collateralPositions"
+
+
+export const resetPositions = (dispatch) => {
+    dispatch(supplyPositionsReset())
+    dispatch(collateralPositionsReset())
+}
 
 export const resetConnectedAccount = (dispatch) => {
     dispatch(accountDisconnected())
-    dispatch(supplyPositionsReset())
+    resetPositions(dispatch)
 }
 
 export function useNetworkEvents() {
@@ -24,7 +31,7 @@ export function useNetworkEvents() {
     const onAccountChanged = (newAccount: Address) => {
         if (newAccount) {
             dispatch(accountConnected(newAccount))
-            dispatch(supplyPositionsReset())
+            resetPositions(dispatch)
         }
     }
     useEffect(() => onAccountChanged(address), [address])
@@ -32,7 +39,7 @@ export function useNetworkEvents() {
     const onChainChanged = (newChain: Chain) => {
         if (newChain) {
             dispatch(chainSwitched(newChain.id))
-            dispatch(supplyPositionsReset())
+            resetPositions(dispatch)
         }
     }
     useEffect(() => onChainChanged(chain), [chain])

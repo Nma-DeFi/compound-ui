@@ -1,0 +1,19 @@
+{
+    "COMP": "COMP.svg",
+    "ETH": "ETH.svg",
+    "WETH": "WETH.svg",
+    "wstETH": "wstETH.svg",
+    "cbETH": "cbETH.svg",
+    "rETH": "rETH.svg",
+    "MATIC": "MATIC.svg",
+    "WMATIC": "MATIC.svg",
+    "stMATIC": "stMATIC.svg",
+    "MaticX": "MATICX.svg",
+    "USDbC": "USDC.svg",
+    "USDC": "USDC.svg",
+    "GMX": "GMX.svg",
+    "ARB": "ARBITRUM.svg",
+    "LINK": "LINK.svg",
+    "WBTC": "WBTC.svg",
+    "UNI": "UNI.svg"
+}

@@ -1,7 +1,7 @@
 import { Address } from "viem";
 import { cometAbi } from "../abi/cometAbi";
 
-export class AllowService {
+export class AllowanceService {
 
     publicClient
     walletClient
@@ -25,7 +25,7 @@ export class AllowService {
             args: [owner, manager]
         })
         console.log(
-            'AllowService.hasPermission',
+            'AllowanceService.hasPermission',
             'chain', this.publicClient.chain.name,
             'owner', owner, 'manager', manager,
             'hasPermission', hasPermission,
@@ -36,7 +36,7 @@ export class AllowService {
 
     async allow(manager: Address, isAllowed: boolean) {
         console.log(
-            'AllowService.allow',
+            'AllowanceService.allow',
             'manager', manager,
             'isAllowed', isAllowed,
             'account', this.account

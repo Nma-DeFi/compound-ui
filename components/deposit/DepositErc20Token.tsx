@@ -7,16 +7,19 @@ import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import { useCurrentChain } from '../../hooks/useCurrentChain'
 import { useErc20Service } from '../../hooks/useErc20Service'
 import { useSupplyService } from '../../hooks/useSupplyService'
-import { Action, ActionInfo } from '../../pages/farm'
-import * as MarketSelector from "../../selectors/market-selector"
-import css from '../../styles/components/farm/DepositErc20.module.scss'
+import { ActionInfo } from "../ResultToast"
+import { Action } from "../ResultToast"
 import { Zero, bn, bnf } from '../../utils/bn'
-import Amount, { AmountDecimalPrecision } from '../Amount'
+import { AMOUNT_DP } from '../Amount'
 import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
 import Price from '../Price'
 import { SmallSpinner } from '../Spinner'
-import Result from './Result'
+import Result from '../ResultToast'
+import TokenIcon from '../TokenIcon'
+import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
+import css from '../../styles/components/farm/DepositErc20.module.scss'
+import AsyncAmount from '../AmountAsync'
 
 const Mode = {
   NotConnected: 0,
@@ -33,11 +36,16 @@ const Mode = {
 export const DEPOSIT_ERC20_TOKEN_MODAL = 'deposit-erc20-modal'
 export const DEPOSIT_ERC20_TOKEN_TOAST = 'deposit-erc20-toast'
 
-export default function DepositErc20Token(market) {
+export default function DepositErc20Token({ comet, token}) {
     
     const [ mode, setMode ] = useState<number>()
-    const [ balance, setBalance ] = useState<BigNumber>()
-    const [ allowance, setAllowance ] = useState<BigNumber>()
+
+    const [ asyncAllowance, setAsyncAllowance ] = useState<AsyncBigNumber>(IdleData)
+    const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
+
+    const { isSuccess: isAllowance, data: allowance } = asyncAllowance
+    const { isSuccess: isBalance, data: balance } = asyncBalance
+
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
 
     const [ approvalHash, setApprovalHash ] = useState<Hash>()
@@ -47,14 +55,10 @@ export default function DepositErc20Token(market) {
     const { currentChainId: chainId } = useCurrentChain()
     const { isConnected, address: account } = useCurrentAccount()
 
-    const comet = MarketSelector.cometProxy(market)
-    const baseToken = MarketSelector.baseToken(market)
-    
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
 
-    const baseTokenErc20  = useErc20Service({ token: baseToken, publicClient, walletClient, account })
-
+    const erc20service  = useErc20Service({ token, publicClient, walletClient, account })
     const supplyService = useSupplyService({ publicClient, walletClient, account, comet })
 
     const { 
@@ -66,7 +70,7 @@ export default function DepositErc20Token(market) {
     const modalEvent = useModalEvent(DEPOSIT_ERC20_TOKEN_MODAL)
 
     useEffect(() => {
-      if (!isConnected || !balance || !allowance) return
+      if (!isConnected || !isBalance || !isAllowance) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
       } else if (amount.isGreaterThan(allowance)) {
@@ -74,7 +78,7 @@ export default function DepositErc20Token(market) {
       } else {
         setMode(Mode.DepositReady)
       }
-    }, [balance, allowance, amount])
+    }, [amount, balance, allowance])
 
     useEffect(() => { 
       if (isWaitingApproval) {
@@ -84,24 +88,24 @@ export default function DepositErc20Token(market) {
 
     useEffect(() => { 
       if (isSuccessApproval) {
-        baseTokenErc20.allowance(account, comet).then(setAllowance)
+        loadAllowance()
       } 
     }, [isSuccessApproval])
 
     useEffect(() => {
-      if (mode === Mode.Init && baseTokenErc20) {
-          baseTokenErc20.balanceOf(account).then(setBalance)
-          baseTokenErc20.allowance(account, comet).then(setAllowance)
+      if (mode === Mode.Init && erc20service) {
+        loadBalance()
+        loadAllowance()
       }
-    }, [baseTokenErc20])
+    }, [mode, erc20service])
     
     useEffect(() => {
-      if (supplyHash && mode === Mode.ConfirmationOfDeposit) {
+      if (mode === Mode.ConfirmationOfDeposit && supplyHash) {
         setMode(Mode.WaitingForDeposit)
-        setSupplyInfo({ action: Action.Deposit, token: baseToken, amount, hash: supplyHash })
+        setSupplyInfo({ action: Action.Deposit, token, amount, hash: supplyHash })
         hideModal(DEPOSIT_ERC20_TOKEN_MODAL)
       }
-    }, [supplyHash])
+    }, [mode, supplyHash])
 
     useEffect(() => {
       switch (modalEvent) {
@@ -124,20 +128,25 @@ export default function DepositErc20Token(market) {
     }
 
     function onHide() {
+      let clearSupplyData = true
       if (mode === Mode.WaitingForDeposit) {
         openToast(DEPOSIT_ERC20_TOKEN_TOAST)
+        clearSupplyData = false
       }
-      setMode(null)
+      initState(clearSupplyData)
     }
     
-    function initState() {
+    function initState(initSupplyData = true) {
       setAmount(Zero)
+      setMode(null)
       setInput(null)
-      setBalance(null)
-      setAllowance(null)
       setApprovalHash(null)
-      setSupplyHash(null)
-      setSupplyInfo(null)
+      setAsyncBalance(IdleData)
+      setAsyncAllowance(IdleData)
+      if (initSupplyData) {
+        setSupplyHash(null)
+        setSupplyInfo(null)
+      }
     }
 
     function setInput(value: string) {
@@ -146,15 +155,25 @@ export default function DepositErc20Token(market) {
       input.value = value ?? ''
     }
 
+    function loadBalance() {
+      const promise = erc20service.balanceOf(account)
+      loadAsyncData(promise, setAsyncBalance)
+    }
+
+    function loadAllowance() {
+      const promise = erc20service.allowance(account, comet)
+      loadAsyncData(promise, setAsyncAllowance)
+    }
+    
     function handleApproval() {
       setMode(Mode.ConfirmationOfApproval)
-      baseTokenErc20.approve(comet, balance).then(setApprovalHash)
+      erc20service.approve(comet, balance).then(setApprovalHash)
     }
 
     function handleDeposit() {
       if (amount.isGreaterThan(Zero)) {
         setMode(Mode.ConfirmationOfDeposit)
-        supplyService.supplyErc20Token({ token: baseToken, amount }).then(setSupplyHash)
+        supplyService.supplyErc20Token({ token, amount }).then(setSupplyHash)
       }
     }
 
@@ -166,7 +185,7 @@ export default function DepositErc20Token(market) {
     function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount, AmountDecimalPrecision)
+      const newInput = bnf(newAmount, AMOUNT_DP)
       setAmount(newAmount)
       setInput(newInput)
     }
@@ -191,18 +210,18 @@ export default function DepositErc20Token(market) {
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                        <Price asset={baseToken} amount={amount} />
+                        <Price asset={token} amount={amount} />
                         </div>
                       </div>
                       <div>
                           <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
                               <div className="d-flex align-items-center">
-                                  <img src={`/images/tokens/${baseToken?.symbol}.svg`} alt="USDC" width="30" /> 
-                                  <span className="px-3">{baseToken?.symbol}</span> 
+                                  <TokenIcon symbol={token?.symbol} width={30} />
+                                  <span className="px-3">{token?.symbol}</span> 
                               </div>
                           </button>
                           <div className="text-center text-body-secondary small">
-                            Wallet : <span className="text-body-tertiary"><Amount value={balance} /></span>
+                            Wallet : <AsyncAmount {...asyncBalance} />
                           </div>
                       </div>
                   </div>
@@ -218,16 +237,16 @@ export default function DepositErc20Token(market) {
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
                   }
                   { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {baseToken?.symbol} Balance</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {token?.symbol} Balance</button>
                   }
                   { mode === Mode.InsufficientAllowance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleApproval}>Enable {baseToken?.symbol}</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleApproval}>Enable {token?.symbol}</button>
                   }
                   { mode === Mode.WaitingForApproval &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Enabling {baseToken?.symbol} ... Wait please <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Enabling {token?.symbol} ... Wait please <SmallSpinner /></button>
                   }
                   { mode === Mode.DepositReady &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit {baseToken?.symbol}</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit {token?.symbol}</button>
                   }
                   { ([Mode.ConfirmationOfApproval, Mode.ConfirmationOfDeposit].includes(mode)) &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>

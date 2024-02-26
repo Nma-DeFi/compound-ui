@@ -5,18 +5,20 @@ import { usePublicClient, useWalletClient } from 'wagmi';
 import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import { useCurrentChain } from '../../hooks/useCurrentChain';
-import { useSupplyBalance } from '../../hooks/useSupplyBalance';
 import { useWithdrawService } from '../../hooks/useWithdrawService';
-import { Action, ActionInfo } from '../../pages/farm';
-import * as MarketSelector from "../../selectors/market-selector";
+import { ActionInfo } from "../ResultToast";
+import { Action } from "../ResultToast";
 import css from '../../styles/components/farm/WithdrawErc20.module.scss';
 import { Zero, bn, bnf } from '../../utils/bn';
-import Amount from '../Amount';
 import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
 import Price from '../Price';
 import { SmallSpinner } from '../Spinner';
-import Result from './Result';
+import Result from '../ResultToast';
+import { WithdrawParam, WithdrawType } from '../../types';
+import AsyncAmount from '../AmountAsync';
+import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async';
+import { usePositionsService } from '../../hooks/usePositionsService';
 
 const Mode = {
   NotConnected: 0,
@@ -30,24 +32,23 @@ const Mode = {
 export const WITHDRAW_ERC20_TOKEN_MODAL = 'withdraw-erc20-modal'
 export const WITHDRAW_ERC20_TOKEN_TOAST = 'withdraw-erc20-toast'
 
-export default function WithdrawErc20Token(market) {
+export default function WithdrawErc20Token({comet, token, withdrawType } : WithdrawParam) {
 
     const [ mode, setMode ] = useState<number>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ withdrawHash, setWithdrawHash ] = useState<Hash>()
     const [ withdrawInfo, setWithdrawInfo ] = useState<ActionInfo>()
+    const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
+
+    const { isSuccess: isBalance, data: balance } = asyncBalance
 
     const { currentChainId: chainId } = useCurrentChain()
     const { isConnected, address: account } = useCurrentAccount()
 
-    const baseToken = MarketSelector.baseToken(market)
-    const comet = MarketSelector.cometProxy(market)
-
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
-    
-    const { isSuccess: isBalance, data: balance} = useSupplyBalance({ comet, publicClient, account })
 
+    const positionsService = usePositionsService({ comet, publicClient })
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
 
     const { hideModal, openToast } = useBootstrap()
@@ -60,15 +61,21 @@ export default function WithdrawErc20Token(market) {
       } else {
         setMode(Mode.WithdrawReady)
       }
-    }, [balance, amount, withdrawService])
+    }, [amount, balance, withdrawService])
 
     useEffect(() => {
-      if (withdrawHash && mode === Mode.ConfirmationOfWithdrawal) {
+      if (mode === Mode.Init && positionsService) {
+        loadBalance()
+      }
+    }, [mode, positionsService])
+
+    useEffect(() => {
+      if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
         setMode(Mode.WaitingForWithdrawal)
-        setWithdrawInfo({ action: Action.Withdraw, token: baseToken, amount, hash: withdrawHash })
+        setWithdrawInfo({ action: Action.Withdraw, token, amount, hash: withdrawHash })
         hideModal(WITHDRAW_ERC20_TOKEN_MODAL)
       }
-    }, [withdrawHash])
+    }, [mode, withdrawHash])
 
     useEffect(() => {
       switch (modalEvent) {
@@ -80,7 +87,7 @@ export default function WithdrawErc20Token(market) {
           break
       } 
     }, [modalEvent])
-    
+
     function onOpen() {
       initState()
       if (!isConnected) {
@@ -91,17 +98,33 @@ export default function WithdrawErc20Token(market) {
     }
 
     function onHide() {
+      let clearWithdrawData = true
       if (mode === Mode.WaitingForWithdrawal) {
         openToast(WITHDRAW_ERC20_TOKEN_TOAST)
+        clearWithdrawData = false
       }
-      setMode(null)
+      initState(clearWithdrawData)
     }
 
-    function initState() {
+    function loadBalance() {
+      let promise;
+      if (withdrawType === WithdrawType.BaseToken) {
+        promise = positionsService.supplyBalanceOf(account);
+      } else {
+        promise = positionsService.collateralBalanceOf({ account, token });
+      }
+      loadAsyncData(promise, setAsyncBalance);
+    }
+
+    function initState(initWithdrawData = true) {
       setAmount(Zero)
+      setMode(null)
       setInput(null)
-      setWithdrawHash(null)
-      setWithdrawInfo(null)
+      setAsyncBalance(IdleData)
+      if (initWithdrawData) {
+        setWithdrawHash(null)
+        setWithdrawInfo(null)
+      }
     }
     
     function setInput(value: string) {
@@ -118,7 +141,7 @@ export default function WithdrawErc20Token(market) {
     function handleWithdraw() {
       if (amount.isGreaterThan(Zero)) {
         setMode(Mode.ConfirmationOfWithdrawal)
-        withdrawService.withdrawErc20Token({ token: baseToken, amount }).then(setWithdrawHash)
+        withdrawService.withdrawErc20Token({ token, amount }).then(setWithdrawHash)
       }
     }
 
@@ -150,17 +173,17 @@ export default function WithdrawErc20Token(market) {
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                          <Price asset={baseToken} amount={amount} />
+                          <Price asset={token} amount={amount} />
                         </div>
                       </div>
                       <div>
                           <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
                               <div className="d-flex align-items-center">
-                                  <img src={`/images/tokens/${baseToken?.symbol}.svg`} alt="USDC" width="30" /> 
-                                  <span className="px-3">{baseToken?.symbol}</span> 
+                                  <img src={`/images/tokens/${token?.symbol}.svg`} alt="USDC" width="30" /> 
+                                  <span className="px-3">{token?.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary"><Amount value={balance} /></span></div>
+                          <div className="text-center text-body-secondary small">Balance : <AsyncAmount {...asyncBalance} /></div>
                       </div>
                   </div>
                   <div className="row g-2">
@@ -175,10 +198,10 @@ export default function WithdrawErc20Token(market) {
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
                   }
                   { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {baseToken?.symbol} Balance</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {token?.symbol} Balance</button>
                   }
                   { mode === Mode.WithdrawReady &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw {baseToken?.symbol}</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw {token?.symbol}</button>
                   }
                   { mode === Mode.ConfirmationOfWithdrawal &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>

@@ -1,3 +1,5 @@
+import BigNumber from "bignumber.js";
+
 export type AsyncStatusType = {
     isIdle: boolean;
     isLoading: boolean;
@@ -6,6 +8,7 @@ export type AsyncStatusType = {
 }
 
 export type AsyncData<T> = { data: T } & AsyncStatusType
+export type AsyncBigNumber = AsyncData<BigNumber>
 
 export const AsyncStatus = {
     Idle: { isIdle: true, isLoading: false, isSuccess: false, isError: false },
@@ -19,7 +22,7 @@ export const IdleData : AsyncData<any> = {
     ...AsyncStatus.Idle
 }
 
-export function asyncExec<T>(promise: Promise<T>, setData: (d: AsyncData<T>) => void) {
+export function loadAsyncData<T>(promise: Promise<T>, setData: (d: AsyncData<T>) => void) {
     setData({ data: undefined, ...AsyncStatus.Loading })
     promise.then(d => setData({data: d, ...AsyncStatus.Success }))
         .catch(() => setData({data: undefined, ...AsyncStatus.Error }))

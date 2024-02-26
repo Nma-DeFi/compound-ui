@@ -3,24 +3,26 @@ import { useEffect, useState } from 'react';
 import { Hash } from 'viem';
 import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi';
 import { CompoundConfig } from '../../compound-config';
-import { useAllowService } from '../../hooks/useAllowService';
+import { useAllowanceService } from '../../hooks/useAllowanceService';
 import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import { useCurrentChain } from '../../hooks/useCurrentChain';
-import { useSupplyBalance } from '../../hooks/useSupplyBalance';
 import { useWithdrawService } from '../../hooks/useWithdrawService';
-import { Action, ActionInfo } from '../../pages/farm';
-import * as MarketSelector from "../../selectors/market-selector";
+import { ActionInfo } from "../ResultToast";
+import { Action } from "../ResultToast";
 import css from '../../styles/components/farm/WithdrawNative.module.scss';
-import { AsyncData, IdleData, asyncExec } from '../../utils/async';
+import { AsyncBigNumber, AsyncData, IdleData, loadAsyncData } from '../../utils/async';
 import { Zero, bn, bnf } from '../../utils/bn';
 import * as ChainUtils from '../../utils/chains';
-import Amount, { AmountDecimalPrecision } from '../Amount';
+import { AMOUNT_DP } from '../Amount';
 import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
 import Price from '../Price';
 import { SmallSpinner } from '../Spinner';
-import Result from './Result';
+import Result from '../ResultToast';
+import { WithdrawParam, WithdrawType } from '../../types';
+import AsyncAmount from '../AmountAsync';
+import { usePositionsService } from '../../hooks/usePositionsService';
 
 const Mode = {
   NotConnected: 0,
@@ -37,7 +39,7 @@ const Mode = {
 export const WITHDRAW_NATIVE_CURRENCY_MODAL = 'withdraw-native-modal'
 export const WITHDRAW_NATIVE_CURRENCY_TOAST = 'withdraw-native-toast'
 
-export default function WithdrawNativeCurrency(market) {
+export default function WithdrawNativeCurrency({ comet, token, withdrawType } : WithdrawParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const { isConnected, address: account } = useCurrentAccount()
@@ -50,23 +52,19 @@ export default function WithdrawNativeCurrency(market) {
     const [ bulkerApprovalHash, setBulkerApprovalHash ] = useState<Hash>()
     const [ withdrawHash, setWithdrawHash ] = useState<Hash>()
     const [ withdrawInfo, setWithdrawInfo ] = useState<ActionInfo>()    
-    const [ 
-      { 
-        isSuccess: isBulkerChecked, 
-        data: isBulkerApproved 
-      }, 
-      setBulkerPermission 
-    ] = useState<AsyncData<boolean>>(IdleData)
+    const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
+    const [ bulkerPermission, setBulkerPermission ] = useState<AsyncData<boolean>>(IdleData)
 
-    const comet = MarketSelector.cometProxy(market)
+    const { isSuccess: isBalance, data: balance } = asyncBalance
+    const { isSuccess: isBulkerChecked, data: isBulkerApproved } = bulkerPermission
+
     const nativeCurrency = ChainUtils.nativeCurrency(chainId)
 
     const { hideModal, openToast } = useBootstrap()
     const modalEvent = useModalEvent(WITHDRAW_NATIVE_CURRENCY_MODAL)
 
-    const { isSuccess: isBalance, data: balance } = useSupplyBalance({ comet, publicClient, account })
-
-    const allowService = useAllowService({ comet, publicClient, walletClient, account })
+    const positionsService = usePositionsService({ comet, publicClient })
+    const allowanceService = useAllowanceService({ comet, publicClient, walletClient, account })
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
 
     const { 
@@ -85,16 +83,7 @@ export default function WithdrawNativeCurrency(market) {
       } else {
         setMode(Mode.WithdrawReady)
       }
-
-    }, [amount, isBalance, isBulkerChecked, withdrawService])
-
-    useEffect(() => {
-      if (withdrawHash && mode === Mode.ConfirmationOfWithdrawal) {
-        setMode(Mode.WaitingForWithdrawal)
-        setWithdrawInfo({ action: Action.Withdraw, token: nativeCurrency, amount, hash: withdrawHash })
-        hideModal(WITHDRAW_NATIVE_CURRENCY_MODAL)
-      }
-    }, [withdrawHash])
+    }, [amount, balance, isBulkerApproved, withdrawService])
 
     useEffect(() => { 
       if (isWaitingBulkerApproval) {
@@ -107,12 +96,26 @@ export default function WithdrawNativeCurrency(market) {
         loadBulkerPermission()
       } 
     }, [isSuccessBulkerApproval])
+
+    useEffect(() => {
+      if (mode === Mode.Init && positionsService) {
+        loadBalance()
+      }
+    }, [mode, positionsService])
     
     useEffect(() => {
-      if (mode === Mode.Init && allowService) {
-          loadBulkerPermission()
+      if (mode === Mode.Init && allowanceService) {
+        loadBulkerPermission()
       }
-    }, [allowService])
+    }, [mode, allowanceService])
+    
+    useEffect(() => {
+      if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
+        setMode(Mode.WaitingForWithdrawal)
+        setWithdrawInfo({ action: Action.Withdraw, token: nativeCurrency, amount, hash: withdrawHash })
+        hideModal(WITHDRAW_NATIVE_CURRENCY_MODAL)
+      }
+    }, [mode, withdrawHash])
 
     useEffect(() => {
       switch (modalEvent) {
@@ -135,25 +138,40 @@ export default function WithdrawNativeCurrency(market) {
     }
 
     function onHide() {
+      let clearWithdrawData = true
       if (mode === Mode.WaitingForWithdrawal) {
         openToast(WITHDRAW_NATIVE_CURRENCY_TOAST)
+        clearWithdrawData = false
       }
+      initState(clearWithdrawData)
+    }
+    
+    function loadBalance() {
+      let promise
+      if (withdrawType === WithdrawType.BaseToken) {
+        promise = positionsService.supplyBalanceOf(account)
+      } else {
+        promise = positionsService.collateralBalanceOf({ account, token })
+      }
+      loadAsyncData(promise, setAsyncBalance);
+    }
+
+    function initState(initWithdrawData = true) {
+      setAmount(Zero)
       setMode(null)
+      setInput(null)
+      setAsyncBalance(IdleData)
+      setBulkerPermission(IdleData)
+      setBulkerApprovalHash(null)
+      if (initWithdrawData) {
+        setWithdrawHash(null)
+        setWithdrawInfo(null)
+      }
     }
 
     function loadBulkerPermission() {
-      const promise = allowService.hasPermission(account, bulker);
-      asyncExec(promise, setBulkerPermission);
-    }
-
-    function initState() {
-      setAmount(Zero)
-      setInput(null)
-      setWithdrawInfo(null)
-      setBulkerApprovalHash(null)
-      setBulkerPermission(IdleData)
-      setWithdrawHash(null)
-      setWithdrawInfo(null)
+      const promise = allowanceService.hasPermission(account, bulker)
+      loadAsyncData(promise, setBulkerPermission)
     }
     
     function setInput(value: string) {
@@ -171,13 +189,13 @@ export default function WithdrawNativeCurrency(market) {
     function handleBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount, AmountDecimalPrecision)
+      const newInput = bnf(newAmount, AMOUNT_DP)
       setAmount(newAmount)
       setInput(newInput)
     }
 
     function handleBulkerApproval() {
-      allowService.allow(bulker, true).then(setBulkerApprovalHash)
+      allowanceService.allow(bulker, true).then(setBulkerApprovalHash)
     }
 
     function handleWithdraw() {
@@ -218,7 +236,7 @@ export default function WithdrawNativeCurrency(market) {
                                   <span className="px-3">{nativeCurrency.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Balance : <span className="text-body-tertiary"><Amount value={balance} /></span></div>
+                          <div className="text-center text-body-secondary small">Balance : <AsyncAmount {...asyncBalance} /></div>
                       </div>
                   </div>
                   <div className="row g-2">

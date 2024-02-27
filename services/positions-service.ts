@@ -41,24 +41,12 @@ export class PositionsService {
     }
 
     async collateralBalanceOf({ account, token }) {
-        console.log(
-            Date.now(), 
-            'PositionsService.collateralBalanceOf',
-            'account', account,
-            'token', token,
-            'comet', this.contract.address
-        )
         const { symbol, address, decimals } = token
-        let balance
-        try {
-            balance = await this.publicClient.readContract({
-                ...this.contract,
-                functionName: 'collateralBalanceOf',
-                args: [ account, address ],
-            })
-        } catch(e) {
-            console.error('collateralBalanceOf', e)
-        }
+        const balance = await this.publicClient.readContract({
+            ...this.contract,
+            functionName: 'collateralBalanceOf',
+            args: [ account, address ],
+        })
         console.log(
             Date.now(), 
             'PositionsService.collateralBalanceOf',

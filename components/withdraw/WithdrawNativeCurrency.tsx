@@ -8,8 +8,6 @@ import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import { useCurrentChain } from '../../hooks/useCurrentChain';
 import { useWithdrawService } from '../../hooks/useWithdrawService';
-import { ActionInfo } from "../ResultToast";
-import { Action } from "../ResultToast";
 import css from '../../styles/components/farm/WithdrawNative.module.scss';
 import { AsyncBigNumber, AsyncData, IdleData, loadAsyncData } from '../../utils/async';
 import { Zero, bn, bnf } from '../../utils/bn';
@@ -19,8 +17,8 @@ import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
 import Price from '../Price';
 import { SmallSpinner } from '../Spinner';
-import Result from '../ResultToast';
-import { WithdrawParam, WithdrawType } from '../../types';
+import ActionResult from '../action-result/ActionResult';
+import { WithdrawParam, ActionType, ActionInfo } from '../../types';
 import AsyncAmount from '../AmountAsync';
 import { usePositionsService } from '../../hooks/usePositionsService';
 
@@ -112,7 +110,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
     useEffect(() => {
       if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
         setMode(Mode.WaitingForWithdrawal)
-        setWithdrawInfo({ action: Action.Withdraw, token: nativeCurrency, amount, hash: withdrawHash })
+        setWithdrawInfo({ action: withdrawType, token: nativeCurrency, amount, hash: withdrawHash })
         hideModal(WITHDRAW_NATIVE_CURRENCY_MODAL)
       }
     }, [mode, withdrawHash])
@@ -148,7 +146,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
     
     function loadBalance() {
       let promise
-      if (withdrawType === WithdrawType.BaseToken) {
+      if (withdrawType === ActionType.WithdrawBaseToken) {
         promise = positionsService.supplyBalanceOf(account)
       } else {
         promise = positionsService.collateralBalanceOf({ account, token })
@@ -207,7 +205,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
 
     return (
       <>
-        <Result {...{id: WITHDRAW_NATIVE_CURRENCY_TOAST, ...withdrawInfo}} />
+        <ActionResult {...{id: WITHDRAW_NATIVE_CURRENCY_TOAST, ...withdrawInfo}} />
         <div id={WITHDRAW_NATIVE_CURRENCY_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">

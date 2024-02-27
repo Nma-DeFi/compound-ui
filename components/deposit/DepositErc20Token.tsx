@@ -7,19 +7,18 @@ import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import { useCurrentChain } from '../../hooks/useCurrentChain'
 import { useErc20Service } from '../../hooks/useErc20Service'
 import { useSupplyService } from '../../hooks/useSupplyService'
-import { ActionInfo } from "../ResultToast"
-import { Action } from "../ResultToast"
 import { Zero, bn, bnf } from '../../utils/bn'
 import { AMOUNT_DP } from '../Amount'
 import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
 import Price from '../Price'
 import { SmallSpinner } from '../Spinner'
-import Result from '../ResultToast'
+import ActionResult from '../action-result/ActionResult'
 import TokenIcon from '../TokenIcon'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
 import css from '../../styles/components/farm/DepositErc20.module.scss'
 import AsyncAmount from '../AmountAsync'
+import { ActionInfo, DepositParam } from '../../types'
 
 const Mode = {
   NotConnected: 0,
@@ -36,7 +35,7 @@ const Mode = {
 export const DEPOSIT_ERC20_TOKEN_MODAL = 'deposit-erc20-modal'
 export const DEPOSIT_ERC20_TOKEN_TOAST = 'deposit-erc20-toast'
 
-export default function DepositErc20Token({ comet, token}) {
+export default function DepositErc20Token({ comet, token, depositType } : DepositParam) {
     
     const [ mode, setMode ] = useState<number>()
 
@@ -102,7 +101,7 @@ export default function DepositErc20Token({ comet, token}) {
     useEffect(() => {
       if (mode === Mode.ConfirmationOfDeposit && supplyHash) {
         setMode(Mode.WaitingForDeposit)
-        setSupplyInfo({ action: Action.Deposit, token, amount, hash: supplyHash })
+        setSupplyInfo({ action: depositType, token, amount, hash: supplyHash })
         hideModal(DEPOSIT_ERC20_TOKEN_MODAL)
       }
     }, [mode, supplyHash])
@@ -192,7 +191,7 @@ export default function DepositErc20Token({ comet, token}) {
 
     return (
       <>
-        <Result {...{id: DEPOSIT_ERC20_TOKEN_TOAST, ...supplyInfo}} />
+        <ActionResult {...{id: DEPOSIT_ERC20_TOKEN_TOAST, ...supplyInfo}} />
         <div id={DEPOSIT_ERC20_TOKEN_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">

@@ -6,8 +6,6 @@ import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap'
 import { useCurrentAccount } from '../../hooks/useCurrentAccount'
 import { useCurrentChain } from '../../hooks/useCurrentChain'
 import { useSupplyService } from '../../hooks/useSupplyService'
-import { ActionInfo } from "../ResultToast"
-import { Action } from "../ResultToast"
 import css from '../../styles/components/farm/DepositNative.module.scss'
 import { Zero, bn, bnf, fromBigInt } from '../../utils/bn'
 import * as ChainUtils from '../../utils/chains'
@@ -16,10 +14,11 @@ import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
 import Price from '../Price'
 import { SmallSpinner } from '../Spinner'
-import Result from '../ResultToast'
+import ActionResult from '../action-result/ActionResult'
 import TokenIcon from '../TokenIcon'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
 import AsyncAmount from '../AmountAsync'
+import { ActionInfo, DepositParam } from '../../types'
 
 const Mode = {
   NotConnected: 0,
@@ -33,7 +32,7 @@ const Mode = {
 export const DEPOSIT_NATIVE_CURRENCY_MODAL = 'deposit-native-modal'
 export const DEPOSIT_NATIVE_CURRENCY_TOAST = 'deposit-native-toast'
 
-export default function DepositNativeCurrency({ comet }) {
+export default function DepositNativeCurrency({ comet, depositType }  : DepositParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const publicClient = usePublicClient({ chainId })
@@ -70,7 +69,7 @@ export default function DepositNativeCurrency({ comet }) {
     useEffect(() => {
       if (mode === Mode.ConfirmationOfDeposit && supplyHash) {
         setMode(Mode.WaitingForDeposit)
-        setSupplyInfo({ action: Action.Deposit, hash: supplyHash, token: nativeCurrency, amount })
+        setSupplyInfo({ action: depositType, hash: supplyHash, token: nativeCurrency, amount })
         hideModal(DEPOSIT_NATIVE_CURRENCY_MODAL)
       }
     }, [mode, supplyHash])
@@ -150,7 +149,7 @@ export default function DepositNativeCurrency({ comet }) {
 
     return (
       <>
-        <Result {...{id: DEPOSIT_NATIVE_CURRENCY_TOAST, ...supplyInfo}} />
+        <ActionResult {...{id: DEPOSIT_NATIVE_CURRENCY_TOAST, ...supplyInfo}} />
         <div id={DEPOSIT_NATIVE_CURRENCY_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">

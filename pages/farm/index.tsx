@@ -22,9 +22,9 @@ import css from '../../styles/pages/Farm.module.scss'
 import TokenIcon from "../../components/TokenIcon"
 import DepositBaseTokenErc20 from "../../components/pages/farm/DepositBaseTokenErc20"
 import DepositBaseTokenNative from "../../components/pages/farm/DepositBaseTokenNative"
-import { Action } from "../../components/ResultToast"
 import { WITHDRAW_NATIVE_CURRENCY_MODAL } from "../../components/withdraw/WithdrawNativeCurrency"
 import { WITHDRAW_ERC20_TOKEN_MODAL } from "../../components/withdraw/WithdrawErc20Token"
+import { ActionType } from "../../types"
 
 export default function Farm() {
 
@@ -46,7 +46,7 @@ export default function Farm() {
 
   function showModal(market, action) {
     let modal
-    if (action === Action.Deposit) {
+    if (action === ActionType.DepositBaseToken) {
       if (isNativeCurrencyMarket(market, chainId)) {
         modal = DEPOSIT_NATIVE_CURRENCY_MODAL
       } else {
@@ -143,8 +143,8 @@ export default function Farm() {
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">
-                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(market, Action.Deposit)}>Deposit</button>
-                          <button type="button" className="btn btn-primary text-white" onClick={() => showModal(market, Action.Withdraw)}>Withdraw</button>
+                          <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(market, ActionType.DepositBaseToken)}>Deposit</button>
+                          <button type="button" className="btn btn-primary text-white" onClick={() => showModal(market, ActionType.WithdrawBaseToken)}>Withdraw</button>
                       </div>
                   </div>
               </div>

@@ -1,28 +1,18 @@
 import { useEffect } from "react";
 import { useWaitForTransaction } from "wagmi";
-import { useCurrentChain } from "../hooks/useCurrentChain";
-import { useAppDispatch } from "../redux/hooks";
-import { supplyPositionsInit } from "../redux/slices/positions/supplyPositions";
-import { transactionUrl } from "../utils/chains";
-import Amount from "./Amount";
-import { SmallSpinner } from "./Spinner";
-import BigNumber from "bignumber.js";
-import { Hash } from "viem";
-import { Asset } from "../types";
+import { useCurrentChain } from "../../hooks/useCurrentChain";
+import { useAppDispatch } from "../../redux/hooks";
+import { supplyPositionsInit } from "../../redux/slices/positions/supplyPositions";
+import { transactionUrl } from "../../utils/chains";
+import { SmallSpinner } from "../Spinner";
+import { ActionInfo, ActionType } from "../../types";
+import { ActionLabels } from "./ActionsLabels";
+import { collateralPositionsInit } from "../../redux/slices/positions/collateralPositions";
+import Amount from "../Amount";
 
-export const Action = {
-    Deposit: 0,
-    Withdraw: 1
-}
-  
-export type ActionInfo = {
-    action: number
-    token: Asset
-    amount: BigNumber
-    hash: Hash
-}
+type ActionResultParam = { id : string } & ActionInfo
 
-export default function Result({ id, action, token, amount, hash}) {
+export default function ActionResult({ id, action, token, amount, hash} : ActionResultParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const { isLoading, isSuccess, isError, data, error } = useWaitForTransaction({ hash  })
@@ -31,15 +21,24 @@ export default function Result({ id, action, token, amount, hash}) {
 
     useEffect(() => {
         if (isSuccess) {
-            dispatch(supplyPositionsInit())
+            switch (action) {
+                case ActionType.DepositBaseToken:
+                case ActionType.WithdrawBaseToken:
+                    dispatch(supplyPositionsInit())
+                    break;
+                case ActionType.DepositCollateral:
+                case ActionType.WithdrawCollateral:
+                    dispatch(collateralPositionsInit())
+                    break;
+                default:
+                    throw new Error("No such action exists")
+            }
         }
     }, [isSuccess])
 
     useEffect(() => { 
         if (isError) console.error(error) 
     }, [isError])
-    
-    const actionLabel = () => (action === Action.Deposit) ? "Deposit" : "Withdrawal"
 
     return (
         <div className="toast-container position-fixed bottom-0 end-0 p-4">
@@ -47,11 +46,11 @@ export default function Result({ id, action, token, amount, hash}) {
                 {isLoading && (
                     <>
                         <div className="toast-header">
-                            <div className="me-auto">{actionLabel()}</div>
+                            <div className="me-auto">{ActionLabels[action].header}</div>
                             <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                         <div className="toast-body text-center px-0 py-4">
-                            <h5 className="mb-4">{actionLabel()} of <span className="text-body-secondary"><Amount value={amount} /> { token?.symbol }</span></h5>
+                            <h5 className="mb-4">{ActionLabels[action].content} of <span className="text-body-secondary"><Amount value={amount} /> { token?.symbol }</span></h5>
                             <div className="fs-6 text-body-secondary">Wait please <SmallSpinner /></div>
                         </div>
                     </>

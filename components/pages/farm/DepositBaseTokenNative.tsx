@@ -1,9 +1,10 @@
 import * as MarketSelector from "../../../selectors/market-selector"
+import { ActionType } from "../../../types"
 import DepositNativeCurrency from "../../deposit/DepositNativeCurrency"
 
 export default function DepositBaseTokenNative(market) {
 
-    const cometProxy = MarketSelector.cometProxy(market)
+    const comet = MarketSelector.cometProxy(market)
 
-    return <DepositNativeCurrency comet={cometProxy} />
+    return <DepositNativeCurrency comet={comet} depositType={ActionType.DepositBaseToken} />
 }

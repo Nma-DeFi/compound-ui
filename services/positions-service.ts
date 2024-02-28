@@ -59,7 +59,7 @@ export class PositionsService {
     }
 
     async collateralBalancesOf({ account, tokens }) {
-        const contracts = tokens.map(token => { 
+        const contracts = tokens.map(({ token }) => { 
             return {
                 ...this.contract,
                 functionName: 'collateralBalanceOf',
@@ -69,9 +69,9 @@ export class PositionsService {
         const balances = await this.publicClient.multicall({ contracts, allowFailure: false })
         let result = {}
         for (let index = 0; index < tokens.length; index++) {
-            const token = tokens[index]
+            const { token, priceFeed } = tokens[index]
             const balance = fromBigInt(balances[index], token.decimals)
-            result = { ...result,  [token.address]: { token, balance } }
+            result = { ...result,  [token.address]: { token, balance, priceFeed } }
         }
         console.log(
             Date.now(), 

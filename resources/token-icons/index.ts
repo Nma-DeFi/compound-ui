@@ -1,10 +1,10 @@
-import icons from "./icons.json"
+import icons from './icons.json'
 
-const ICON_PATH = '/images/tokens/'
-const ICON_NOT_FOUND = '_default.svg'
+const ICONS_PATH = '/images/tokens/'
+const DEFAULT_ICON = '_default.svg'
 
 export function getTokenIcon(symbol: string) {
-    const found = Object.keys(icons).find(icons => icons === symbol)
-    const iconFile = found ? icons[symbol] : ICON_NOT_FOUND
-    return ICON_PATH + iconFile
+    const found = Object.keys(icons).find(icon => icon === symbol)
+    const iconFile = found ? icons[symbol] : DEFAULT_ICON
+    return ICONS_PATH + iconFile
 }

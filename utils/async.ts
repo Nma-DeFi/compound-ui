@@ -9,6 +9,7 @@ export type AsyncStatusType = {
 
 export type AsyncData<T> = { data: T } & AsyncStatusType
 export type AsyncBigNumber = AsyncData<BigNumber>
+export type AsyncBoolean = AsyncData<boolean>
 
 export const AsyncStatus = {
     Idle: { isIdle: true, isLoading: false, isSuccess: false, isError: false },
@@ -20,6 +21,11 @@ export const AsyncStatus = {
 export const IdleData : AsyncData<any> = {
     data: undefined,
     ...AsyncStatus.Idle
+}
+
+export const LoadingData : AsyncData<any> = {
+    data: undefined,
+    ...AsyncStatus.Loading
 }
 
 export function loadAsyncData<T>(promise: Promise<T>, setData: (d: AsyncData<T>) => void) {

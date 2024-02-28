@@ -11,6 +11,7 @@ import { PositionsService } from '../../../services/positions-service';
 export type CollateralBalances = Record<Address, {
     token: Token,
     balance: BigNumber,
+    priceFeed: Address
 }>
 
 export type CollateralPositionsData = Record<Address, CollateralBalances>
@@ -60,7 +61,7 @@ export const collateralPositionsInit = createAsyncThunk<any, void, ThunkApiField
 
         for (const market of markets) {
             const comet = MarketSelector.cometProxy(market)
-            const tokens = MarketSelector.collateralTokens(market).map(c => c.token)
+            const tokens = MarketSelector.collateralTokens(market)
             const positionsService = new PositionsService({comet, publicClient })
             const collateralBalances = await positionsService.collateralBalancesOf({ account, tokens })
             positions = { ...positions, [comet]: collateralBalances }  

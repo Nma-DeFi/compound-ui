@@ -1,32 +1,57 @@
 import Compound from "@compound-finance/compound-js";
-import { mainnet } from "wagmi";
+import { Address, mainnet } from "wagmi";
+import { cometAbi } from "../abi/cometAbi";
+import { PublicClient } from "viem";
+
+type CompoundSdk = { getPrice: (token: string) => Promise<number> }
 
 export class PriceService {
 
-    compound: { getPrice: (token: string) => Promise<number> }
+    publicClient: PublicClient
+    compoundSdk: CompoundSdk
+    cometContract
 
-    constructor() {
+    constructor( args? : { publicClient?: PublicClient, comet?: Address}) {
         const [ rpc ] = mainnet.rpcUrls.default.http
-        this.compound = new (Compound as any)(rpc)
-    }
-
-    async getPrice(token: string) {
-        try {
-            const mappedToken = this.mapToken(token)
-            const price = await this.compound.getPrice(mappedToken)
-            console.log(
-                'PriceService.getPrice',
-                'token', mappedToken,
-                'price', price
-            )
-            return price
-        } catch(e) {
-            return 0 // FIXME
+        this.compoundSdk = new (Compound as any)(rpc)
+        if (args?.publicClient && args?.comet) {
+            this.publicClient = args.publicClient
+            this.cometContract = { address: args.comet, abi: cometAbi }
         }
     }
 
-    mapToken(token: string) {
-        const mapping = { 'WETH': 'ETH' }
-        return mapping[token] || token
+    async getPriceFromSymbol(symbol: string) {
+        const SYMBOL_MAP = { 'WETH': 'ETH' }
+        const mappedSymbol = SYMBOL_MAP[symbol] || symbol
+        const price = await this.compoundSdk.getPrice(mappedSymbol)
+        console.log(
+            'PriceService.getPriceFromSymbol',
+            'token', mappedSymbol,
+            'price', price
+        )
+        return price
     }
+
+    async getPriceFromFeed(feed: Address) {
+
+        const [ price, scale ] = await this.publicClient.multicall({
+            contracts: [
+                {
+                    ...this.cometContract,
+                    functionName: 'getPrice',
+                    args: [ feed ],
+                },
+                {
+                    ...this.cometContract,
+                    functionName: 'priceScale',
+                }
+            ],
+            allowFailure: false,
+        })
+
+        console.log('getPriceFromFeed', feed, price, scale)
+
+        return Number(price) / Number(scale)
+    }
+
 }

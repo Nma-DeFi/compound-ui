@@ -12,6 +12,7 @@ import { ThunkApiFields } from '../../types';
 export type SupplyBalance = {
   baseToken: Token,
   supplyBalance: BigNumber,
+  priceFeed: Address
 }
 
 export type SupplyPositionsData = Record<Address, SupplyBalance>
@@ -62,9 +63,10 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
       for (const market of markets) {
           const comet = MarketSelector.cometProxy(market)
           const baseToken = MarketSelector.baseToken(market)
+          const priceFeed = MarketSelector.baseTokePriceFeed(market)
           const positionsService = new PositionsService({comet, publicClient })
           const supplyBalance = await positionsService.supplyBalanceOf(address)
-          positions = { ...positions, [comet]: { baseToken, supplyBalance } }  
+          positions = { ...positions, [comet]: { baseToken, supplyBalance, priceFeed } }  
       }
       log(chainId, positions)
       return positions

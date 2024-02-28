@@ -6,34 +6,47 @@ import { SupplyPositionsState } from '../redux/slices/positions/supplyPositions'
 import { RootState } from '../redux/types';
 import { PriceService } from '../services/price-service';
 import css from '../styles/components/UserAccount.module.scss';
-import { Zero, bnf } from '../utils/bn';
-import { PRICE_DP } from './Price';
+import { Zero } from '../utils/bn';
+import Price from './Price';
+import { usePublicClient } from 'wagmi';
+import { useCurrentChain } from '../hooks/useCurrentChain';
+import { useComet } from '../hooks/useComet';
+import { usePriceService } from '../hooks/usePriceService';
+import { AsyncBigNumber, AsyncStatus, IdleData, LoadingData } from '../utils/async';
+import { NoData } from './Layout';
 
-export function UserAccount({ isLoading, isSuccess, data } : SupplyPositionsState) {
+export function UserAccount(supplyPositionsState : SupplyPositionsState) {
+
+    const { isSuccess: isSupplyPositions, data: supplyPositions } = supplyPositionsState
+    
+    const [ farming, setFarming ] = useState<AsyncBigNumber>(IdleData)
 
     const { isConnected } = useCurrentAccount()
+    const { currentChainId: chainId } = useCurrentChain()
 
-    const [ farming, setFarming ] = useState<string>()
+    const publicClient = usePublicClient({ chainId })
+    const comet = useComet({ chainId })
+
+    const priceService = usePriceService({ comet, publicClient})
 
     useEffect(() => {
-        if (isSuccess) {
-            const priceService = new PriceService()
-            const positions = Object.values(data)
-            const pricesPromise = positions
-                .map(({ baseToken }) => baseToken.symbol)
-                .map(symbol => priceService.getPrice(symbol))
+        if (isSupplyPositions && priceService) {
+            setFarming(LoadingData)
+            const positions = Object.values(supplyPositions)
+            const pricesPromise = positions.map(({ priceFeed }) => priceService.getPriceFromFeed(priceFeed))
             Promise.all(pricesPromise).then(prices => {
-                let totalFarming: BigNumber = Zero
+                let farming: BigNumber = Zero
                 for (let index = 0; index < prices.length; index++) {
                     const price = prices[index]
                     const balance = positions[index].supplyBalance
-                    totalFarming = totalFarming.plus(balance.times(price))
-                }
-                const totalFarmingUsd = bnf(totalFarming, PRICE_DP, false)
-                setFarming(`$${totalFarmingUsd}`)
+                    farming = farming.plus(balance.times(price))
+                }   
+                setFarming({...AsyncStatus.Success, data: farming})
             })    
+        } else {
+            setFarming(IdleData)
         }
-    }, [isSuccess])
+    }, [isSupplyPositions, priceService])
 
     return isConnected ? (
         <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4 mt-4 mt-xl-0">
@@ -51,12 +64,12 @@ export function UserAccount({ isLoading, isSuccess, data } : SupplyPositionsStat
             <div className="d-flex justify-content-around justify-content-xl-between mb-2 small">
                 <div className="">
                     <div className="fw-semibold mb-1">Farming</div> 
-                    { isLoading ? (
+                    { (farming.isIdle || farming.isLoading) ? (
                         <div className="placeholder bg-secondary-subtle col-10"></div>
-                    ) : isSuccess ? (
-                        <div className="text-body-secondary">{ farming }</div>
+                    ) : farming.isSuccess ? (
+                        <div className="text-body-secondary"><Price value={farming.data} /></div>
                     ) : (
-                        <div className="text-body-secondary">—</div>
+                        <div className="text-body-secondary">{NoData}</div>
                     )}
                 </div>
                 <div>

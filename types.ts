@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js"
-import { Address, Hash } from "viem"
+import { AbiItem, Address, Hash } from "viem"
 
 export type Asset = {
   name: string, 
@@ -10,6 +10,11 @@ export type Asset = {
 export type NativeCurrency = Asset
 
 export type Token = Asset & { address: Address }
+
+export type Contract = {
+  address: Address,
+  abi: AbiItem[]
+}
 
 export enum ActionType {
   DepositBaseToken,

@@ -22,6 +22,7 @@ import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import { collateralPositionsInit } from '../../redux/slices/positions/collateralPositions';
 import CollateralBalance from '../../components/CollateralBalance';
 
+
 export default function Collateral() {
 
     const { isConnected } = useCurrentAccount()
@@ -33,6 +34,8 @@ export default function Collateral() {
     const [ token, setToken ] = useState<Token>()
     
     const { isIdle: isNoCollateralPositions } = useCollateralPositions()
+
+    const { DepositCollateral, WithdrawCollateral } = ActionType
 
     const dispatch = useAppDispatch()
 
@@ -56,7 +59,7 @@ export default function Collateral() {
 
     function showModal(action: ActionType, token: Token) {
         let modal: string
-        if (action === ActionType.DepositCollateral) {
+        if (action === DepositCollateral) {
             if (isWrappedNativeToken(chainId, token)) {
                 modal = DEPOSIT_NATIVE_CURRENCY_MODAL
             } else {
@@ -87,10 +90,10 @@ export default function Collateral() {
 
     return (
         <div className="col-12 col-xl-8 col-xxl-7 px-xl-5">
-            <DepositNativeCurrency comet={comet} depositType={ActionType.DepositCollateral} />
-            <DepositErc20Token comet={comet} token={token} depositType={ActionType.DepositCollateral} />
-            <WithdrawNativeCurrency comet={comet} token={token} withdrawType={ActionType.WithdrawCollateral} />
-            <WithdrawErc20Token comet={comet} token={token} withdrawType={ActionType.WithdrawCollateral} />
+            <DepositNativeCurrency comet={comet} depositType={DepositCollateral} />
+            <DepositErc20Token comet={comet} token={token} depositType={DepositCollateral} />
+            <WithdrawNativeCurrency comet={comet} token={token} withdrawType={WithdrawCollateral} />
+            <WithdrawErc20Token comet={comet} token={token} withdrawType={WithdrawCollateral} />
             <div className="row g-0 align-items-center bg-body shadow border rounded-4 p-4 mb-5">
                 <div className="col-9 col-sm-4">
                     <h2 className="mb-2">Collateral</h2>
@@ -125,7 +128,7 @@ export default function Collateral() {
                         </div>
                     </div>
                     <div className="col-6 col-sm-4 d-flex justify-content-start justify-content-sm-center">
-                        <CollateralBalance market={markets[marketIndex]} token={collateral.token} />
+                        <CollateralBalance market={markets[marketIndex]} collateral={collateral} />
                     </div>
                     <div className="col-6 col-sm-3">
                         <div className="d-flex flex-column">

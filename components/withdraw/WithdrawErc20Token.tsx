@@ -10,7 +10,7 @@ import css from '../../styles/components/farm/WithdrawErc20.module.scss';
 import { Zero, bn, bnf } from '../../utils/bn';
 import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
-import Price from '../Price';
+import PriceOld from '../PriceOld';
 import { SmallSpinner } from '../Spinner';
 import ActionResult from '../action-result/ActionResult';
 import { WithdrawParam, ActionType, ActionInfo } from '../../types';
@@ -171,7 +171,7 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                          <Price asset={token} amount={amount} />
+                          <PriceOld asset={token} amount={amount} />
                         </div>
                       </div>
                       <div>

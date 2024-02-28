@@ -12,7 +12,7 @@ import * as ChainUtils from '../../utils/chains'
 import { AMOUNT_DP } from '../Amount'
 import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
-import Price from '../Price'
+import PriceOld from '../PriceOld'
 import { SmallSpinner } from '../Spinner'
 import ActionResult from '../action-result/ActionResult'
 import TokenIcon from '../TokenIcon'
@@ -167,7 +167,7 @@ export default function DepositNativeCurrency({ comet, depositType }  : DepositP
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                          <Price asset={nativeCurrency} amount={amount} />
+                          <PriceOld asset={nativeCurrency} amount={amount} />
                         </div>
                       </div>
                       <div>

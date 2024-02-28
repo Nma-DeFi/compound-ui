@@ -1,22 +1,23 @@
 import { connect } from "react-redux"
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
 import { RootState } from "../redux/types"
-import { baseToken, cometProxy } from "../selectors/market-selector"
+import { baseTokePriceFeed, cometProxy } from "../selectors/market-selector"
 import Amount from "./Amount"
 import { NoData } from "./Layout"
-import Price from "./Price"
+import PriceAsync from "./PriceAsync"
 
+const AMOUNT_DP = 2
 
 export function SupplyBalance({ market, isLoading, isSuccess, supplyBalance }) {
 
     const { isConnected } = useCurrentAccount()
     
     return isConnected 
-        ? <SupplyBalanceAmount {...{ isLoading, isSuccess, amount: supplyBalance, token: baseToken(market) }} /> 
+        ? <SupplyBalanceAmount {...{ isLoading, isSuccess, amount: supplyBalance, market }} /> 
         : <NoSupplyBalance />
 }
 
-const SupplyBalanceAmount = ({ isLoading, isSuccess, amount, token }) => (
+const SupplyBalanceAmount = ({ isLoading, isSuccess, amount, market }) => (
     <>
         { isLoading ? (
             <>
@@ -25,8 +26,10 @@ const SupplyBalanceAmount = ({ isLoading, isSuccess, amount, token }) => (
             </>
         ) : isSuccess ? (
             <>
-                <div className="mb-1"><Amount value={amount} config={{ dp: 2, trimZeros: false}} /></div>
-                <small className="text-body-secondary"><Price asset={token} amount={amount} /></small>
+                <div className="mb-1"><Amount value={amount} config={{ dp: AMOUNT_DP, trimZeros: false}} /></div>
+                <small className="text-body-secondary">
+                    <PriceAsync comet={cometProxy(market)} priceFeed={baseTokePriceFeed(market)} amount={amount} />
+                </small>
             </>
         ) : (
             <NoSupplyBalance />

@@ -25,7 +25,7 @@ export default function Amount({ value, config = DefaultConfig } : AmountParam) 
     const [amount, setAmount] = useState<string>()
 
     useEffect(() => {
-        if (value === undefined || value === null) {
+        if (!value || value.isNaN()) {
             setAmount(NoData)
         } else {
             const { dp, trimZeros } = config

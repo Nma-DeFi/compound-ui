@@ -1,4 +1,4 @@
-import { Address, isAddressEqual } from 'viem';
+import { isAddressEqual } from 'viem';
 import { CompoundConfig } from '../compound-config';
 import { arbitrum, goerli } from 'wagmi/chains';
 import { Token } from '../types';

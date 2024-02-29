@@ -11,7 +11,6 @@ import { Zero, bn, bnf } from '../../utils/bn'
 import { AMOUNT_DP } from '../Amount'
 import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
-import PriceOld from '../PriceOld'
 import { SmallSpinner } from '../Spinner'
 import ActionResult from '../action-result/ActionResult'
 import TokenIcon from '../TokenIcon'
@@ -19,6 +18,7 @@ import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
 import css from '../../styles/components/farm/DepositErc20.module.scss'
 import AsyncAmount from '../AmountAsync'
 import { ActionInfo, DepositParam } from '../../types'
+import PriceAsync from '../PriceAsync'
 
 const Mode = {
   NotConnected: 0,
@@ -209,7 +209,7 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                        <PriceOld asset={token} amount={amount} />
+                          <PriceAsync comet={comet} priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

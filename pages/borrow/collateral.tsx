@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useCurrentChain } from '../../hooks/useCurrentChain';
 import { useMarkets } from '../../hooks/useMarkets';
-import { getBaseTokenOrNativeCurrency } from '../../utils/markets';
-import css from '../../styles/components/borrow/Collateral.module.scss';
+import { getBaseTokenOrNativeCurrency, getPriceFeedKind } from '../../utils/markets';
 import { Path } from '../../components/Layout';
 import Link from 'next/link';
 import TokenIcon from '../../components/TokenIcon';
@@ -12,7 +11,7 @@ import DepositErc20Token, { DEPOSIT_ERC20_TOKEN_MODAL } from '../../components/d
 import DepositNativeCurrency, { DEPOSIT_NATIVE_CURRENCY_MODAL } from '../../components/deposit/DepositNativeCurrency';
 import { collateralTokens, cometProxy } from '../../selectors/market-selector';
 import { useBootstrap } from '../../hooks/useBootstrap';
-import { ActionType, Token } from '../../types';
+import { ActionType, PriceFeed, Token } from '../../types';
 import { percent } from '../../utils/number';
 import WithdrawErc20Token, { WITHDRAW_ERC20_TOKEN_MODAL } from '../../components/withdraw/WithdrawErc20Token';
 import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from '../../components/withdraw/WithdrawNativeCurrency';
@@ -21,6 +20,7 @@ import { useAppDispatch } from '../../redux/hooks';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import { collateralPositionsInit } from '../../redux/slices/positions/collateralPositions';
 import CollateralBalance from '../../components/CollateralBalance';
+import css from '../../styles/components/borrow/Collateral.module.scss';
 
 
 export default function Collateral() {
@@ -57,7 +57,15 @@ export default function Collateral() {
         }
     }, [chainId, isMarkets, marketIndex])
 
-    function showModal(action: ActionType, token: Token) {
+    function showModal(action: ActionType, market, collateral) {
+        const priceFeed : PriceFeed = {
+            address: collateral.priceFeed,
+            kind: getPriceFeedKind(market, chainId)
+        }
+        const token: Token = { 
+            ...collateral.token,
+            priceFeed,
+        } 
         let modal: string
         if (action === DepositCollateral) {
             if (isWrappedNativeToken(chainId, token)) {
@@ -90,7 +98,7 @@ export default function Collateral() {
 
     return (
         <div className="col-12 col-xl-8 col-xxl-7 px-xl-5">
-            <DepositNativeCurrency comet={comet} depositType={DepositCollateral} />
+            <DepositNativeCurrency comet={comet} token={token} depositType={DepositCollateral} />
             <DepositErc20Token comet={comet} token={token} depositType={DepositCollateral} />
             <WithdrawNativeCurrency comet={comet} token={token} withdrawType={WithdrawCollateral} />
             <WithdrawErc20Token comet={comet} token={token} withdrawType={WithdrawCollateral} />
@@ -132,8 +140,8 @@ export default function Collateral() {
                     </div>
                     <div className="col-6 col-sm-3">
                         <div className="d-flex flex-column">
-                            <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(ActionType.DepositCollateral, collateral.token)}>Deposit</button>
-                            <button type="button" className="btn btn-primary text-white" onClick={() => showModal(ActionType.WithdrawCollateral, collateral.token)}>Withdraw</button>
+                            <button type="button" className="btn btn-primary text-white mb-2" onClick={() => showModal(ActionType.DepositCollateral, markets[marketIndex], collateral)}>Deposit</button>
+                            <button type="button" className="btn btn-primary text-white" onClick={() => showModal(ActionType.WithdrawCollateral, markets[marketIndex], collateral)}>Withdraw</button>
                         </div>
                     </div>
                     <div className="w-100 my-4 my-sm-2"></div>

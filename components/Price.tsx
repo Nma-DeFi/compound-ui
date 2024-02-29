@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { bnf } from "../utils/bn";
 import { NoData } from "./Layout";
 
-export const PRICE_DP = 2
+const PRICE_DP = 2
 
 type PriceParam = { value: BigNumber }
 

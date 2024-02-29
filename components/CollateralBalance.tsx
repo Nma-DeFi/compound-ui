@@ -6,6 +6,10 @@ import Amount from "./Amount"
 import { NoData } from "./Layout"
 import css from '../styles/components/CollateralBalance.module.scss';
 import PriceAsync from "./PriceAsync"
+import { useEffect, useState } from "react"
+import { PriceFeed } from "../types"
+import { getPriceFeedKind } from "../utils/markets"
+import { useCurrentChain } from "../hooks/useCurrentChain"
 
 
 export function CollateralBalance({ market, collateral, isLoading, isSuccess, amount }) {
@@ -17,27 +21,43 @@ export function CollateralBalance({ market, collateral, isLoading, isSuccess, am
         : <NoCollateralBalance />
 }
 
-const CollateralAmount = ({ market, collateral, isLoading, isSuccess, amount }) => (
-    <>
-        { isLoading ? (
-            <div className="px-3 text-center">
-                <div className="fw-medium mb-1">Your balance</div> 
-                <div className="text-body-secondary"><div className="placeholder bg-secondary-subtle col-5"></div></div>
-                <div className={`${css['collateral-balance']} text-body-tertiary`}><div className="placeholder placeholder-sm bg-secondary-subtle col-5"></div></div>
-            </div>
-        ) : isSuccess ? (
-            <div className="px-3 text-center">
-                <div className="fw-medium mb-1">Your balance</div> 
-                <div className="text-body-secondary"><Amount value={amount} config={{ dp: 2, trimZeros: false}} /></div>
-                <div className={`${css['collateral-balance']} text-body-tertiary`}>
-                    <PriceAsync comet={cometProxy(market)} priceFeed={collateral.priceFeed} amount={amount} />
+function CollateralAmount({ market, collateral, isLoading, isSuccess, amount }) { 
+    
+    const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
+    const { currentChainId: chainId } = useCurrentChain()
+
+    useEffect(() => {
+        if (market && collateral) {
+            const address = collateral.priceFeed
+            const kind = getPriceFeedKind(market, chainId)
+            setPriceFeed({address, kind})
+        } else {
+            setPriceFeed(null)
+        }
+    }, [chainId, market, collateral])
+
+    return (
+        <>
+            { isLoading ? (
+                <div className="px-3 text-center">
+                    <div className="fw-medium mb-1">Your balance</div> 
+                    <div className="text-body-secondary"><div className="placeholder bg-secondary-subtle col-5"></div></div>
+                    <div className={`${css['collateral-balance']} text-body-tertiary`}><div className="placeholder placeholder-sm bg-secondary-subtle col-5"></div></div>
                 </div>
-            </div>
-        ) : (
-            <NoCollateralBalance />
-        )}
-    </>
-)
+            ) : isSuccess ? (
+                <div className="px-3 text-center">
+                    <div className="fw-medium mb-1">Your balance</div> 
+                    <div className="text-body-secondary"><Amount value={amount} /></div>
+                    <div className={`${css['collateral-balance']} text-body-tertiary`}>
+                        <PriceAsync comet={cometProxy(market)} priceFeed={priceFeed} amount={amount} placeHolderCfg={{ col: 4 }} />
+                    </div>
+                </div>
+            ) : (
+                <NoCollateralBalance />
+            )}
+        </>
+    )
+}
 
 const NoCollateralBalance = () => (
     <div className="px-3 text-center">

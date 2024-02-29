@@ -1,5 +1,6 @@
 import { cometAbi } from "../abi/cometAbi";
 import { fromBigInt } from "../utils/bn";
+import { getPriceFeedKind } from "../utils/markets";
 
 export class PositionsService {
 
@@ -58,7 +59,7 @@ export class PositionsService {
         return fromBigInt(balance, decimals)
     }
 
-    async collateralBalancesOf({ account, tokens }) {
+    async collateralBalancesOf({ account, chainId, market, tokens }) {
         const contracts = tokens.map(({ token }) => { 
             return {
                 ...this.contract,
@@ -69,8 +70,9 @@ export class PositionsService {
         const balances = await this.publicClient.multicall({ contracts, allowFailure: false })
         let result = {}
         for (let index = 0; index < tokens.length; index++) {
-            const { token, priceFeed } = tokens[index]
+            const { token, priceFeed: address } = tokens[index]
             const balance = fromBigInt(balances[index], token.decimals)
+            const priceFeed = { address, kind: getPriceFeedKind(market, chainId) } 
             result = { ...result,  [token.address]: { token, balance, priceFeed } }
         }
         console.log(

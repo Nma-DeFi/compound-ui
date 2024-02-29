@@ -10,7 +10,7 @@ export const ActionLabels = {
         content : 'Deposit',
     },
     [ActionType.WithdrawBaseToken] : {
-        header : 'Withdraw',
+        header : 'Withdrawal',
         content : 'Withdrawal',
     },
     [ActionType.WithdrawCollateral] : {

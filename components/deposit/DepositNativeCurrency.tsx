@@ -12,13 +12,13 @@ import * as ChainUtils from '../../utils/chains'
 import { AMOUNT_DP } from '../Amount'
 import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
-import PriceOld from '../PriceOld'
 import { SmallSpinner } from '../Spinner'
 import ActionResult from '../action-result/ActionResult'
 import TokenIcon from '../TokenIcon'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
 import AsyncAmount from '../AmountAsync'
 import { ActionInfo, DepositParam } from '../../types'
+import PriceAsync from '../PriceAsync'
 
 const Mode = {
   NotConnected: 0,
@@ -32,7 +32,7 @@ const Mode = {
 export const DEPOSIT_NATIVE_CURRENCY_MODAL = 'deposit-native-modal'
 export const DEPOSIT_NATIVE_CURRENCY_TOAST = 'deposit-native-toast'
 
-export default function DepositNativeCurrency({ comet, depositType }  : DepositParam) {
+export default function DepositNativeCurrency({ comet, token, depositType }  : DepositParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const publicClient = usePublicClient({ chainId })
@@ -167,7 +167,7 @@ export default function DepositNativeCurrency({ comet, depositType }  : DepositP
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                          <PriceOld asset={nativeCurrency} amount={amount} />
+                        <PriceAsync comet={comet} priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

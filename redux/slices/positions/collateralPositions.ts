@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { Address } from 'viem';
 import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
-import { Token } from '../../../types';
+import { PriceFeed, Token } from '../../../types';
 import BigNumber from 'bignumber.js';
 import { ThunkApiFields } from '../../types';
 import { MarketDataService } from '../../../services/market-data-service';
@@ -11,7 +11,7 @@ import { PositionsService } from '../../../services/positions-service';
 export type CollateralBalances = Record<Address, {
     token: Token,
     balance: BigNumber,
-    priceFeed: Address
+    priceFeed: PriceFeed
 }>
 
 export type CollateralPositionsData = Record<Address, CollateralBalances>
@@ -63,7 +63,7 @@ export const collateralPositionsInit = createAsyncThunk<any, void, ThunkApiField
             const comet = MarketSelector.cometProxy(market)
             const tokens = MarketSelector.collateralTokens(market)
             const positionsService = new PositionsService({comet, publicClient })
-            const collateralBalances = await positionsService.collateralBalancesOf({ account, tokens })
+            const collateralBalances = await positionsService.collateralBalancesOf({ account, chainId, market, tokens })
             positions = { ...positions, [comet]: collateralBalances }  
         }
         console.log(Date.now(), 'collateralPositions', chainId, positions)

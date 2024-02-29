@@ -15,12 +15,12 @@ import * as ChainUtils from '../../utils/chains';
 import { AMOUNT_DP } from '../Amount';
 import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
-import PriceOld from '../PriceOld';
 import { SmallSpinner } from '../Spinner';
 import ActionResult from '../action-result/ActionResult';
 import { WithdrawParam, ActionType, ActionInfo } from '../../types';
 import AsyncAmount from '../AmountAsync';
 import { usePositionsService } from '../../hooks/usePositionsService';
+import PriceAsync from '../PriceAsync';
 
 const Mode = {
   NotConnected: 0,
@@ -224,7 +224,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)}
                         />
                         <div className="small text-body-tertiary">
-                          <PriceOld asset={nativeCurrency} amount={amount} />
+                          <PriceAsync comet={comet} priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

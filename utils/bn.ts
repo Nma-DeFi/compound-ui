@@ -1,26 +1,32 @@
-import BigNumber from "bignumber.js";
-import { formatUnits, parseUnits } from "viem";
+import BigNumber from "bignumber.js"
+import { formatUnits, parseUnits } from "viem"
 
-export const Zero = bn(0);
+export const Zero = bn(0)
 
-export const DecimalPrecision = 2;
+export const DEFAULT_DP = 2
+export const DEFAULT_RM = BigNumber.ROUND_HALF_UP
 
-export function bn(value) {
-    return new BigNumber(value);
+export function bn(value: BigNumber.Value) {
+    return new BigNumber(value)
 }
 
-export function bnf(value, dp = DecimalPrecision, trimZeros = true) {
+export function bnf(
+        value: BigNumber.Value, 
+        dp: number = DEFAULT_DP, 
+        trimZeros: boolean = true, 
+        rm: BigNumber.RoundingMode = DEFAULT_RM
+    ) {
 
     let result: string | BigNumber = bn(value ?? 0)
 
     if (result.abs().gte(1e9)) {
-        result = `${result.div(1e9).toFixed(dp)}B`
+        result = `${result.div(1e9).toFixed(dp, rm)}B`
     } else if (result.abs().gte(1e6)) {
-        result = `${result.div(1e6).toFixed(dp)}M`
+        result = `${result.div(1e6).toFixed(dp, rm)}M`
     } else if (result.abs().gte(1e3)) {
-        result = `${result.div(1e3).toFixed(dp)}K`
+        result = `${result.div(1e3).toFixed(dp, rm)}K`
     } else {
-        result = result.toFixed(dp)
+        result = result.toFixed(dp, rm)
     }
 
     if (trimZeros && result.includes('.')) {

@@ -5,37 +5,55 @@ import { baseTokePriceFeed, cometProxy } from "../selectors/market-selector"
 import Amount from "./Amount"
 import { NoData } from "./Layout"
 import PriceAsync from "./PriceAsync"
-
-const AMOUNT_DP = 2
+import { PriceFeed } from "../types"
+import { useCurrentChain } from "../hooks/useCurrentChain"
+import { useEffect, useState } from "react"
+import { getPriceFeedKind } from "../utils/markets"
 
 export function SupplyBalance({ market, isLoading, isSuccess, supplyBalance }) {
 
     const { isConnected } = useCurrentAccount()
     
     return isConnected 
-        ? <SupplyBalanceAmount {...{ isLoading, isSuccess, amount: supplyBalance, market }} /> 
+        ? <SupplyBalanceAmount {...{ market, isLoading, isSuccess, supplyBalance }} /> 
         : <NoSupplyBalance />
 }
 
-const SupplyBalanceAmount = ({ isLoading, isSuccess, amount, market }) => (
-    <>
-        { isLoading ? (
-            <>
-                <div className="mb-1"><div className="placeholder bg-secondary-subtle col-5"></div></div>
-                <div className="placeholder placeholder-sm bg-secondary-subtle col-5"></div>
-            </>
-        ) : isSuccess ? (
-            <>
-                <div className="mb-1"><Amount value={amount} config={{ dp: AMOUNT_DP, trimZeros: false}} /></div>
-                <small className="text-body-secondary">
-                    <PriceAsync comet={cometProxy(market)} priceFeed={baseTokePriceFeed(market)} amount={amount} />
-                </small>
-            </>
-        ) : (
-            <NoSupplyBalance />
-        )}
-    </>
-)
+export function SupplyBalanceAmount({ market, isLoading, isSuccess, supplyBalance }) { 
+
+    const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
+    const { currentChainId: chainId } = useCurrentChain()
+
+    useEffect(() => {
+        if (market) {
+            const address = baseTokePriceFeed(market)
+            const kind = getPriceFeedKind(market, chainId)
+            setPriceFeed({address, kind})
+        } else {
+            setPriceFeed(null)
+        }
+    }, [chainId, market])
+
+    return (
+        <>
+            { isLoading ? (
+                <>
+                    <div className="mb-1"><div className="placeholder bg-secondary-subtle col-5"></div></div>
+                    <div className="placeholder placeholder-sm bg-secondary-subtle col-5"></div>
+                </>
+            ) : isSuccess ? (
+                <>
+                    <div className="mb-1"><Amount value={supplyBalance} /></div>
+                    <small className="text-body-secondary">
+                        <PriceAsync comet={cometProxy(market)} priceFeed={priceFeed} amount={supplyBalance} placeHolderCfg={{ col: 5 }} />
+                    </small>
+                </>
+            ) : (
+                <NoSupplyBalance />
+            )}
+        </>
+    )
+}
 
 const NoSupplyBalance = () => (
     <>

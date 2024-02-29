@@ -14,12 +14,20 @@ import { useComet } from '../hooks/useComet';
 import { usePriceService } from '../hooks/usePriceService';
 import { AsyncBigNumber, AsyncStatus, IdleData, LoadingData } from '../utils/async';
 import { NoData } from './Layout';
+import { CollateralPositionsState } from '../redux/slices/positions/collateralPositions';
 
-export function UserAccount(supplyPositionsState : SupplyPositionsState) {
+type PositionsState = { 
+    supplyPositions: SupplyPositionsState, 
+    collateralPositions: CollateralPositionsState 
+}
 
-    const { isSuccess: isSupplyPositions, data: supplyPositions } = supplyPositionsState
+export function UserAccount(positionsState : PositionsState) {
+
+    const { isSuccess: isSupplyPositions, data: supplyPositions } = positionsState.supplyPositions
+    const { isSuccess: isCollateralPositions, data: collateralPositions } = positionsState.collateralPositions
     
     const [ farming, setFarming ] = useState<AsyncBigNumber>(IdleData)
+    const [ collateral, setCollateral ] = useState<AsyncBigNumber>(IdleData)
 
     const { isConnected } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
@@ -48,13 +56,38 @@ export function UserAccount(supplyPositionsState : SupplyPositionsState) {
         }
     }, [isSupplyPositions, priceService])
 
+    useEffect(() => {
+        if (isCollateralPositions && priceService) {
+            setCollateral(LoadingData)
+            const positions = Object.values(collateralPositions).flatMap(c => Object.values(c))
+            const pricesPromise = positions.map(({ priceFeed }) => priceService.getPriceFromFeed(priceFeed))
+            Promise.all(pricesPromise).then(prices => {
+                let collateral: BigNumber = Zero
+                for (let index = 0; index < prices.length; index++) {
+                    const price = prices[index]
+                    const balance = positions[index].balance
+                    collateral = collateral.plus(balance.times(price))
+                }   
+                setCollateral({...AsyncStatus.Success, data: collateral})
+            })
+        } else {
+            setCollateral(IdleData)
+        }
+    }, [isCollateralPositions, priceService])
+
     return isConnected ? (
         <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4 mt-4 mt-xl-0">
             <h4 className={css['title']}>Your account</h4>
             <div className="d-flex justify-content-around justify-content-xl-between mb-3 small">
                 <div>
                     <div className="fw-semibold mb-1">Collateral</div> 
-                    <div className="text-body-secondary">—</div>
+                    { (collateral.isIdle || collateral.isLoading) ? (
+                        <div className="placeholder bg-secondary-subtle col-10"></div>
+                    ) : collateral.isSuccess ? (
+                        <div className="text-body-secondary"><Price value={collateral.data} /></div>
+                    ) : (
+                        <div className="text-body-secondary">{NoData}</div>
+                    )}
                 </div>
                 <div>
                     <div className="fw-semibold mb-1">Borrowing</div> 
@@ -62,7 +95,7 @@ export function UserAccount(supplyPositionsState : SupplyPositionsState) {
                 </div>
             </div>
             <div className="d-flex justify-content-around justify-content-xl-between mb-2 small">
-                <div className="">
+                <div>
                     <div className="fw-semibold mb-1">Farming</div> 
                     { (farming.isIdle || farming.isLoading) ? (
                         <div className="placeholder bg-secondary-subtle col-10"></div>
@@ -81,5 +114,7 @@ export function UserAccount(supplyPositionsState : SupplyPositionsState) {
     ) : ''
 }
 
-const mapStateToProps = (state: RootState) => state.supplyPositions
+const mapStateToProps = ({ supplyPositions, collateralPositions } : RootState) => { 
+    return { supplyPositions, collateralPositions }
+}
 export default connect(mapStateToProps)(UserAccount)

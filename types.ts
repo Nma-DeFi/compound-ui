@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js"
-import { AbiItem, Address, Hash } from "viem"
+import { Address, Hash } from "viem"
 
 export type Asset = {
   name: string, 
@@ -9,11 +9,9 @@ export type Asset = {
 
 export type NativeCurrency = Asset
 
-export type Token = Asset & { address: Address }
-
-export type Contract = {
+export type Token = Asset & { 
   address: Address,
-  abi: AbiItem[]
+  priceFeed?: Address,
 }
 
 export enum ActionType {
@@ -41,6 +39,16 @@ export type WithdrawParam = {
 
 export type DepositParam = {
   comet: Address,
-  token?: Token,
+  token: Token,
   depositType: DepositType
+}
+
+export enum PriceFeedKind {
+  USD_PRICE,
+  ETH_PRICE,
+} 
+
+export type PriceFeed = { 
+  address: Address, 
+  kind: PriceFeedKind
 }

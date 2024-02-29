@@ -4,15 +4,16 @@ import { Address } from 'viem';
 import * as MarketSelector from '../../../selectors/market-selector';
 import { MarketDataService } from '../../../services/market-data-service';
 import { PositionsService } from '../../../services/positions-service';
-import { Token } from '../../../types';
+import { PriceFeed, Token } from '../../../types';
 import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { bnf } from '../../../utils/bn';
 import { ThunkApiFields } from '../../types';
+import { getPriceFeedKind } from '../../../utils/markets';
 
 export type SupplyBalance = {
   baseToken: Token,
   supplyBalance: BigNumber,
-  priceFeed: Address
+  priceFeed: PriceFeed
 }
 
 export type SupplyPositionsData = Record<Address, SupplyBalance>
@@ -63,7 +64,10 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
       for (const market of markets) {
           const comet = MarketSelector.cometProxy(market)
           const baseToken = MarketSelector.baseToken(market)
-          const priceFeed = MarketSelector.baseTokePriceFeed(market)
+          const priceFeed = {
+            address: MarketSelector.baseTokePriceFeed(market),
+            kind: getPriceFeedKind(market, chainId)
+          } 
           const positionsService = new PositionsService({comet, publicClient })
           const supplyBalance = await positionsService.supplyBalanceOf(address)
           positions = { ...positions, [comet]: { baseToken, supplyBalance, priceFeed } }  

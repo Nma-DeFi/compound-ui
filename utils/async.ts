@@ -8,6 +8,7 @@ export type AsyncStatusType = {
 }
 
 export type AsyncData<T> = { data: T } & AsyncStatusType
+export type AsyncNumber = AsyncData<number>
 export type AsyncBigNumber = AsyncData<BigNumber>
 export type AsyncBoolean = AsyncData<boolean>
 

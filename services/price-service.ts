@@ -2,6 +2,7 @@ import Compound from "@compound-finance/compound-js";
 import { Address, mainnet } from "wagmi";
 import { cometAbi } from "../abi/cometAbi";
 import { PublicClient } from "viem";
+import { PriceFeed, PriceFeedKind } from "../types";
 
 type CompoundSdk = { getPrice: (token: string) => Promise<number> }
 
@@ -11,47 +12,53 @@ export class PriceService {
     compoundSdk: CompoundSdk
     cometContract
 
-    constructor( args? : { publicClient?: PublicClient, comet?: Address}) {
+    constructor( args? : { publicClient: PublicClient, comet: Address}) {
         const [ rpc ] = mainnet.rpcUrls.default.http
         this.compoundSdk = new (Compound as any)(rpc)
-        if (args?.publicClient && args?.comet) {
+        if (args) {
             this.publicClient = args.publicClient
             this.cometContract = { address: args.comet, abi: cometAbi }
         }
     }
 
     async getPriceFromSymbol(symbol: string) {
-        const SYMBOL_MAP = { 'WETH': 'ETH' }
-        const mappedSymbol = SYMBOL_MAP[symbol] || symbol
-        const price = await this.compoundSdk.getPrice(mappedSymbol)
+        const price = await this.compoundSdk.getPrice(symbol)
         console.log(
             'PriceService.getPriceFromSymbol',
-            'token', mappedSymbol,
+            'token', symbol,
             'price', price
         )
         return price
     }
 
-    async getPriceFromFeed(feed: Address) {
+    async getPriceFromFeed({ address, kind } : PriceFeed) {
 
-        const [ price, scale ] = await this.publicClient.multicall({
-            contracts: [
-                {
-                    ...this.cometContract,
-                    functionName: 'getPrice',
-                    args: [ feed ],
-                },
-                {
-                    ...this.cometContract,
-                    functionName: 'priceScale',
-                }
-            ],
-            allowFailure: false,
-        })
+        let promises: Promise<any>[] = [ 
+            this.publicClient.multicall({
+                contracts: [
+                    {
+                        ...this.cometContract,
+                        functionName: 'getPrice',
+                        args: [ address ],
+                    },
+                    {
+                        ...this.cometContract,
+                        functionName: 'priceScale',
+                    }
+                ],
+                allowFailure: false,
+            }) 
+        ]
 
-        console.log('getPriceFromFeed', feed, price, scale)
+        if (kind === PriceFeedKind.ETH_PRICE) {
+            promises = [...promises, this.getPriceFromSymbol('ETH')]
+        }
 
-        return Number(price) / Number(scale)
+        const [ feedPrice, feedScale, ethPrice ] = (await Promise.all(promises)).flat()
+
+        const price = Number(feedPrice) / Number(feedScale)
+
+        return (kind === PriceFeedKind.ETH_PRICE) ? price * ethPrice : price
     }
 
 }

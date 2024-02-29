@@ -11,7 +11,7 @@ export type NativeCurrency = Asset
 
 export type Token = Asset & { 
   address: Address,
-  priceFeed?: Address,
+  priceFeed?: PriceFeed,
 }
 
 export enum ActionType {

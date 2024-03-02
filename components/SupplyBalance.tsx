@@ -64,10 +64,10 @@ const NoSupplyBalance = () => (
 )
 
 const mapStateToProps = (state: RootState, { market }) => {
-    const { isLoading, isSuccess, data: positions } = state.supplyPositions
+    const { isIdle, isLoading, isSuccess, data: positions } = state.supplyPositions
     const comet = cometProxy(market) 
     const supplyBalance = positions?.[comet].supplyBalance
-    return { isLoading, isSuccess, supplyBalance }
+    return { isIdle, isLoading, isSuccess, supplyBalance }
 }
 export default connect(mapStateToProps)(SupplyBalance)
 

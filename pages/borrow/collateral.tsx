@@ -25,7 +25,6 @@ import { usePriceService } from '../../hooks/usePriceService';
 import { usePublicClient } from 'wagmi';
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async';
 import PriceAsync from '../../components/PriceAsync';
-import { useQuery } from '@tanstack/react-query';
 
 
 export default function Collateral() {

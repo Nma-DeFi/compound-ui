@@ -4,7 +4,10 @@ import { formatUnits, parseUnits } from "viem"
 export const Zero = bn(0)
 
 export const DEFAULT_DP = 2
+export const DEFAULT_TRIM = true
 export const DEFAULT_RM = BigNumber.ROUND_HALF_UP
+
+type DecimalsTypes = string | bigint | number
 
 export function bn(value: BigNumber.Value) {
     return new BigNumber(value)
@@ -13,7 +16,7 @@ export function bn(value: BigNumber.Value) {
 export function bnf(
         value: BigNumber.Value, 
         dp: number = DEFAULT_DP, 
-        trimZeros: boolean = true, 
+        trimZeros: boolean = DEFAULT_TRIM, 
         rm: BigNumber.RoundingMode = DEFAULT_RM
     ) {
 
@@ -37,13 +40,13 @@ export function bnf(
     return result
 }
 
-export function fromBigInt(bi: bigint, decimals: string | bigint | number = 18): BigNumber {
+export function fromBigInt(bi: bigint, decimals: DecimalsTypes = 18): BigNumber {
     const _decimals = Number(decimals)
     const formatted = formatUnits(bi, _decimals)
     return bn(formatted)
 }
 
-export function toBigInt(bn: BigNumber, decimals: string | bigint | number = 18): bigint {
+export function toBigInt(bn: BigNumber, decimals: DecimalsTypes = 18): bigint {
     const _decimals = Number(decimals)
     return parseUnits(bn.toFixed(), _decimals)
 }

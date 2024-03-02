@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import BigNumber from 'bignumber.js';
 import { Address } from 'viem';
 import * as MarketSelector from '../../../selectors/market-selector';
@@ -8,7 +8,7 @@ import { PriceFeed, Token } from '../../../types';
 import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { bnf } from '../../../utils/bn';
 import { ThunkApiFields } from '../../types';
-import { getPriceFeedKind } from '../../../utils/markets';
+import * as MarketUtils from '../../../utils/markets';
 
 export type SupplyBalance = {
   baseToken: Token,
@@ -26,22 +26,22 @@ export const supplyPositionsSlice = createSlice({
   name: 'supplyPositions',
   initialState,
   reducers: {
-    supplyPositionsReset: (state) => {
+    supplyPositionsReset: (state: SupplyPositionsState) => {
       state.data = undefined
       Object.assign(state, AsyncStatus.Idle)
     }
   },
   extraReducers(builder) {
       builder
-        .addCase(supplyPositionsInit.pending, (state) => {
+        .addCase(supplyPositionsInit.pending, (state: SupplyPositionsState) => {
           state.data = undefined
           Object.assign(state, AsyncStatus.Loading)
         })
-        .addCase(supplyPositionsInit.fulfilled, (state, action) => {
+        .addCase(supplyPositionsInit.fulfilled, (state: SupplyPositionsState, action: PayloadAction<SupplyPositionsData>) => {
           state.data = action.payload
           Object.assign(state, AsyncStatus.Success)
         })
-        .addCase(supplyPositionsInit.rejected, (state, action) => {
+        .addCase(supplyPositionsInit.rejected, (state: SupplyPositionsState, action: PayloadAction<unknown>) => {
           console.error(action)
           state.data = undefined
           Object.assign(state, AsyncStatus.Error)
@@ -66,7 +66,7 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
           const baseToken = MarketSelector.baseToken(market)
           const priceFeed = {
             address: MarketSelector.baseTokePriceFeed(market),
-            kind: getPriceFeedKind(market, chainId)
+            kind: MarketUtils.getPriceFeedKind(market, chainId)
           } 
           const positionsService = new PositionsService({comet, publicClient })
           const supplyBalance = await positionsService.supplyBalanceOf(address)

@@ -1,47 +1,23 @@
-import { useEffect, useState } from "react";
-import { NoData } from "./Layout";
-import { useCurrentChain } from "../hooks/useCurrentChain";
-import { Address, usePublicClient } from "wagmi";
-import { AsyncNumber, IdleData, loadAsyncData } from "../utils/async";
-import { usePriceService } from "../hooks/usePriceService";
-import Price from "./Price";
-import PlaceHolder, { PlaceHolderParam } from "./PlaceHolder";
-import BigNumber from "bignumber.js";
-import { Zero } from "../utils/bn";
-import { PriceFeed } from "../types";
+import { NoData } from "./Layout"
+import { AsyncBigNumber } from "../utils/async"
+import PlaceHolder, { PlaceHolderParam } from "./PlaceHolder"
+import Price from "./Price"
 
 type PriceAsyncParam = {
-  comet: Address,
-  priceFeed: PriceFeed,
-  amount: BigNumber
-  placeHolderCfg?: PlaceHolderParam
+    asyncPrice: AsyncBigNumber,
+    placeHolderCfg?: PlaceHolderParam,
 }
 
-export default function PriceAsync({ comet, priceFeed, amount, placeHolderCfg } : PriceAsyncParam) {
-    
-    const [ asyncPrice, setAsyncPrice ] = useState<AsyncNumber>(IdleData)
+export default function PriceAsync({ asyncPrice, placeHolderCfg } : PriceAsyncParam) {
+
     const { isIdle, isLoading, isSuccess, data: price } = asyncPrice
-
-    const { currentChainId: chainId } = useCurrentChain()
-    const publicClient = usePublicClient({ chainId })
-
-    const priceService = usePriceService({ publicClient, comet })
-
-    useEffect(() => {
-        if (priceService && priceFeed) {
-            const promise = priceService.getPriceFromFeed(priceFeed)
-            loadAsyncData(promise, setAsyncPrice)
-        } else {
-            setAsyncPrice(IdleData)
-        }
-    }, [priceService, priceFeed])
-
+    
     return (
         <>
-            { (isIdle || isLoading) ? (
+            { isIdle || isLoading ? (
               <PlaceHolder {...placeHolderCfg}/>
             ) : isSuccess ? (
-              <Price value={(amount ?? Zero).times(price)} />
+              <Price value={price} />
             ) : (
               <>{NoData}</>
             )}

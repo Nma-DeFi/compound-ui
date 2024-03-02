@@ -4,22 +4,23 @@ import { RootState } from "../redux/types"
 import { baseTokePriceFeed, cometProxy } from "../selectors/market-selector"
 import Amount from "./Amount"
 import { NoData } from "./Layout"
-import PriceAsync from "./PriceAsync"
+import PriceFromFeed from "./PriceFromFeed"
 import { PriceFeed } from "../types"
 import { useCurrentChain } from "../hooks/useCurrentChain"
 import { useEffect, useState } from "react"
 import { getPriceFeedKind } from "../utils/markets"
+import PlaceHolder, { PlaceHolderSize } from "./PlaceHolder"
 
-export function SupplyBalance({ market, isLoading, isSuccess, supplyBalance }) {
+export function SupplyBalance({ market, isIdle, isLoading, isSuccess, supplyBalance }) {
 
     const { isConnected } = useCurrentAccount()
     
     return isConnected 
-        ? <SupplyBalanceAmount {...{ market, isLoading, isSuccess, supplyBalance }} /> 
+        ? <SupplyBalanceAmount {...{ market, isIdle, isLoading, isSuccess, supplyBalance }} /> 
         : <NoSupplyBalance />
 }
 
-export function SupplyBalanceAmount({ market, isLoading, isSuccess, supplyBalance }) { 
+export function SupplyBalanceAmount({ market, isIdle, isLoading, isSuccess, supplyBalance }) { 
 
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
     const { currentChainId: chainId } = useCurrentChain()
@@ -36,16 +37,16 @@ export function SupplyBalanceAmount({ market, isLoading, isSuccess, supplyBalanc
 
     return (
         <>
-            { isLoading ? (
+            { isIdle || isLoading ? (
                 <>
-                    <div className="mb-1"><div className="placeholder bg-secondary-subtle col-5"></div></div>
-                    <div className="placeholder placeholder-sm bg-secondary-subtle col-5"></div>
+                    <div className="mb-1"><PlaceHolder size={PlaceHolderSize.DEFAULT} col={5} /></div>
+                    <PlaceHolder col={4} />
                 </>
             ) : isSuccess ? (
                 <>
                     <div className="mb-1"><Amount value={supplyBalance} /></div>
                     <small className="text-body-secondary">
-                        <PriceAsync comet={cometProxy(market)} priceFeed={priceFeed} amount={supplyBalance} placeHolderCfg={{ col: 5 }} />
+                        <PriceFromFeed comet={cometProxy(market)} priceFeed={priceFeed} amount={supplyBalance} placeHolderCfg={{ col: 4 }} />
                     </small>
                 </>
             ) : (

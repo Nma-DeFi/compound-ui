@@ -20,7 +20,7 @@ import ActionResult from '../action-result/ActionResult';
 import { WithdrawParam, ActionType, ActionInfo } from '../../types';
 import AsyncAmount from '../AmountAsync';
 import { usePositionsService } from '../../hooks/usePositionsService';
-import PriceAsync from '../PriceAsync';
+import PriceFromFeed from '../PriceFromFeed';
 
 const Mode = {
   NotConnected: 0,
@@ -224,7 +224,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)}
                         />
                         <div className="small text-body-tertiary">
-                          <PriceAsync comet={comet} priceFeed={token?.priceFeed} amount={amount} />
+                          <PriceFromFeed comet={comet} priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

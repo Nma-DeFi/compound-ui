@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { useCurrentAccount } from '../hooks/useCurrentAccount';
 import { SupplyPositionsState } from '../redux/slices/positions/supplyPositions';
 import { RootState } from '../redux/types';
-import { PriceService } from '../services/price-service';
 import css from '../styles/components/UserAccount.module.scss';
 import { Zero } from '../utils/bn';
 import Price from './Price';
@@ -12,9 +11,9 @@ import { usePublicClient } from 'wagmi';
 import { useCurrentChain } from '../hooks/useCurrentChain';
 import { useComet } from '../hooks/useComet';
 import { usePriceService } from '../hooks/usePriceService';
-import { AsyncBigNumber, AsyncStatus, IdleData, LoadingData } from '../utils/async';
+import { AsyncBigNumber, AsyncStatus, IdleData, LoadingData, loadAsyncData } from '../utils/async';
 import { NoData } from './Layout';
-import { CollateralPositionsState } from '../redux/slices/positions/collateralPositions';
+import { CollateralPositionsState, getTotalCollateralUsdBalance } from '../redux/slices/positions/collateralPositions';
 
 type PositionsState = { 
     supplyPositions: SupplyPositionsState, 
@@ -58,18 +57,8 @@ export function UserAccount(positionsState : PositionsState) {
 
     useEffect(() => {
         if (isCollateralPositions && priceService) {
-            setCollateral(LoadingData)
-            const positions = Object.values(collateralPositions).flatMap(c => Object.values(c))
-            const pricesPromise = positions.map(({ priceFeed }) => priceService.getPriceFromFeed(priceFeed))
-            Promise.all(pricesPromise).then(prices => {
-                let collateral: BigNumber = Zero
-                for (let index = 0; index < prices.length; index++) {
-                    const price = prices[index]
-                    const balance = positions[index].balance
-                    collateral = collateral.plus(balance.times(price))
-                }   
-                setCollateral({...AsyncStatus.Success, data: collateral})
-            })
+            const promise = getTotalCollateralUsdBalance({ collateralPositions, priceService })
+            loadAsyncData(promise, setCollateral)
         } else {
             setCollateral(IdleData)
         }

@@ -18,9 +18,14 @@ import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from '../../co
 import { useCollateralPositions } from '../../hooks/useCollateralPositions';
 import { useAppDispatch } from '../../redux/hooks';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
-import { collateralPositionsInit } from '../../redux/slices/positions/collateralPositions';
+import { collateralPositionsInit, getCollateralUsdBalanceByMarket } from '../../redux/slices/positions/collateralPositions';
 import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
+import { usePriceService } from '../../hooks/usePriceService';
+import { usePublicClient } from 'wagmi';
+import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async';
+import PriceAsync from '../../components/PriceAsync';
+import { useQuery } from '@tanstack/react-query';
 
 
 export default function Collateral() {
@@ -28,12 +33,21 @@ export default function Collateral() {
     const { isConnected } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
 
+    const publicClient = usePublicClient({ chainId })
+
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
     const [ marketIndex, setMarketIndex ] = useState<number>(0)
     const [ comet, setComet ] = useState<Address>()
     const [ token, setToken ] = useState<Token>()
+    const [ totalUsdBalance, setTotalUsdBalance ] = useState<AsyncBigNumber>(IdleData)
+
+    const { 
+        isIdle: isNoCollateralPositions, 
+        isSuccess: isCollateralPositions, 
+        data: collateralPositions 
+    } = useCollateralPositions()
     
-    const { isIdle: isNoCollateralPositions } = useCollateralPositions()
+    const priceService = usePriceService({ comet, publicClient})
 
     const { DepositCollateral, WithdrawCollateral } = ActionType
 
@@ -55,7 +69,19 @@ export default function Collateral() {
             const comet = cometProxy(market)
             setComet(comet)
         }
-    }, [chainId, isMarkets, marketIndex])
+    }, [chainId, markets, marketIndex])
+
+    useEffect(() => {
+        if (isConnected && isMarkets && isCollateralPositions && priceService) {
+            const marketId = cometProxy(markets[marketIndex])
+            const promise = getCollateralUsdBalanceByMarket({ 
+                collateralPositions, 
+                marketId, 
+                priceService 
+            })
+            loadAsyncData(promise, setTotalUsdBalance)
+        }
+    }, [chainId, markets, marketIndex, collateralPositions, priceService])
 
     function showModal(action: ActionType, market, collateral) {
         const priceFeed : PriceFeed = {
@@ -98,14 +124,22 @@ export default function Collateral() {
 
     return (
         <div className="col-12 col-xl-8 col-xxl-7 px-xl-5">
-            <DepositNativeCurrency comet={comet} token={token} depositType={DepositCollateral} />
-            <DepositErc20Token comet={comet} token={token} depositType={DepositCollateral} />
-            <WithdrawNativeCurrency comet={comet} token={token} withdrawType={WithdrawCollateral} />
-            <WithdrawErc20Token comet={comet} token={token} withdrawType={WithdrawCollateral} />
+            <DepositNativeCurrency {...{ comet, token, depositType: DepositCollateral }} />
+            <DepositErc20Token {...{ comet, token, depositType: DepositCollateral }} />
+            <WithdrawNativeCurrency {...{ comet, token, withdrawType: WithdrawCollateral }} />
+            <WithdrawErc20Token {...{ comet, token, withdrawType: WithdrawCollateral }} />
             <div className="row g-0 align-items-center bg-body shadow border rounded-4 p-4 mb-5">
                 <div className="col-9 col-sm-4">
                     <h2 className="mb-2">Collateral</h2>
-                    <div>ETH <span className="text-body-secondary">Market</span> : <span className="text-body-tertiary">$3.40K</span></div>
+                    { isMarkets && 
+                        <>
+                            <span className="fs-5 text-body-secondary">{getBaseTokenOrNativeCurrency(markets[marketIndex], chainId).symbol}</span>
+                            <span className="text-body-secondary ps-2">Market</span> 
+                            {isConnected && 
+                                <span className="text-body-tertiary ps-2">: <PriceAsync asyncPrice={totalUsdBalance} placeHolderCfg={{ col: 2 }} /></span>
+                            }
+                        </>
+                    }
                 </div>
                 <div className="col-12 col-sm-7 order-3 order-sm-2">
                     <div className="d-flex justify-content-around justify-content-sm-end pt-5 pt-sm-0">

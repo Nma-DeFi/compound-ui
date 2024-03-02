@@ -16,7 +16,7 @@ import { WithdrawParam, ActionType, ActionInfo } from '../../types';
 import AsyncAmount from '../AmountAsync';
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async';
 import { usePositionsService } from '../../hooks/usePositionsService';
-import PriceAsync from '../PriceAsync';
+import PriceFromFeed from '../PriceFromFeed';
 
 const Mode = {
   NotConnected: 0,
@@ -171,7 +171,7 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                          <PriceAsync comet={comet} priceFeed={token?.priceFeed} amount={amount} />
+                          <PriceFromFeed comet={comet} priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

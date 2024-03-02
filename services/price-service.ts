@@ -22,17 +22,10 @@ export class PriceService {
     }
 
     async getPriceFromSymbol(symbol: string) {
-        const price = await this.compoundSdk.getPrice(symbol)
-        console.log(
-            'PriceService.getPriceFromSymbol',
-            'token', symbol,
-            'price', price
-        )
-        return price
+        return await this.compoundSdk.getPrice(symbol)
     }
 
     async getPriceFromFeed({ address, kind } : PriceFeed) {
-
         let promises: Promise<any>[] = [ 
             this.publicClient.multicall({
                 contracts: [

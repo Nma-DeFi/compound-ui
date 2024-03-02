@@ -144,11 +144,11 @@ export default function Farm() {
                   </div>
                   { isConnected &&
                     <div className="col text-center">
-                      <SupplyBalance {...market} />
+                      <SupplyBalance market={market} />
                     </div>
                   }
                   <div className="col text-center">
-                    <SupplyApr {...market} />
+                    <SupplyApr market={market} />
                   </div>
                   <div className="col p-0">
                       <div className="d-flex flex-column">

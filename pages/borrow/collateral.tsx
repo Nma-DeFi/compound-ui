@@ -45,10 +45,10 @@ export default function Collateral() {
         isSuccess: isCollateralPositions, 
         data: collateralPositions 
     } = useCollateralPositions()
-    
-    const priceService = usePriceService({ comet, publicClient})
 
     const { DepositCollateral, WithdrawCollateral } = ActionType
+
+    const priceService = usePriceService({ comet, publicClient})
 
     const dispatch = useAppDispatch()
 

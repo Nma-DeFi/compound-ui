@@ -149,8 +149,8 @@ export default function Collateral() {
                             <span className="text-body-secondary ps-2">Market</span> 
                             {isConnected && 
                                 <span className="text-body-tertiary ps-2">: <PriceAsync asyncPrice={{ 
-                                    isIdle: isPendingUsdCollateral,
-                                    isLoading: isLoadingUsdCollateral, 
+                                    isIdle: undefined,
+                                    isLoading: isPendingUsdCollateral || isLoadingUsdCollateral, 
                                     isSuccess: isSuccessUsdCollateral, 
                                     isError: isErrorUsdCollateral, 
                                     data: usdCollateral, 

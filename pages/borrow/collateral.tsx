@@ -23,37 +23,62 @@ import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
 import { usePriceService } from '../../hooks/usePriceService';
 import { usePublicClient } from 'wagmi';
-import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async';
 import PriceAsync from '../../components/PriceAsync';
+import { useQuery } from '@tanstack/react-query';
 
 
-export default function Collateral() {
+export function useTotalUsdCollateralForMarket({ asyncCollateralPositions, asyncMarkets, marketIndex }) {
 
+    const { isSuccess: isCollateralPositions, data: collateralPositions } = asyncCollateralPositions
+    const { isSuccess: isMarkets, data: markets } = asyncMarkets
+    
     const { isConnected } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
 
     const publicClient = usePublicClient({ chainId })
 
-    const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
-    const [ marketIndex, setMarketIndex ] = useState<number>(0)
-    const [ comet, setComet ] = useState<Address>()
-    const [ token, setToken ] = useState<Token>()
-    const [ totalUsdBalance, setTotalUsdBalance ] = useState<AsyncBigNumber>(IdleData)
+    const marketId = isMarkets ? cometProxy(markets[marketIndex]) : undefined
 
-    const { 
-        isIdle: isNoCollateralPositions, 
-        isSuccess: isCollateralPositions, 
-        data: collateralPositions 
-    } = useCollateralPositions()
+    const priceService = usePriceService({ comet: marketId, publicClient})
+
+    return useQuery({
+        queryKey: ['TotalUsdCollateralForMarket', chainId, marketId, collateralPositions],
+        queryFn: () => getCollateralUsdBalanceByMarket({ collateralPositions, marketId, priceService }),
+        enabled: !!(isConnected && isCollateralPositions && isMarkets && marketId && priceService),
+    })
+}
+
+export default function Collateral() {
 
     const { DepositCollateral, WithdrawCollateral } = ActionType
 
-    const priceService = usePriceService({ comet, publicClient})
+    const { isConnected } = useCurrentAccount()
+    const { currentChainId: chainId } = useCurrentChain()
+
+    const [ marketIndex, setMarketIndex ] = useState<number>(0)
+    const [ comet, setComet ] = useState<Address>()
+    const [ token, setToken ] = useState<Token>()
 
     const dispatch = useAppDispatch()
 
     const { openModal } = useBootstrap()
 
+    const asyncCollateralPositions = useCollateralPositions()
+
+    const asyncMarkets = useMarkets({ chainId })
+
+    const { isSuccess: isMarkets, data: markets } = asyncMarkets
+
+    const { isIdle: isNoCollateralPositions } = asyncCollateralPositions
+
+    const { 
+        isPending: isPendingUsdCollateral, 
+        isLoading: isLoadingUsdCollateral, 
+        isSuccess: isSuccessUsdCollateral, 
+        isError: isErrorUsdCollateral, 
+        data: usdCollateral, 
+    } = useTotalUsdCollateralForMarket({ asyncCollateralPositions, asyncMarkets, marketIndex })
+    
     useEffect(() => { 
         if (isConnected && isNoCollateralPositions) {
           dispatch(collateralPositionsInit())
@@ -69,18 +94,6 @@ export default function Collateral() {
             setComet(comet)
         }
     }, [chainId, markets, marketIndex])
-
-    useEffect(() => {
-        if (isConnected && isMarkets && isCollateralPositions && priceService) {
-            const marketId = cometProxy(markets[marketIndex])
-            const promise = getCollateralUsdBalanceByMarket({ 
-                collateralPositions, 
-                marketId, 
-                priceService 
-            })
-            loadAsyncData(promise, setTotalUsdBalance)
-        }
-    }, [chainId, markets, marketIndex, collateralPositions, priceService])
 
     function showModal(action: ActionType, market, collateral) {
         const priceFeed : PriceFeed = {
@@ -135,7 +148,13 @@ export default function Collateral() {
                             <span className="fs-5 text-body-secondary">{getBaseTokenOrNativeCurrency(markets[marketIndex], chainId).symbol}</span>
                             <span className="text-body-secondary ps-2">Market</span> 
                             {isConnected && 
-                                <span className="text-body-tertiary ps-2">: <PriceAsync asyncPrice={totalUsdBalance} placeHolderCfg={{ col: 2 }} /></span>
+                                <span className="text-body-tertiary ps-2">: <PriceAsync asyncPrice={{ 
+                                    isIdle: isPendingUsdCollateral,
+                                    isLoading: isLoadingUsdCollateral, 
+                                    isSuccess: isSuccessUsdCollateral, 
+                                    isError: isErrorUsdCollateral, 
+                                    data: usdCollateral, 
+                                }} placeHolderCfg={{ col: 2 }} /></span>
                             }
                         </>
                     }

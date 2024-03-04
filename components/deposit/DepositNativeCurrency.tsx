@@ -178,7 +178,7 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
                               </div>
                           </button>
                           <div className="text-center text-body-secondary small">
-                            Wallet : <AsyncAmount {...asyncBalance} />
+                            Wallet : <span className="text-body-tertiary"><AsyncAmount {...asyncBalance} /></span>
                           </div>
                       </div>
                   </div>

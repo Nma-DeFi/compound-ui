@@ -10,11 +10,11 @@ type PriceAsyncParam = {
 
 export default function PriceAsync({ asyncPrice, placeHolderCfg } : PriceAsyncParam) {
 
-    const { isIdle, isLoading, isSuccess, data: price } = asyncPrice
+    const { isLoading, isSuccess, data: price } = asyncPrice
     
     return (
         <>
-            { isIdle || isLoading ? (
+            { isLoading ? (
               <PlaceHolder {...placeHolderCfg}/>
             ) : isSuccess ? (
               <Price value={price} />

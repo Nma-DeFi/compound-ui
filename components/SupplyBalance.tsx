@@ -11,16 +11,16 @@ import { useEffect, useState } from "react"
 import { getPriceFeedKind } from "../utils/markets"
 import PlaceHolder, { PlaceHolderSize } from "./PlaceHolder"
 
-export function SupplyBalance({ market, isIdle, isLoading, isSuccess, supplyBalance }) {
+export function SupplyBalance({ market, isLoading, isSuccess, supplyBalance }) {
 
     const { isConnected } = useCurrentAccount()
     
     return isConnected 
-        ? <SupplyBalanceAmount {...{ market, isIdle, isLoading, isSuccess, supplyBalance }} /> 
+        ? <SupplyBalanceAmount {...{ market, isLoading, isSuccess, supplyBalance }} /> 
         : <NoSupplyBalance />
 }
 
-export function SupplyBalanceAmount({ market, isIdle, isLoading, isSuccess, supplyBalance }) { 
+export function SupplyBalanceAmount({ market, isLoading, isSuccess, supplyBalance }) { 
 
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
     const { currentChainId: chainId } = useCurrentChain()
@@ -37,7 +37,7 @@ export function SupplyBalanceAmount({ market, isIdle, isLoading, isSuccess, supp
 
     return (
         <>
-            { isIdle || isLoading ? (
+            { isLoading ? (
                 <>
                     <div className="mb-1"><PlaceHolder size={PlaceHolderSize.DEFAULT} col={5} /></div>
                     <PlaceHolder col={4} />
@@ -64,10 +64,10 @@ const NoSupplyBalance = () => (
 )
 
 const mapStateToProps = (state: RootState, { market }) => {
-    const { isIdle, isLoading, isSuccess, data: positions } = state.supplyPositions
+    const { isLoading, isSuccess, data: positions } = state.supplyPositions
     const comet = cometProxy(market) 
     const supplyBalance = positions?.[comet].supplyBalance
-    return { isIdle, isLoading, isSuccess, supplyBalance }
+    return { isLoading, isSuccess, supplyBalance }
 }
 export default connect(mapStateToProps)(SupplyBalance)
 

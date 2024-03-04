@@ -13,16 +13,16 @@ import { useCurrentChain } from "../hooks/useCurrentChain"
 import PlaceHolder, { PlaceHolderSize } from "./PlaceHolder"
 
 
-export function CollateralBalance({ market, collateral, isIdle, isLoading, isSuccess, amount }) {
+export function CollateralBalance({ market, collateral, isLoading, isSuccess, amount }) {
 
     const { isConnected } = useCurrentAccount()
     
     return isConnected 
-        ? <CollateralAmount {...{ market, collateral, isIdle, isLoading, isSuccess, amount }} /> 
+        ? <CollateralAmount {...{ market, collateral, isLoading, isSuccess, amount }} /> 
         : <NoCollateralBalance />
 }
 
-function CollateralAmount({ market, collateral, isIdle, isLoading, isSuccess, amount }) { 
+function CollateralAmount({ market, collateral, isLoading, isSuccess, amount }) { 
 
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
     const { currentChainId: chainId } = useCurrentChain()
@@ -39,7 +39,7 @@ function CollateralAmount({ market, collateral, isIdle, isLoading, isSuccess, am
 
     return (
         <>
-            { isIdle || isLoading ? (
+            { isLoading ? (
                 <CollateralBalanceLayout>
                     <PlaceHolder size={PlaceHolderSize.DEFAULT} col={5} />
                     <div className={css['collateral-balance']}><PlaceHolder col={4} /></div>
@@ -73,10 +73,10 @@ const CollateralBalanceLayout = ({ children}) => (
 )
 
 const mapStateToProps = (state: RootState, { market, collateral }) => {
-    const { isIdle, isLoading, isSuccess, data: positions } = state.collateralPositions
+    const { isLoading, isSuccess, data: positions } = state.collateralPositions
     const comet = cometProxy(market) 
     const amount = positions?.[comet][collateral.token.address].balance
-    return { isIdle, isLoading, isSuccess, amount }
+    return { isLoading, isSuccess, amount }
 }
 export default connect(mapStateToProps)(CollateralBalance)
 

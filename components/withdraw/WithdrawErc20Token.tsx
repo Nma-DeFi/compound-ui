@@ -181,7 +181,9 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
                                   <span className="px-3">{token?.symbol}</span> 
                               </div>
                           </button>
-                          <div className="text-center text-body-secondary small">Balance : <AsyncAmount {...asyncBalance} /></div>
+                          <div className="text-center text-body-secondary small">
+                            Balance : <span className="text-body-tertiary"><AsyncAmount {...asyncBalance} /></span>
+                          </div>
                       </div>
                   </div>
                   <div className="row g-2">

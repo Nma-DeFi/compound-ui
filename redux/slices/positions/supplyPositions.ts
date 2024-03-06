@@ -6,9 +6,9 @@ import { MarketDataService } from '../../../services/market-data-service';
 import { PositionsService } from '../../../services/positions-service';
 import { PriceFeed, Token } from '../../../types';
 import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
-import { bnf } from '../../../utils/bn';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
+import { log } from '../helpers/supply';
 
 export type SupplyBalance = {
   baseToken: Token,
@@ -80,8 +80,3 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
 export const { supplyPositionsReset } = supplyPositionsSlice.actions
 
 export default supplyPositionsSlice.reducer
-
-function log(chainId: number, positions: SupplyPositionsData) {
-  const formatter = ({ baseToken, supplyBalance }) => `${baseToken.name} : ${bnf(supplyBalance)}`
-  console.log(Date.now(), 'supplyPositions', chainId, Object.values(positions).map(formatter))
-}

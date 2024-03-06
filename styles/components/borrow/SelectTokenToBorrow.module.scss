@@ -1,0 +1,12 @@
+.item-hover {
+    cursor: pointer;
+}
+
+.item-hover:hover {
+    //background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
+    background-color: rgba(var(--bs-secondary-rgb), 0.02) !important;
+}
+
+.collateral-list {
+    font-size: 90%;
+}

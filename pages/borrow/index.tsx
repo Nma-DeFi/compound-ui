@@ -1,13 +1,19 @@
 import Head from "next/head"
 import Link from "next/link"
 import { Path } from "../../components/Layout"
+import { useBootstrap } from "../../hooks/useBootstrap"
+import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
 
 export default function Borrow() {
+
+    const { openModal } = useBootstrap()
+
     return ( 
       <>
         <Head>
           <title>Borrow</title>
         </Head>
+        <SelectTokenToBorrow />
         <div className="col-12 col-xl-6 col-xxl-5 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
@@ -16,7 +22,7 @@ export default function Borrow() {
                     <h1 className="m-0">0</h1>
                     <small className="text-body-tertiary">$0.00</small>
                 </div>
-                <button type="button" className="btn btn-lg btn-light border border-light-subtle rounded-5">
+                <button type="button" className="btn btn-lg btn-light border border-light-subtle rounded-5" onClick={() => openModal(SELECT_TOKEN_TO_BORROW_MODAL)}>
                     <div className="d-flex align-items-center">
                         <img src="/images/tokens/USDC.svg" className="me-2 me-sm-3" alt="USDC" width="35" /> 
                         <span className="me-2 me-sm-3">USDC</span> 
@@ -39,7 +45,7 @@ export default function Borrow() {
           </div>
         </div>
         <div className="col-12 col-lg-3 col-xxl-2">
-          <div className="bg-body p-3 rounded border shadow">
+          {/*<div className="bg-body p-3 rounded border shadow">
             <h4 className="mb-4">Your positions</h4>
             <table className="table table-borderless align-middle">
                 <tbody>
@@ -101,7 +107,7 @@ export default function Borrow() {
           </div>
           <p className="h6 p-3 pt-4">
             Your collaterals : <span className="ps-2 text-body-secondary">$896 <i className="bi bi-box-arrow-up-right"></i></span>
-          </p>
+          </p>*/}
         </div>
       </>
     )

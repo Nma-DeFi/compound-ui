@@ -18,7 +18,8 @@ import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from '../../co
 import { useCollateralPositions } from '../../hooks/useCollateralPositions';
 import { useAppDispatch } from '../../redux/hooks';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
-import { collateralPositionsInit, getCollateralUsdBalanceByMarket } from '../../redux/slices/positions/collateralPositions';
+import { collateralPositionsInit } from '../../redux/slices/positions/collateralPositions';
+import { getCollateralUsdBalanceByMarket } from '../../redux/slices/helpers/collateral';
 import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
 import { usePriceService } from '../../hooks/usePriceService';

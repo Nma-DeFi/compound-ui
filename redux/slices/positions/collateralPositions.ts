@@ -7,8 +7,6 @@ import { ThunkApiFields } from '../../types';
 import { MarketDataService } from '../../../services/market-data-service';
 import * as MarketSelector from '../../../selectors/market-selector';
 import { PositionsService } from '../../../services/positions-service';
-import { PriceService } from '../../../services/price-service';
-import { Zero, bnf } from '../../../utils/bn';
 
 export type CollateralPositionsByMarket = Record<Address, {
     token: Token,
@@ -76,37 +74,3 @@ export const collateralPositionsInit = createAsyncThunk<any, void, ThunkApiField
 export const { collateralPositionsReset } = collateralPositionsSlice.actions
 
 export default collateralPositionsSlice.reducer
-
-export async function getCollateralUsdBalanceByMarket(
-        { collateralPositions, marketId, priceService } : 
-        { 
-            collateralPositions: CollateralPositionsData, 
-            marketId: Address, 
-            priceService: PriceService
-        }) 
-    : Promise<BigNumber> {
-    const positions = Object.values(collateralPositions[marketId])
-    // TODO Multicall
-    const promises = positions.map(({ priceFeed }) => priceService.getPriceFromFeed(priceFeed))
-    const prices = await Promise.all(promises)
-    let totalCollateralUsd: BigNumber = Zero
-    for (let index = 0; index < prices.length; index++) {
-        const price = prices[index]
-        const balance = positions[index].balance
-        totalCollateralUsd = totalCollateralUsd.plus(balance.times(price))
-    }   
-    return totalCollateralUsd
-}
-
-export async function getTotalCollateralUsdBalance(
-    { collateralPositions, priceService } : 
-    { 
-        collateralPositions: CollateralPositionsData, 
-        priceService: PriceService
-    }) 
-: Promise<BigNumber> {
-    const collateralsByMarketsParams = Object.keys(collateralPositions).map((marketId: Address) => ({ collateralPositions, marketId, priceService }))
-    const collateralsByMarketsPromises = collateralsByMarketsParams.map(params => getCollateralUsdBalanceByMarket(params))
-    const collateralsByMarketsArray = await Promise.all(collateralsByMarketsPromises)
-    return collateralsByMarketsArray.reduce((accumulator, currentValue) => accumulator.plus(currentValue), Zero)
-}

@@ -14,7 +14,7 @@ import { usePriceService } from '../hooks/usePriceService';
 import { AsyncBigNumber, AsyncStatus, IdleData, LoadingData, loadAsyncData } from '../utils/async';
 import { NoData } from './Layout';
 import { CollateralPositionsState } from '../redux/slices/positions/collateralPositions';
-import { getTotalCollateralUsdBalance } from '../redux/slices/helpers/collateral';
+import { getTotalCollateralUsdBalance } from '../redux/helpers/collateral';
 
 type PositionsState = { 
     supplyPositions: SupplyPositionsState, 

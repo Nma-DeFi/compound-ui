@@ -60,13 +60,12 @@ export class PositionsService {
     }
 
     async collateralBalancesOf({ account, chainId, market, tokens }) {
-        const contracts = tokens.map(({ token }) => { 
-            return {
+        const contracts = tokens.map(({ token }) => ({
                 ...this.contract,
                 functionName: 'collateralBalanceOf',
                 args: [ account, token.address ], 
-            }
-        })
+            })
+        )
         const balances = await this.publicClient.multicall({ contracts, allowFailure: false })
         let result = {}
         for (let index = 0; index < tokens.length; index++) {

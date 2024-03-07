@@ -1,7 +1,7 @@
-import { CollateralPositionsData } from '../positions/collateralPositions'
+import { CollateralPositionsData } from '../slices/positions/collateralPositions'
 import { Address } from 'viem'
-import { PriceService } from '../../../services/price-service'
-import { Zero } from '../../../utils/bn'
+import { PriceService } from '../../services/price-service'
+import { Zero } from '../../utils/bn'
 import BigNumber from 'bignumber.js'
 
 
@@ -29,7 +29,7 @@ export async function getTotalCollateralUsdBalance(
         priceService: PriceService;
     }): Promise<BigNumber> {
     const params = Object.keys(collateralPositions).map((marketId: Address) => ({ collateralPositions, marketId, priceService }));
-    const promises = params.map(params => getCollateralUsdBalanceByMarket(params));
+    const promises = params.map(param => getCollateralUsdBalanceByMarket(param));
     const collaterals = await Promise.all(promises);
     return collaterals.reduce((accumulator, currentValue) => accumulator.plus(currentValue), Zero);
 }

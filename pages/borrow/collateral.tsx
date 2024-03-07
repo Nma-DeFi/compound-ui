@@ -19,7 +19,7 @@ import { useCollateralPositions } from '../../hooks/useCollateralPositions';
 import { useAppDispatch } from '../../redux/hooks';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import { collateralPositionsInit } from '../../redux/slices/positions/collateralPositions';
-import { getCollateralUsdBalanceByMarket } from '../../redux/slices/helpers/collateral';
+import { getCollateralUsdBalanceByMarket } from '../../redux/helpers/collateral';
 import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
 import { usePriceService } from '../../hooks/usePriceService';
@@ -131,7 +131,7 @@ export default function Collateral() {
     }, [])
 
     function marketlinkCss(index: number) {
-        const linkCss = 'text-body d-flex align-items-center py-2 border-bottom border-5 border-primary'
+        const linkCss = 'text-body d-flex align-items-center py-2 border-bottom border-3 border-primary'
         return `${linkCss} ${index === marketIndex ? css['market-link-active'] : css['market-link']}`
     }
 

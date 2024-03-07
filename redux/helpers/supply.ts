@@ -1,5 +1,5 @@
-import { SupplyPositionsData } from '../positions/supplyPositions';
-import { bnf } from '../../../utils/bn';
+import { SupplyPositionsData } from '../slices/positions/supplyPositions';
+import { bnf } from '../../utils/bn';
 
 
 export function log(chainId: number, positions: SupplyPositionsData) {

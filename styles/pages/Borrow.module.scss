@@ -1,0 +1,23 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+#borrow-input {
+    font-size: $h1-font-size !important;
+    font-weight: $font-weight-medium !important;
+    line-height: 1.2 !important; 
+    //margin-bottom: 0.2rem !important;
+    all: inherit;
+    width: 100%;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+#borrow-input::-webkit-outer-spin-button,
+#borrow-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#borrow-input::placeholder {
+    color: $dark;
+}

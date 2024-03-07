@@ -480,6 +480,11 @@ export enum Account_OrderBy {
   RewardsClaimed = 'rewardsClaimed'
 }
 
+export enum Aggregation_Interval {
+  Day = 'day',
+  Hour = 'hour'
+}
+
 export type BaseToken = {
   __typename?: 'BaseToken';
   /** Block the base token was created */
@@ -8224,6 +8229,8 @@ export type _Block_ = {
   hash?: Maybe<Scalars['Bytes']['output']>;
   /** The block number */
   number: Scalars['Int']['output'];
+  /** The hash of the parent block */
+  parentHash?: Maybe<Scalars['Bytes']['output']>;
   /** Integer representation of the timestamp stored in blocks for the chain */
   timestamp?: Maybe<Scalars['Int']['output']>;
 };
@@ -8262,7 +8269,7 @@ export type MarketByIdQuery = { __typename?: 'Query', market?: { __typename?: 'M
 export type AllMarketsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null } }, collateralTokens: Array<{ __typename?: 'CollateralToken', borrowCollateralFactor: any, liquidateCollateralFactor: any, liquidationFactor: any, supplyCap: any, priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, decimals?: number | null, address: any } }> }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any } }> };
+export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null } }, collateralTokens: Array<{ __typename?: 'CollateralToken', borrowCollateralFactor: any, liquidateCollateralFactor: any, liquidationFactor: any, supplyCap: any, priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, decimals?: number | null, address: any } }> }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any, netBorrowApr: any, rewardBorrowApr: any, borrowApr: any } }> };
 
 export type MarketsByQueryVariables = Exact<{
   where?: InputMaybe<Market_Filter>;
@@ -8337,6 +8344,9 @@ export const AllMarketsDocument = gql`
       netSupplyApr
       rewardSupplyApr
       supplyApr
+      netBorrowApr
+      rewardBorrowApr
+      borrowApr
     }
   }
 }

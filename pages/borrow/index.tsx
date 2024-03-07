@@ -3,29 +3,53 @@ import Link from "next/link"
 import { Path } from "../../components/Layout"
 import { useBootstrap } from "../../hooks/useBootstrap"
 import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
+import { useEffect, useState } from "react"
+import TokenIcon from "../../components/TokenIcon"
+import { getBaseTokenOrNativeCurrency } from "../../utils/markets"
+import { useCurrentChain } from "../../hooks/useCurrentChain"
+import { bnf } from "../../utils/bn"
+import { netBorrowAprScaled } from "../../selectors/market-selector"
+import { useMarkets } from "../../hooks/useMarkets"
+import css from '../../styles/pages/Borrow.module.scss'
+import AmountInput from "../../components/AmountInput"
 
 export default function Borrow() {
 
+    const { currentChainId: chainId } = useCurrentChain()
+    const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
+
+    const [ selectedMarket, setSelectedMarket ] = useState(null)
+
     const { openModal } = useBootstrap()
+    
+    useEffect(() => {
+      if (isMarkets) {
+        setSelectedMarket(markets[0])
+      }
+    }, [chainId, markets])
 
     return ( 
       <>
         <Head>
           <title>Borrow</title>
         </Head>
-        <SelectTokenToBorrow />
+        <SelectTokenToBorrow onSelect={setSelectedMarket} />
         <div className="col-12 col-xl-6 col-xxl-5 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
             <div className="d-flex border align-items-center p-3 rounded mb-2">
                 <div className="flex-grow-1">
-                    <h1 className="m-0">0</h1>
+                    <AmountInput 
+                      id={css['borrow-input']} 
+                      onChange={() => {}} 
+                      disabled={false} 
+                      focused={true} />
                     <small className="text-body-tertiary">$0.00</small>
                 </div>
                 <button type="button" className="btn btn-lg btn-light border border-light-subtle rounded-5" onClick={() => openModal(SELECT_TOKEN_TO_BORROW_MODAL)}>
                     <div className="d-flex align-items-center">
-                        <img src="/images/tokens/USDC.svg" className="me-2 me-sm-3" alt="USDC" width="35" /> 
-                        <span className="me-2 me-sm-3">USDC</span> 
+                        <TokenIcon symbol={getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol} css="me-2 me-sm-3" width="35" />
+                        <span className="me-2 me-sm-3">{getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol}</span> 
                         <i className="bi bi-chevron-down"></i>
                     </div>
                 </button>
@@ -36,7 +60,7 @@ export default function Borrow() {
                     <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Increase your borrowing capacity <i className="bi bi-arrow-right"></i></Link>
                 </div>
                 <div className="d-flex align-items-start my-2 my-sm-0">
-                    <small className="px-2 py-1 me-1 shadow-sm rounded">Borrow APR : <span className="text-body-tertiary">4.12%</span></small>
+                    <small className="px-2 py-1 me-1 shadow-sm rounded">Borrow APR : <span className="text-body-tertiary">{bnf(netBorrowAprScaled(selectedMarket))}<small>%</small></span></small>
                 </div>
             </div>
             <div className="d-grid">

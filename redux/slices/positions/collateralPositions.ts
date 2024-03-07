@@ -62,7 +62,7 @@ export const collateralPositionsInit = createAsyncThunk<any, void, ThunkApiField
         for (const market of markets) {
             const comet = MarketSelector.cometProxy(market)
             const tokens = MarketSelector.collateralTokens(market)
-            const positionsService = new PositionsService({comet, publicClient })
+            const positionsService = new PositionsService({ comet, publicClient })
             const collateralBalances = await positionsService.collateralBalancesOf({ account, chainId, market, tokens })
             positions = { ...positions, [comet]: collateralBalances }  
         }

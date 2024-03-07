@@ -17,3 +17,7 @@ export function tokenScale(amount, decimals) {
     const factor = bn(10).pow(decimals);
     return bn(amount).div(factor);
 }
+
+export function percentScale(percent) {
+    return Number(percent) * 100
+}

@@ -11,4 +11,7 @@ export const totalBaseSupplyUsd = market => market?.accounting?.totalBaseSupplyU
 export const netSupplyAprScaled = market => market?.accounting?.netSupplyAprScaled
 export const rewardSupplyAprScaled = market => market?.accounting?.rewardSupplyAprScaled 
 export const supplyAprScaled = market => market?.accounting?.supplyAprScaled 
+export const netBorrowAprScaled = market => market?.accounting?.netBorrowAprScaled
+export const rewardBorrowAprScaled = market => market?.accounting?.rewardBorrowAprScaled 
+export const borrowAprScaled = market => market?.accounting?.borrowAprScaled
 

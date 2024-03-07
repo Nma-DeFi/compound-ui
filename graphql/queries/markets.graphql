@@ -41,7 +41,10 @@ query AllMarkets {
             lastAccrualTime
             netSupplyApr
             rewardSupplyApr
-            supplyApr   
+            supplyApr
+            netBorrowApr
+            rewardBorrowApr
+            borrowApr  
         }
     }
 }

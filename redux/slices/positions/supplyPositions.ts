@@ -8,7 +8,7 @@ import { PriceFeed, Token } from '../../../types';
 import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
-import { log } from '../helpers/supply';
+import { log } from '../../helpers/supply';
 
 export type SupplyBalance = {
   baseToken: Token,

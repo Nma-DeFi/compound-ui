@@ -25,8 +25,6 @@ import DepositBaseTokenNative from "../../components/pages/farm/DepositBaseToken
 import { WITHDRAW_NATIVE_CURRENCY_MODAL } from "../../components/withdraw/WithdrawNativeCurrency"
 import { WITHDRAW_ERC20_TOKEN_MODAL } from "../../components/withdraw/WithdrawErc20Token"
 import { ActionType } from "../../types"
-import { useCollateralPositions } from "../../hooks/useCollateralPositions"
-import { collateralPositionsInit } from "../../redux/slices/positions/collateralPositions"
 
 export default function Farm() {
 
@@ -34,7 +32,6 @@ export default function Farm() {
   const { currentChainId: chainId } = useCurrentChain()
   const { isLoading, isError, isSuccess, data: markets } = useMarkets({ chainId })
   const { isIdle: isNoSupplyPositions } = useSupplyPositions()
-  const { isIdle: isNoCollateralPositions } = useCollateralPositions()
 
   const dispatch = useAppDispatch()
 
@@ -46,12 +43,6 @@ export default function Farm() {
       dispatch(supplyPositionsInit())
     } 
   }, [isConnected, isNoSupplyPositions])
-
-  useEffect(() => { 
-    if (isConnected && isNoCollateralPositions) {
-      dispatch(collateralPositionsInit())
-    } 
-  }, [isConnected, isNoCollateralPositions])
 
   function showModal(market, action) {
     let modal

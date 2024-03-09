@@ -11,7 +11,7 @@ export async function getCollateralUsdBalanceByMarket(
         marketId: Address;
         priceService: PriceService;
     }): Promise<BigNumber> {
-    const positions = Object.values(collateralPositions[marketId]);
+    const positions = Object.values(collateralPositions[marketId]).filter(p => p.balance.gt(Zero))
     const promises = positions.map(({ priceFeed }) => priceService.getPriceFromFeed(priceFeed));
     const prices = await Promise.all(promises);
     let totalCollateralUsd: BigNumber = Zero;

@@ -6,10 +6,12 @@ import { accountConnected, accountDisconnected } from "../redux/slices/currentAc
 import { chainSwitched } from "../redux/slices/currentChain"
 import { supplyPositionsReset } from "../redux/slices/positions/supplyPositions"
 import { collateralPositionsReset } from "../redux/slices/positions/collateralPositions"
+import { borrowPositionsReset } from "../redux/slices/positions/borrowPositions"
 
 
 export const resetPositions = (dispatch) => {
     dispatch(supplyPositionsReset())
+    dispatch(borrowPositionsReset())
     dispatch(collateralPositionsReset())
 }
 

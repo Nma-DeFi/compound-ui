@@ -1,3 +1,4 @@
+import { Address } from "viem";
 import { cometAbi } from "../abi/cometAbi";
 import { fromBigInt } from "../utils/bn";
 import { getPriceFeedKind } from "../utils/markets";
@@ -33,6 +34,32 @@ export class PositionsService {
         console.log(
             Date.now(), 
             'PositionsService.supplyBalanceOf',
+            'account', account,
+            'comet', this.contract.address,
+            'balance', balance,
+            'decimals', decimals,
+        )
+        return fromBigInt(balance, decimals)
+    }
+
+    async borrowBalanceOf(account) {
+        const [ balance, decimals ] = await this.publicClient.multicall({
+            contracts: [
+                {
+                    ...this.contract,
+                    functionName: 'borrowBalanceOf',
+                    args: [ account ],
+                },
+                {
+                    ...this.contract,
+                    functionName: 'decimals',
+                }
+            ],
+            allowFailure: false,
+        })
+        console.log(
+            Date.now(), 
+            'PositionsService.borrowBalanceOf',
             'account', account,
             'comet', this.contract.address,
             'balance', balance,

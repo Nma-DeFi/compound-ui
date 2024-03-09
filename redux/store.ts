@@ -3,6 +3,7 @@ import currentAccount from './slices/currentAccount'
 import currentChain from './slices/currentChain'
 import publicClient from './slices/publicClient'
 import supplyPositions from './slices/positions/supplyPositions'
+import borrowPositions from './slices/positions/borrowPositions'
 import collateralPositions from './slices/positions/collateralPositions'
 
 export const store = configureStore({
@@ -11,6 +12,7 @@ export const store = configureStore({
     currentAccount,
     publicClient,
     supplyPositions,
+    borrowPositions,
     collateralPositions,
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware({

@@ -12,15 +12,30 @@ import { netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
 import AmountInput from "../../components/AmountInput"
+import { useCurrentAccount } from "../../hooks/useCurrentAccount"
+import { useBorrowPositions } from "../../hooks/useBorrowPositions"
+import { useAppDispatch } from "../../redux/hooks"
+import { borrowPositionsInit } from "../../redux/slices/positions/borrowPositions"
 
 export default function Borrow() {
 
+    const { isConnected } = useCurrentAccount()
+
     const { currentChainId: chainId } = useCurrentChain()
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
+    const { isIdle: isNoBorrowPositions } = useBorrowPositions()
 
     const [ selectedMarket, setSelectedMarket ] = useState(null)
 
+    const dispatch = useAppDispatch()
+
     const { openModal } = useBootstrap()
+
+    useEffect(() => { 
+      if (isConnected && isNoBorrowPositions) {
+        dispatch(borrowPositionsInit())
+      } 
+    }, [isConnected, isNoBorrowPositions])
     
     useEffect(() => {
       if (isMarkets) {

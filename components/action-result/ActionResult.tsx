@@ -25,13 +25,11 @@ export default function ActionResult({ id, action, token, amount, hash} : Action
                 case ActionType.DepositBaseToken:
                 case ActionType.WithdrawBaseToken:
                     dispatch(supplyPositionsInit())
-                    break;
+                    break
                 case ActionType.DepositCollateral:
                 case ActionType.WithdrawCollateral:
                     dispatch(collateralPositionsInit())
-                    break;
-                default:
-                    throw new Error("No such action exists")
+                    break
             }
         }
     }, [isSuccess])

@@ -13,8 +13,9 @@ import { useComet } from '../hooks/useComet';
 import { usePriceService } from '../hooks/usePriceService';
 import { AsyncBigNumber, AsyncStatus, IdleData, LoadingData, loadAsyncData } from '../utils/async';
 import { NoData } from './Layout';
-import { CollateralPositionsState } from '../redux/slices/positions/collateralPositions';
+import { CollateralPositionsState, collateralPositionsInit } from '../redux/slices/positions/collateralPositions';
 import { getTotalCollateralUsdBalance } from '../redux/helpers/collateral';
+import { useAppDispatch } from '../redux/hooks';
 
 type PositionsState = { 
     supplyPositions: SupplyPositionsState, 
@@ -24,7 +25,7 @@ type PositionsState = {
 export function UserAccount(positionsState : PositionsState) {
 
     const { isSuccess: isSupplyPositions, data: supplyPositions } = positionsState.supplyPositions
-    const { isSuccess: isCollateralPositions, data: collateralPositions } = positionsState.collateralPositions
+    const { isIdle: isNoCollateralPositions, isSuccess: isCollateralPositions, data: collateralPositions } = positionsState.collateralPositions
     
     const [ farming, setFarming ] = useState<AsyncBigNumber>(IdleData)
     const [ collateral, setCollateral ] = useState<AsyncBigNumber>(IdleData)
@@ -36,6 +37,14 @@ export function UserAccount(positionsState : PositionsState) {
     const comet = useComet({ chainId })
 
     const priceService = usePriceService({ comet, publicClient})
+
+    const dispatch = useAppDispatch()
+
+    useEffect(() => { 
+        if (isConnected && isNoCollateralPositions) {
+            dispatch(collateralPositionsInit())
+        } 
+    }, [isConnected, isNoCollateralPositions])
 
     useEffect(() => {
         if (isSupplyPositions && priceService) {
@@ -54,7 +63,7 @@ export function UserAccount(positionsState : PositionsState) {
         } else {
             setFarming(IdleData)
         }
-    }, [isSupplyPositions, priceService])
+    }, [supplyPositions, priceService])
 
     useEffect(() => {
         if (isCollateralPositions && priceService) {
@@ -63,7 +72,7 @@ export function UserAccount(positionsState : PositionsState) {
         } else {
             setCollateral(IdleData)
         }
-    }, [isCollateralPositions, priceService])
+    }, [collateralPositions, priceService])
 
     return isConnected ? (
         <div id={css['user-account']} className="bg-body p-4 border rounded shadow text-center rounded-4 mt-4 mt-xl-0">

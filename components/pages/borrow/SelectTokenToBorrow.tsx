@@ -41,8 +41,8 @@ export default function SelectTokenToBorrow({ onSelect }) {
               <GrowSpinners nb={3} css="d-flex justify-content-center py-5" />
             }
 
-            { isSuccess && markets.map(market =>
-              <div className={`bg-body shadow rounded px-4 py-3 mx-2 my-5 ${css['item-hover']}`} onClick={() => handleSelect(market)}>
+            { isSuccess && markets.map((market) =>
+              <div key={market.id} className={`bg-body shadow rounded px-4 py-3 mx-2 my-5 ${css['item-hover']}`} onClick={() => handleSelect(market)}>
                 <div className="d-flex justify-content-between align-items-center mb-5">
                     <div className="d-flex justify-content-start">
                         <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} width="42" />
@@ -61,7 +61,7 @@ export default function SelectTokenToBorrow({ onSelect }) {
                     <div className="me-1  text-body-secondary">Collaterals</div> 
                     <div className={`d-flex flex-wrap text-body-tertiary py-1 ${css['collateral-list']}`}>
                         {collateralTokens(market).map((collateral, index) =>
-                          <div className={`${collateralTokens(market).length === (index + 1) ? '' : 'border-end'} px-2`}>
+                          <div key={index} className={`${collateralTokens(market).length === (index + 1) ? '' : 'border-end'} px-2`}>
                             {getTokenOrNativeCurrency(chainId, collateral.token).symbol}
                           </div>
                         )}

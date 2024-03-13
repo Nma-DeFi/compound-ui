@@ -5,43 +5,117 @@ import { useBootstrap } from "../../hooks/useBootstrap"
 import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
 import { useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
-import { getBaseTokenOrNativeCurrency } from "../../utils/markets"
+import { getBaseTokenOrNativeCurrency, getPriceFeedKind } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
-import { bnf } from "../../utils/bn"
-import { netBorrowAprScaled } from "../../selectors/market-selector"
+import { Zero, bn, bnf } from "../../utils/bn"
+import { baseTokePriceFeed, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
 import AmountInput from "../../components/AmountInput"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
-import { useBorrowPositions } from "../../hooks/useBorrowPositions"
-import { useAppDispatch } from "../../redux/hooks"
-import { borrowPositionsInit } from "../../redux/slices/positions/borrowPositions"
+import { useSupplyPositions } from "../../hooks/useSupplyPositions"
+import { useBorrowCapacity } from "../../hooks/useBorrowCapacity"
+import BigNumber from "bignumber.js"
+import PriceAsync from "../../components/PriceAsync"
+import PriceFromFeed from "../../components/PriceFromFeed"
+import { PriceFeed } from "../../types"
+import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
+import { usePublicClient } from "wagmi"
+import { AsyncBigNumber, IdleData, LoadingData, SuccessData } from "../../utils/async"
+
+const enum Mode {
+  NotConnected,
+  FarmingBaseToken,
+  InsufficientBorrowCapacity,
+  ReadyToBorrow,
+}
 
 export default function Borrow() {
+
+    const [ mode, setMode ] = useState<Mode>()
+    const [ amount, setAmount ] = useState<BigNumber>(Zero)
+    const [ amountUsd, setAmountUsd ] = useState<AsyncBigNumber>(IdleData)
+    const [ selectedMarket, setSelectedMarket ] = useState(null)
+    const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
 
     const { isConnected } = useCurrentAccount()
 
     const { currentChainId: chainId } = useCurrentChain()
+
+    const publicClient = usePublicClient({ chainId })
+
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
-    const { isIdle: isNoBorrowPositions } = useBorrowPositions()
 
-    const [ selectedMarket, setSelectedMarket ] = useState(null)
+    const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
+    
+    const asyncBorrowCapacity  =  useBorrowCapacity({ isConnected, chainId, publicClient, marketId: cometProxy(selectedMarket) })
+    
+    const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
 
-    const dispatch = useAppDispatch()
+    const { isLoading: isLoadingPrice, isSuccess: isSuccessPrice, data: price } = usePriceFromFeed({ chainId, publicClient, priceFeed })
+
+    useEffect(() => {
+      if (isLoadingPrice) {
+        setAmountUsd(LoadingData)
+      } else if (isSuccessPrice)  {
+        setAmountUsd(SuccessData(amount.times(price)))
+      } else {
+        setAmountUsd(IdleData)
+      }
+  }, [isLoadingPrice, isSuccessPrice, amount])
 
     const { openModal } = useBootstrap()
 
     useEffect(() => { 
-      if (isConnected && isNoBorrowPositions) {
-        dispatch(borrowPositionsInit())
-      } 
-    }, [isConnected, isNoBorrowPositions])
+      if (!selectedMarket) return
+      if (isConnected && (!isSupplyPositions || !isBorrowCapacity || !amountUsd.isSuccess)) return
+      if (!isConnected) {
+        setMode(Mode.NotConnected)
+      } else if (isFarmingBaseToken()) {
+        setMode(Mode.FarmingBaseToken)
+      } else if (isInsufficientBorrowCap()) {
+        setMode(Mode.InsufficientBorrowCapacity)
+      } else {
+        setMode(Mode.ReadyToBorrow)
+      }
+    })
     
     useEffect(() => {
       if (isMarkets) {
         setSelectedMarket(markets[0])
       }
     }, [chainId, markets])
+
+    useEffect(() => {
+      if (selectedMarket) {
+        setAmount(Zero)
+        setInput(null)
+        setPriceFeed({
+          address: baseTokePriceFeed(selectedMarket),
+          kind: getPriceFeedKind(selectedMarket, chainId),
+        })
+      }
+    }, [chainId, selectedMarket])
+
+    function isFarmingBaseToken() {
+      const comet = cometProxy(selectedMarket)
+      return supplyPositions[comet].supplyBalance.isGreaterThan(Zero)
+    }
+
+    function isInsufficientBorrowCap() {
+      return borrowCapacity.isEqualTo(Zero) || borrowCapacity.isLessThan(amountUsd.data)
+    }
+    
+    function handleAmountChange(event) {
+      const amount = bn(event.target.value || 0)
+      setAmount(amount)
+    }
+
+    function setInput(value: string) {
+      const elem = document.getElementById(css['borrow-input']) 
+      const input = elem as HTMLInputElement
+      input.value = value ?? ''
+    }
 
     return ( 
       <>
@@ -56,10 +130,12 @@ export default function Borrow() {
                 <div className="flex-grow-1">
                     <AmountInput 
                       id={css['borrow-input']} 
-                      onChange={() => {}} 
+                      onChange={handleAmountChange} 
                       disabled={false} 
                       focused={true} />
-                    <small className="text-body-tertiary">$0.00</small>
+                    <small className="text-body-tertiary">
+                      <PriceAsync asyncPrice={amountUsd} />
+                    </small>
                 </div>
                 <button type="button" className="btn btn-lg btn-light border border-light-subtle rounded-5" onClick={() => openModal(SELECT_TOKEN_TO_BORROW_MODAL)}>
                     <div className="d-flex align-items-center">
@@ -71,8 +147,41 @@ export default function Borrow() {
             </div>
             <div className="d-flex flex-wrap justify-content-between mb-4">
                 <div>
-                    <div className="mb-1">Maximum borrowing : <span className="text-body-tertiary">800 USDC</span></div>
+                { mode === Mode.NotConnected &&
+                  <>
+                    Connect your wallet
+                  </>
+                }
+                { mode === Mode.FarmingBaseToken &&
+                  <>
+                    Cannot supply and borrow at the same time
+                  </>
+                }
+                { mode === Mode.InsufficientBorrowCapacity &&
+                  <>
+                  <div className="mb-1">
+                    { borrowCapacity?.isEqualTo(Zero) ?
+                      <>No borrowing capacity</>
+                    :
+                      <>Insufficient borrowing capacity</>
+                    }
+                    </div>
+                    <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Add collateral <i className="bi bi-arrow-right"></i></Link>
+                  </>
+                }
+                { mode === Mode.ReadyToBorrow &&
+                  <>
+                    <div className="mb-1">Maximum borrowing : <span className="text-body-tertiary">
+                      <PriceAsync asyncPrice={{ 
+                        isIdle: asyncBorrowCapacity.isError, 
+                        isLoading: asyncBorrowCapacity.isLoading, 
+                        isSuccess: asyncBorrowCapacity.isSuccess, 
+                        isError: asyncBorrowCapacity.isError, 
+                        data: asyncBorrowCapacity.data 
+                      }} /></span></div>
                     <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Increase your borrowing capacity <i className="bi bi-arrow-right"></i></Link>
+                  </>
+                }
                 </div>
                 <div className="d-flex align-items-start my-2 my-sm-0">
                     <small className="px-2 py-1 me-1 shadow-sm rounded">Borrow APR : <span className="text-body-tertiary">{bnf(netBorrowAprScaled(selectedMarket))}<small>%</small></span></small>

@@ -9,7 +9,6 @@ import { Zero } from '../utils/bn';
 import Price from './Price';
 import { usePublicClient } from 'wagmi';
 import { useCurrentChain } from '../hooks/useCurrentChain';
-import { useComet } from '../hooks/useComet';
 import { usePriceService } from '../hooks/usePriceService';
 import { AsyncBigNumber, AsyncStatus, IdleData, LoadingData, loadAsyncData } from '../utils/async';
 import { NoData } from './Layout';
@@ -34,9 +33,8 @@ export function UserAccount(positionsState : PositionsState) {
     const { currentChainId: chainId } = useCurrentChain()
 
     const publicClient = usePublicClient({ chainId })
-    const comet = useComet({ chainId })
 
-    const priceService = usePriceService({ comet, publicClient})
+    const priceService = usePriceService({ chainId, publicClient})
 
     const dispatch = useAppDispatch()
 

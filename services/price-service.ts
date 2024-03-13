@@ -26,6 +26,7 @@ export class PriceService {
     }
 
     async getPriceFromFeed({ address, kind } : PriceFeed) {
+
         let promises: Promise<any>[] = [ 
             this.publicClient.multicall({
                 contracts: [
@@ -49,9 +50,56 @@ export class PriceService {
 
         const [ feedPrice, feedScale, ethPrice ] = (await Promise.all(promises)).flat()
 
-        const price = Number(feedPrice) / Number(feedScale)
+        const price = (Number(feedPrice) / Number(feedScale))
 
         return (kind === PriceFeedKind.ETH_PRICE) ? price * ethPrice : price
+    }
+
+    async getAllPricesFromFeeds(priceFeeds : PriceFeed[]) {
+
+        console.log('getAllPricesFromFeeds in', priceFeeds)
+
+        const multicallParams = priceFeeds.map(({ address }) => ({
+            ...this.cometContract,
+            functionName: 'getPrice',
+            args: [ address ],
+        }))
+
+        let promises: Promise<any>[] = [ 
+            this.publicClient.multicall({
+                contracts: [
+                    {
+                        ...this.cometContract,
+                        functionName: 'priceScale',
+                    },
+                    ...multicallParams
+                ],
+                allowFailure: false,
+            }) 
+        ]
+
+        const isEthPriceFeed = !!priceFeeds.find(priceFeed => (priceFeed.kind === PriceFeedKind.ETH_PRICE))
+
+        if (isEthPriceFeed) {
+            promises = [this.getPriceFromSymbol('ETH'), ...promises]
+        }
+
+        let prices : number[]
+
+        if (isEthPriceFeed) {
+            const [ ethPrice, [ priceScale, ...rawPrices ] ] = await Promise.all(promises)
+            prices = rawPrices.map((rawPrice, index) => { 
+                const price = (Number(rawPrice) / Number(priceScale)) 
+                return (priceFeeds[index].kind === PriceFeedKind.ETH_PRICE) ? price * ethPrice : price
+            })
+        } else {
+            const [ [ priceScale, ...rawPrices ] ] = await Promise.all(promises)
+            prices = rawPrices.map(rawPrice => (Number(rawPrice) / Number(priceScale)))
+        }
+
+        console.log('getAllPricesFromFeeds out', prices)
+
+        return prices
     }
 
 }

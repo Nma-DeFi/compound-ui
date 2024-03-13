@@ -16,9 +16,7 @@ import { percent } from '../../utils/number';
 import WithdrawErc20Token, { WITHDRAW_ERC20_TOKEN_MODAL } from '../../components/withdraw/WithdrawErc20Token';
 import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from '../../components/withdraw/WithdrawNativeCurrency';
 import { useCollateralPositions } from '../../hooks/useCollateralPositions';
-import { useAppDispatch } from '../../redux/hooks';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
-import { collateralPositionsInit } from '../../redux/slices/positions/collateralPositions';
 import { getCollateralUsdBalanceByMarket } from '../../redux/helpers/collateral';
 import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
@@ -40,12 +38,13 @@ export function useTotalUsdCollateralForMarket({ asyncCollateralPositions, async
 
     const marketId = isMarkets ? cometProxy(markets[marketIndex]) : undefined
 
-    const priceService = usePriceService({ comet: marketId, publicClient})
+    const priceService = usePriceService({ chainId, publicClient})
 
     return useQuery({
         queryKey: ['TotalUsdCollateralForMarket', chainId, marketId, collateralPositions],
-        queryFn: () => getCollateralUsdBalanceByMarket({ collateralPositions, marketId, priceService }),
+        queryFn: () => getCollateralUsdBalanceByMarket({ marketId, collateralPositions, priceService }),
         enabled: !!(isConnected && isCollateralPositions && isMarkets && marketId && priceService),
+        staleTime: (2 * 60 * 1000),
     })
 }
 
@@ -60,8 +59,6 @@ export default function Collateral() {
     const [ comet, setComet ] = useState<Address>()
     const [ token, setToken ] = useState<Token>()
 
-    const dispatch = useAppDispatch()
-
     const { openModal } = useBootstrap()
 
     const asyncCollateralPositions = useCollateralPositions()
@@ -70,8 +67,6 @@ export default function Collateral() {
 
     const { isSuccess: isMarkets, data: markets } = asyncMarkets
 
-    const { isIdle: isNoCollateralPositions } = asyncCollateralPositions
-
     const { 
         isPending: isPendingUsdCollateral, 
         isLoading: isLoadingUsdCollateral, 
@@ -79,12 +74,6 @@ export default function Collateral() {
         isError: isErrorUsdCollateral, 
         data: usdCollateral, 
     } = useTotalUsdCollateralForMarket({ asyncCollateralPositions, asyncMarkets, marketIndex })
-    
-    useEffect(() => { 
-        if (isConnected && isNoCollateralPositions) {
-          dispatch(collateralPositionsInit())
-        } 
-      }, [isConnected, isNoCollateralPositions])
 
     useEffect(() => setMarketIndex(0), [chainId])
 

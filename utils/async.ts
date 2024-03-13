@@ -29,7 +29,14 @@ export const LoadingData : AsyncData<any> = {
     ...AsyncStatus.Loading
 }
 
-export function loadAsyncData<T>(promise: Promise<T>, setData: (d: AsyncData<T>) => void) {
+export function SuccessData<T>(value: T) : AsyncData<T> {
+     return ({
+        data: value,
+        ...AsyncStatus.Success
+    }) 
+}
+
+export function loadAsyncData<T>(promise: Promise<T>, setData: (d: AsyncData<T>) => void) : void {
     setData({ data: undefined, ...AsyncStatus.Loading })
     promise.then(d => setData({data: d, ...AsyncStatus.Success }))
          .catch(() => setData({data: undefined, ...AsyncStatus.Error }))

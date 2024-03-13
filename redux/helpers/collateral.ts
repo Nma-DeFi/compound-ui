@@ -6,16 +6,15 @@ import BigNumber from 'bignumber.js'
 
 
 export async function getCollateralUsdBalanceByMarket(
-    { collateralPositions, marketId, priceService }: {
-        collateralPositions: CollateralPositionsData;
+    {  marketId, collateralPositions, priceService }: {
         marketId: Address;
+        collateralPositions: CollateralPositionsData;
         priceService: PriceService;
     }): Promise<BigNumber> {
-    const positions = Object.values(collateralPositions[marketId]).filter(p => p.balance.gt(Zero))
-    const promises = positions.map(({ priceFeed }) => priceService.getPriceFromFeed(priceFeed));
-    const prices = await Promise.all(promises);
+    const positions = Object.values(collateralPositions[marketId]).filter(p => p.balance.gt(Zero));
+    const prices = await priceService.getAllPricesFromFeeds(positions.map(p => p.priceFeed))
     let totalCollateralUsd: BigNumber = Zero;
-    for (let index = 0; index < prices.length; index++) {
+    for (let index = 0; index < positions.length; index++) {
         const price = prices[index];
         const balance = positions[index].balance;
         totalCollateralUsd = totalCollateralUsd.plus(balance.times(price));

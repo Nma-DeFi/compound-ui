@@ -7,11 +7,14 @@ import { ThunkApiFields } from '../../types';
 import { MarketDataService } from '../../../services/market-data-service';
 import * as MarketSelector from '../../../selectors/market-selector';
 import { PositionsService } from '../../../services/positions-service';
+import { fromBigInt } from '../../../utils/bn';
+import { getPriceFeedKind } from '../../../utils/markets';
 
 export type CollateralPositionsByMarket = Record<Address, {
-    token: Token,
-    balance: BigNumber,
+    token: Token
+    balance: BigNumber
     priceFeed: PriceFeed
+    collateralFactor: number
 }>
 
 export type CollateralPositionsData = Record<Address, CollateralPositionsByMarket>
@@ -63,8 +66,17 @@ export const collateralPositionsInit = createAsyncThunk<any, void, ThunkApiField
             const comet = MarketSelector.cometProxy(market)
             const tokens = MarketSelector.collateralTokens(market)
             const positionsService = new PositionsService({ comet, publicClient })
-            const collateralBalances = await positionsService.collateralBalancesOf({ account, chainId, market, tokens })
-            positions = { ...positions, [comet]: collateralBalances }  
+            const balances = await positionsService.collateralBalancesOf({ account, tokens })
+            let positionsByMarket : CollateralPositionsByMarket = {}
+            for (let index = 0; index < tokens.length; index++) {
+                const { token, priceFeed: address, borrowCollateralFactor } = tokens[index]
+                const balance = fromBigInt(balances[index], token.decimals)
+                const priceFeed = { address, kind: getPriceFeedKind(market, chainId) } 
+                const collateralFactor = Number(borrowCollateralFactor)
+                const positionData = { token, balance, priceFeed, collateralFactor }
+                positionsByMarket = { ...positionsByMarket,  [token.address]: positionData }
+            }
+            positions = { ...positions, [comet]: positionsByMarket }  
         }
         console.log(Date.now(), 'collateralPositions', chainId, positions)
         return positions

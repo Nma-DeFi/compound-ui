@@ -48,7 +48,7 @@ function CollateralAmount({ market, collateral, isLoading, isSuccess, amount }) 
                 <CollateralBalanceLayout>
                     <div className="text-body-secondary"><Amount value={amount} /></div>
                     <div className={`${css['collateral-balance']} text-body-tertiary`}>
-                        <PriceFromFeed comet={cometProxy(market)} priceFeed={priceFeed} amount={amount} placeHolderCfg={{ col: 4 }} />
+                        <PriceFromFeed priceFeed={priceFeed} amount={amount} placeHolderCfg={{ col: 4 }} />
                     </div>
                 </CollateralBalanceLayout>
             ) : (

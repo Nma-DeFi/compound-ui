@@ -209,7 +209,7 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                          <PriceFromFeed comet={comet} priceFeed={token?.priceFeed} amount={amount} />
+                          <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

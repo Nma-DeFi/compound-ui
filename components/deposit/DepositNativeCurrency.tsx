@@ -167,7 +167,7 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                        <PriceFromFeed comet={comet} priceFeed={token?.priceFeed} amount={amount} />
+                        <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

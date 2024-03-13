@@ -224,7 +224,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)}
                         />
                         <div className="small text-body-tertiary">
-                          <PriceFromFeed comet={comet} priceFeed={token?.priceFeed} amount={amount} />
+                          <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

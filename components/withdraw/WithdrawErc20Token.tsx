@@ -171,7 +171,7 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
                           disabled={Mode.Init === mode} 
                           focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)} />
                         <div className="small text-body-tertiary">
-                          <PriceFromFeed comet={comet} priceFeed={token?.priceFeed} amount={amount} />
+                          <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

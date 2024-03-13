@@ -1,15 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePriceService } from "./usePriceService";
-import { useCurrentChain } from "./useCurrentChain";
 
-export function usePriceFromFeed({ publicClient, comet, priceFeed }) {
-    
-    const { currentChainId } = useCurrentChain()
-    const priceService = usePriceService({ publicClient, comet })
+export function usePriceFromFeed({ chainId, publicClient, priceFeed }) {
+
+    const priceService = usePriceService({ chainId, publicClient })
 
     return useQuery({
-        queryKey: ['PriceFromFeed', currentChainId, priceFeed?.address],
+        queryKey: ['PriceFromFeed', chainId, priceFeed],
         queryFn: () => priceService.getPriceFromFeed(priceFeed),
         enabled: !!(priceService && priceFeed),
+        staleTime: (2 * 60 * 1000),
     })
 }

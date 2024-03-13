@@ -15,8 +15,6 @@ import { baseTokenAddress, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../
 import { bnf } from "../../utils/bn"
 import { isNativeCurrencyMarket, getBaseTokenOrNativeCurrency } from "../../utils/markets"
 import { useSupplyPositions } from "../../hooks/useSupplyPositions"
-import { useAppDispatch } from "../../redux/hooks"
-import { supplyPositionsInit } from "../../redux/slices/positions/supplyPositions"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
 import css from '../../styles/pages/Farm.module.scss'
 import TokenIcon from "../../components/TokenIcon"
@@ -28,21 +26,14 @@ import { ActionType } from "../../types"
 
 export default function Farm() {
 
+  useSupplyPositions()
+
   const { isConnected } = useCurrentAccount()
   const { currentChainId: chainId } = useCurrentChain()
   const { isLoading, isError, isSuccess, data: markets } = useMarkets({ chainId })
-  const { isIdle: isNoSupplyPositions } = useSupplyPositions()
-
-  const dispatch = useAppDispatch()
-
+  
   const [ targetMarket, setTargetMarket ] = useState(null)
   const { openModal } = useBootstrap()
-
-  useEffect(() => { 
-    if (isConnected && isNoSupplyPositions) {
-      dispatch(supplyPositionsInit())
-    } 
-  }, [isConnected, isNoSupplyPositions])
 
   function showModal(market, action) {
     let modal

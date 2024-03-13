@@ -11,8 +11,8 @@ import * as MarketUtils from '../../../utils/markets';
 import { log } from '../../helpers/supply';
 
 export type SupplyBalance = {
-  baseToken: Token,
-  supplyBalance: BigNumber,
+  baseToken: Token
+  supplyBalance: BigNumber
   priceFeed: PriceFeed
 }
 

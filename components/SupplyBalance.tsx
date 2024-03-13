@@ -46,7 +46,7 @@ export function SupplyBalanceAmount({ market, isLoading, isSuccess, supplyBalanc
                 <>
                     <div className="mb-1"><Amount value={supplyBalance} /></div>
                     <small className="text-body-secondary">
-                        <PriceFromFeed comet={cometProxy(market)} priceFeed={priceFeed} amount={supplyBalance} placeHolderCfg={{ col: 4 }} />
+                        <PriceFromFeed priceFeed={priceFeed} amount={supplyBalance} placeHolderCfg={{ col: 4 }} />
                     </small>
                 </>
             ) : (

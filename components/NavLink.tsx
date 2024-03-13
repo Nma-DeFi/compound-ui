@@ -17,5 +17,5 @@ export default function NavLink({ href, children }) {
                 {children}
             </a>
         </Link>
-    );
+    )
 }

@@ -27,11 +27,11 @@ export default function SelectTokenToBorrow({ onSelect }) {
     <div id={SELECT_TOKEN_TO_BORROW_MODAL} className="modal" tabIndex={-1}>
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-          <div className="modal-header">
-            <h4 className="modal-title">Select token</h4>
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div className="modal-body py-0">
+          <div className="modal-body">
+            <div className="d-flex justify-content-between align-items-center mb-5">
+              <h3 className="m-0">Borrow token</h3>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
             { isError &&
               <p className="p-3">Data currently unavailable</p>
@@ -42,7 +42,7 @@ export default function SelectTokenToBorrow({ onSelect }) {
             }
 
             { isSuccess && markets.map((market) =>
-              <div key={market.id} className={`bg-body shadow rounded px-4 py-3 mx-2 my-5 ${css['item-hover']}`} onClick={() => handleSelect(market)}>
+              <div key={market.id} className={`bg-body shadow rounded px-4 py-3 mx-2 mb-5 ${css['item-hover']}`} onClick={() => handleSelect(market)}>
                 <div className="d-flex justify-content-between align-items-center mb-5">
                     <div className="d-flex justify-content-start">
                         <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} width="42" />

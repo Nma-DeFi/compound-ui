@@ -21,6 +21,7 @@ import { WithdrawParam, ActionType, ActionInfo } from '../../types';
 import AsyncAmount from '../AmountAsync';
 import { usePositionsService } from '../../hooks/usePositionsService';
 import PriceFromFeed from '../PriceFromFeed';
+import TokenIcon from '../TokenIcon';
 
 const Mode = {
   NotConnected: 0,
@@ -230,7 +231,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
                       <div>
                           <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
                               <div className="d-flex align-items-center">
-                                  <img src={`/images/tokens/${nativeCurrency.symbol}.svg`} alt={nativeCurrency.symbol} width="30" /> 
+                                  <TokenIcon symbol={nativeCurrency.symbol} width="30" />
                                   <span className="px-3">{nativeCurrency.symbol}</span> 
                               </div>
                           </button>

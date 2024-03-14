@@ -6,13 +6,14 @@ export const enum PlaceHolderSize {
 
 export type PlaceHolderParam = { 
     size?: PlaceHolderSize, 
-    col?: number
+    col?: number,
+    css?: string
 }
 
-export default function PlaceHolder({ size = PlaceHolderSize.SMALL, col = 1} : PlaceHolderParam) {
+export default function PlaceHolder({ size = PlaceHolderSize.SMALL, col = 1, css = ''} : PlaceHolderParam) {
     return (
-        <span className={`placeholder-glow`}>
-            <span className={`placeholder ${size} bg-secondary-subtle col-${col}`}></span>
+        <span className={`placeholder-glow ${css}`}>
+            <span className={`placeholder ${size} bg-dark-subtle col-${col}`}></span>
         </span>
     )
 }

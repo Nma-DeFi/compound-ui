@@ -3,8 +3,11 @@ import { useCollateralPositions } from "./useCollateralPositions"
 import { useBorrowPositions } from "./useBorrowPositions"
 import { usePriceService } from "./usePriceService"
 import { getBorrowCapacity } from "../redux/helpers/borrow"
+import { useCurrentAccount } from "./useCurrentAccount"
 
-export function useBorrowCapacity({ isConnected, chainId, publicClient, marketId }) {
+export function useBorrowCapacity({ chainId, publicClient, marketId }) {
+
+  const { isConnected } = useCurrentAccount()
 
   const priceService = usePriceService({ chainId, publicClient})
 

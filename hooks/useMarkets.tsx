@@ -8,6 +8,6 @@ export function useMarkets({ chainId }) {
     return useQuery({
         queryKey: ['AllMarkets', chainId],
         queryFn: () => marketInfoService.findAllMarkets(),
-        refetchInterval: (3 * 60 * 1000)
+        //refetchInterval: (3 * 60 * 1000)
     })
 }

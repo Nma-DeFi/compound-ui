@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js"
 import { formatUnits, parseUnits } from "viem"
 
-export const Zero = bn(0)
+export const Zero = bn(0), One = bn(1)
 
 export const DEFAULT_DP = 2
 export const DEFAULT_TRIM = true

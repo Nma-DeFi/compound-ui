@@ -207,21 +207,21 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
                           id={css['deposit-input']} 
                           onChange={handleAmountChange} 
                           disabled={Mode.Init === mode} 
-                          focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
+                          focused={false} />
                         <div className="small text-body-tertiary">
                           <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>
-                          <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
-                              <div className="d-flex align-items-center">
-                                  <TokenIcon symbol={token?.symbol} width={30} />
-                                  <span className="px-3">{token?.symbol}</span> 
-                              </div>
-                          </button>
-                          <div className="text-center text-body-secondary small">
-                            Wallet : <span className="text-body-tertiary"><AsyncAmount {...asyncBalance} /></span>
-                          </div>
+                        <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
+                            <div className="d-flex align-items-center">
+                                <TokenIcon symbol={token?.symbol} width={30} />
+                                <span className="px-3">{token?.symbol}</span> 
+                            </div>
+                        </button>
+                        <div className="text-center text-body-secondary small">
+                          Wallet : <span className="text-body-tertiary"><AsyncAmount {...asyncBalance} /></span>
+                        </div>
                       </div>
                   </div>
                   <div className="row g-2">

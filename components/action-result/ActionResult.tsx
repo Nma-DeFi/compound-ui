@@ -2,17 +2,17 @@ import { useEffect } from "react";
 import { useWaitForTransaction } from "wagmi";
 import { useCurrentChain } from "../../hooks/useCurrentChain";
 import { useAppDispatch } from "../../redux/hooks";
-import { supplyPositionsInit } from "../../redux/slices/positions/supplyPositions";
+import { supplyPositionsReset } from "../../redux/slices/positions/supplyPositions";
 import { transactionUrl } from "../../utils/chains";
 import { SmallSpinner } from "../Spinner";
 import { ActionInfo, ActionType } from "../../types";
 import { ActionLabels } from "./ActionsLabels";
-import { collateralPositionsInit } from "../../redux/slices/positions/collateralPositions";
+import { collateralPositionsReset } from "../../redux/slices/positions/collateralPositions";
 import Amount from "../Amount";
 
 type ActionResultParam = { id : string } & ActionInfo
 
-export default function ActionResult({ id, action, token, amount, hash} : ActionResultParam) {
+export default function ActionResult({ id, action, token, amount, hash } : ActionResultParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const { isLoading, isSuccess, isError, data, error } = useWaitForTransaction({ hash  })
@@ -24,11 +24,13 @@ export default function ActionResult({ id, action, token, amount, hash} : Action
             switch (action) {
                 case ActionType.DepositBaseToken:
                 case ActionType.WithdrawBaseToken:
-                    dispatch(supplyPositionsInit())
+                    //dispatch(supplyPositionsInit())
+                    dispatch(supplyPositionsReset())
                     break
                 case ActionType.DepositCollateral:
                 case ActionType.WithdrawCollateral:
-                    dispatch(collateralPositionsInit())
+                    //dispatch(collateralPositionsInit())
+                    dispatch(collateralPositionsReset())
                     break
             }
         }

@@ -17,6 +17,7 @@ import AsyncAmount from '../AmountAsync';
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async';
 import { usePositionsService } from '../../hooks/usePositionsService';
 import PriceFromFeed from '../PriceFromFeed';
+import TokenIcon from '../TokenIcon';
 
 const Mode = {
   NotConnected: 0,
@@ -169,7 +170,7 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
                           id={css['withdraw-input']} 
                           onChange={handleAmountChange} 
                           disabled={Mode.Init === mode} 
-                          focused={[Mode.NotConnected, Mode.WithdrawReady].includes(mode)} />
+                          focused={false} />
                         <div className="small text-body-tertiary">
                           <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
@@ -177,7 +178,7 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
                       <div>
                           <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
                               <div className="d-flex align-items-center">
-                                  <img src={`/images/tokens/${token?.symbol}.svg`} alt="USDC" width="30" /> 
+                                  <TokenIcon symbol={token?.symbol} width="30" />
                                   <span className="px-3">{token?.symbol}</span> 
                               </div>
                           </button>

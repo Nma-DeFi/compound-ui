@@ -7,8 +7,8 @@ import { useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
 import { getBaseTokenOrNativeCurrency, getPriceFeedKind } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
-import { Zero, bn, bnf } from "../../utils/bn"
-import { baseTokePriceFeed, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
+import { Zero, bn } from "../../utils/bn"
+import { baseTokePriceFeed, baseToken, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
 import AmountInput from "../../components/AmountInput"
@@ -17,13 +17,16 @@ import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useBorrowCapacity } from "../../hooks/useBorrowCapacity"
 import BigNumber from "bignumber.js"
 import PriceAsync from "../../components/PriceAsync"
-import PriceFromFeed from "../../components/PriceFromFeed"
 import { PriceFeed } from "../../types"
-import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import { usePublicClient } from "wagmi"
-import { AsyncBigNumber, IdleData, LoadingData, SuccessData } from "../../utils/async"
+import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
+import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
+import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/borrow/BorrowErc20Token"
+import { nf } from "../../utils/number"
+import { SmallSpinner } from "../../components/Spinner"
 
 const enum Mode {
+  Loading,
   NotConnected,
   FarmingBaseToken,
   InsufficientBorrowCapacity,
@@ -34,9 +37,12 @@ export default function Borrow() {
 
     const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
-    const [ amountUsd, setAmountUsd ] = useState<AsyncBigNumber>(IdleData)
-    const [ selectedMarket, setSelectedMarket ] = useState(null)
+    const [ borrowApr, setBorrowApr ] = useState<Number>()
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
+    const [ borrowInfo, setBorrowInfo ] = useState(null)
+    const [ selectedMarket, setSelectedMarket ] = useState(null)
+
+    const marketId = cometProxy(selectedMarket)
 
     const { isConnected } = useCurrentAccount()
 
@@ -48,28 +54,19 @@ export default function Borrow() {
 
     const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
     
-    const asyncBorrowCapacity  =  useBorrowCapacity({ isConnected, chainId, publicClient, marketId: cometProxy(selectedMarket) })
+    const asyncBorrowCapacity  =  useBorrowCapacity({ chainId, publicClient, marketId })
     
-    const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
-
-    const { isLoading: isLoadingPrice, isSuccess: isSuccessPrice, data: price } = usePriceFromFeed({ chainId, publicClient, priceFeed })
-
-    useEffect(() => {
-      if (isLoadingPrice) {
-        setAmountUsd(LoadingData)
-      } else if (isSuccessPrice)  {
-        setAmountUsd(SuccessData(amount.times(price)))
-      } else {
-        setAmountUsd(IdleData)
-      }
-  }, [isLoadingPrice, isSuccessPrice, amount])
+    const asyncAmountUsd = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
 
     const { openModal } = useBootstrap()
 
+    const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
+    const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountUsd
+
     useEffect(() => { 
-      if (!selectedMarket) return
-      if (isConnected && (!isSupplyPositions || !isBorrowCapacity || !amountUsd.isSuccess)) return
-      if (!isConnected) {
+      if (isLoading()) {
+        setMode(Mode.Loading)
+      } else if (!isConnected) {
         setMode(Mode.NotConnected)
       } else if (isFarmingBaseToken()) {
         setMode(Mode.FarmingBaseToken)
@@ -88,22 +85,28 @@ export default function Borrow() {
 
     useEffect(() => {
       if (selectedMarket) {
+        const borrowApr = Number(netBorrowAprScaled(selectedMarket))
+        const priceFeedAddress = baseTokePriceFeed(selectedMarket)
+        const priceFeedKind = getPriceFeedKind(selectedMarket, chainId)
         setAmount(Zero)
         setInput(null)
-        setPriceFeed({
-          address: baseTokePriceFeed(selectedMarket),
-          kind: getPriceFeedKind(selectedMarket, chainId),
-        })
+        setBorrowApr(borrowApr)
+        setPriceFeed({ address: priceFeedAddress, kind: priceFeedKind })
       }
     }, [chainId, selectedMarket])
 
+    function isLoading() {
+      if (!isMarkets || !selectedMarket) return true
+      if (isConnected && (!isSupplyPositions || !isBorrowCapacity || !isAmountUsd)) return true
+      return false
+    }
+
     function isFarmingBaseToken() {
-      const comet = cometProxy(selectedMarket)
-      return supplyPositions[comet].supplyBalance.isGreaterThan(Zero)
+      return supplyPositions[marketId].supplyBalance.isGreaterThan(Zero)
     }
 
     function isInsufficientBorrowCap() {
-      return borrowCapacity.isEqualTo(Zero) || borrowCapacity.isLessThan(amountUsd.data)
+      return borrowCapacity.isEqualTo(Zero) || borrowCapacity.isLessThan(amountUsd)
     }
     
     function handleAmountChange(event) {
@@ -111,8 +114,15 @@ export default function Borrow() {
       setAmount(amount)
     }
 
+    function handleBorrow() {
+      const token = baseToken(selectedMarket)
+      setBorrowInfo({ comet: marketId, token, amount, priceFeed, borrowApr })
+      openModal(BORROW_ERC20_MODAL)
+    }
+    
     function setInput(value: string) {
-      const elem = document.getElementById(css['borrow-input']) 
+      const id = css['borrow-input']
+      const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement
       input.value = value ?? ''
     }
@@ -123,6 +133,7 @@ export default function Borrow() {
           <title>Borrow</title>
         </Head>
         <SelectTokenToBorrow onSelect={setSelectedMarket} />
+        <BorrowErc20Token  {...borrowInfo} />
         <div className="col-12 col-xl-6 col-xxl-5 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
@@ -134,28 +145,47 @@ export default function Borrow() {
                       disabled={false} 
                       focused={true} />
                     <small className="text-body-tertiary">
-                      <PriceAsync asyncPrice={amountUsd} />
+                    { mode === Mode.Loading ? (
+                        <PlaceHolder />
+                      ) : (
+                        <PriceAsync asyncPrice={asyncAmountUsd} />
+                      )
+                    }
                     </small>
                 </div>
                 <button type="button" className="btn btn-lg btn-light border border-light-subtle rounded-5" onClick={() => openModal(SELECT_TOKEN_TO_BORROW_MODAL)}>
-                    <div className="d-flex align-items-center">
-                        <TokenIcon symbol={getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol} css="me-2 me-sm-3" width="35" />
-                        <span className="me-2 me-sm-3">{getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol}</span> 
+                  { mode === Mode.Loading ? (
+                      <div className="d-flex align-items-center">
+                        <div className="me-1 me-sm-2 mb-1" style={{ width: '6rem'}}>
+                          <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} />
+                        </div>
                         <i className="bi bi-chevron-down"></i>
-                    </div>
+                        </div>
+                    ) : (
+                      <div className="d-flex align-items-center">
+                        <TokenIcon symbol={getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol} css="me-2 me-sm-3" width="35" />
+                        <span className="me-2 me-sm-3">
+                          {getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol}
+                        </span> 
+                        <i className="bi bi-chevron-down"></i>
+                      </div>
+                    )
+                  }
                 </button>
             </div>
             <div className="d-flex flex-wrap justify-content-between mb-4">
                 <div>
+                { mode === Mode.Loading  &&
+                  <div style={{ width: '20rem'}}>
+                    <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} css="d-block mb-1" />
+                    <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} />
+                  </div>
+                }
                 { mode === Mode.NotConnected &&
-                  <>
-                    Connect your wallet
-                  </>
+                  <>Connect your wallet</>
                 }
                 { mode === Mode.FarmingBaseToken &&
-                  <>
-                    Cannot supply and borrow at the same time
-                  </>
+                  <>Cannot supply and borrow at the same time</>
                 }
                 { mode === Mode.InsufficientBorrowCapacity &&
                   <>
@@ -173,7 +203,7 @@ export default function Borrow() {
                   <>
                     <div className="mb-1">Maximum borrowing : <span className="text-body-tertiary">
                       <PriceAsync asyncPrice={{ 
-                        isIdle: asyncBorrowCapacity.isError, 
+                        isIdle: asyncBorrowCapacity.isPending, 
                         isLoading: asyncBorrowCapacity.isLoading, 
                         isSuccess: asyncBorrowCapacity.isSuccess, 
                         isError: asyncBorrowCapacity.isError, 
@@ -183,12 +213,27 @@ export default function Borrow() {
                   </>
                 }
                 </div>
-                <div className="d-flex align-items-start my-2 my-sm-0">
-                    <small className="px-2 py-1 me-1 shadow-sm rounded">Borrow APR : <span className="text-body-tertiary">{bnf(netBorrowAprScaled(selectedMarket))}<small>%</small></span></small>
+                <div className="my-2 my-sm-0">
+                    <div className="px-2 py-1 me-1 shadow-sm rounded small">
+                      { mode === Mode.Loading ? 
+                      (
+                        <div style={{ width: '6rem'}}>
+                          <PlaceHolder size={PlaceHolderSize.SMALL} col={12} />
+                        </div>
+                      ) : (
+                        <>Borrow APR : <span className="text-body-tertiary">{nf(borrowApr)}<small>%</small></span></>
+                      )
+                    }
+                    </div>
                 </div>
             </div>
             <div className="d-grid">
-                <button className="btn btn-lg btn-primary text-white" type="button">Borrow USDC</button>
+                { mode === Mode.Loading ? (
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Loading <SmallSpinner /></button>
+                  ) : (
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol}</button>
+                  )
+                }
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { GraphQLClient } from "graphql-request";
 import { CompoundConfig} from "../compound-config";
 import { Sdk, getSdk } from "../graphql/generated/sdk";
-import { percentScale, presentBaseValue, tokenScale } from "../comet"
+import { percentScale, presentBaseValue, amountScale } from "../comet"
 import { baseTokenDecimals } from "../selectors/market-selector";
 
 export class MarketDataService {
@@ -29,7 +29,7 @@ export class MarketDataService {
             return { 
                 ...m,
                 userPosition: {
-                    balance: tokenScale(userBaseBalance, decimals),
+                    balance: amountScale(userBaseBalance, decimals),
                     balanceUsd: position?.accounting.baseBalanceUsd || 0,
                 }
             }
@@ -45,8 +45,9 @@ export class MarketDataService {
         market.accounting.netBorrowAprScaled = percentScale(market.accounting.netBorrowApr)
         market.accounting.rewardBorrowAprScaled = percentScale(market.accounting.rewardBorrowApr)
         market.accounting.borrowAprScaled = percentScale(market.accounting.borrowApr)
-        market.accounting.totalBaseSupplyScaled = tokenScale(market.accounting.totalBaseSupply, decimals)
-        market.accounting.totalPresentSupplyScaled = tokenScale(presentTotalBaseSupply, decimals)
+        market.accounting.totalBaseSupplyScaled = amountScale(market.accounting.totalBaseSupply, decimals)
+        market.accounting.totalPresentSupplyScaled = amountScale(presentTotalBaseSupply, decimals)
+        market.configuration.baseBorrowMinScaled = amountScale(market.configuration.baseBorrowMin, decimals)
         return market
     }
 }

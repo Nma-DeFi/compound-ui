@@ -7,8 +7,8 @@ import { useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
 import { getBaseTokenOrNativeCurrency, getPriceFeedKind } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
-import { Zero, bn } from "../../utils/bn"
-import { baseTokePriceFeed, baseToken, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
+import { Zero, bn, bnf } from "../../utils/bn"
+import { baseBorrowMinScaled, baseTokePriceFeed, baseToken, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
 import AmountInput from "../../components/AmountInput"
@@ -24,18 +24,20 @@ import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
 import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/borrow/BorrowErc20Token"
 import { nf } from "../../utils/number"
 import { SmallSpinner } from "../../components/Spinner"
+import Amount from "../../components/Amount"
 
 const enum Mode {
   Loading,
   NotConnected,
   FarmingBaseToken,
   InsufficientBorrowCapacity,
+  InsufficientBorrowAmount,
   ReadyToBorrow,
 }
 
 export default function Borrow() {
 
-    const [ mode, setMode ] = useState<Mode>()
+    const [ mode, setMode ] = useState<Mode>(Mode.Loading)
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ borrowApr, setBorrowApr ] = useState<Number>()
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
@@ -60,6 +62,9 @@ export default function Borrow() {
 
     const { openModal } = useBootstrap()
 
+    const minBorrowAmount = baseBorrowMinScaled(selectedMarket)
+    const token = getBaseTokenOrNativeCurrency(selectedMarket, chainId)
+
     const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
     const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountUsd
 
@@ -72,6 +77,8 @@ export default function Borrow() {
         setMode(Mode.FarmingBaseToken)
       } else if (isInsufficientBorrowCap()) {
         setMode(Mode.InsufficientBorrowCapacity)
+      }  else if (isInsufficientBorrowAmount()) {
+        setMode(Mode.InsufficientBorrowAmount)
       } else {
         setMode(Mode.ReadyToBorrow)
       }
@@ -106,7 +113,11 @@ export default function Borrow() {
     }
 
     function isInsufficientBorrowCap() {
-      return borrowCapacity.isEqualTo(Zero) || borrowCapacity.isLessThan(amountUsd)
+      return borrowCapacity.isZero() || borrowCapacity.isLessThan(amountUsd)
+    }
+
+    function isInsufficientBorrowAmount() {
+      return !amount.isZero() && amount.isLessThan(minBorrowAmount)
     }
     
     function handleAmountChange(event) {
@@ -115,7 +126,7 @@ export default function Borrow() {
     }
 
     function handleBorrow() {
-      const token = baseToken(selectedMarket)
+      if (amount.isZero()) return
       setBorrowInfo({ comet: marketId, token, amount, priceFeed, borrowApr })
       openModal(BORROW_ERC20_MODAL)
     }
@@ -146,7 +157,7 @@ export default function Borrow() {
                       focused={true} />
                     <small className="text-body-tertiary">
                     { mode === Mode.Loading ? (
-                        <PlaceHolder />
+                        <PlaceHolder col={2} />
                       ) : (
                         <PriceAsync asyncPrice={asyncAmountUsd} />
                       )
@@ -163,9 +174,9 @@ export default function Borrow() {
                         </div>
                     ) : (
                       <div className="d-flex align-items-center">
-                        <TokenIcon symbol={getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol} css="me-2 me-sm-3" width="35" />
+                        <TokenIcon symbol={ token?.symbol } css="me-2 me-sm-3" width="35" />
                         <span className="me-2 me-sm-3">
-                          {getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol}
+                          { token?.symbol }
                         </span> 
                         <i className="bi bi-chevron-down"></i>
                       </div>
@@ -199,6 +210,9 @@ export default function Borrow() {
                     <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Add collateral <i className="bi bi-arrow-right"></i></Link>
                   </>
                 }
+                { mode === Mode.InsufficientBorrowAmount &&
+                  <>Minimum borrow amount : <Amount value={minBorrowAmount} /> { token?.symbol }</>
+                }
                 { mode === Mode.ReadyToBorrow &&
                   <>
                     <div className="mb-1">Maximum borrowing : <span className="text-body-tertiary">
@@ -231,7 +245,7 @@ export default function Borrow() {
                 { mode === Mode.Loading ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Loading <SmallSpinner /></button>
                   ) : (
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {getBaseTokenOrNativeCurrency(selectedMarket, chainId)?.symbol}</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {token?.symbol}</button>
                   )
                 }
             </div>

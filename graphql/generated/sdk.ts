@@ -8269,7 +8269,7 @@ export type MarketByIdQuery = { __typename?: 'Query', market?: { __typename?: 'M
 export type AllMarketsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null } }, collateralTokens: Array<{ __typename?: 'CollateralToken', borrowCollateralFactor: any, liquidateCollateralFactor: any, liquidationFactor: any, supplyCap: any, priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, decimals?: number | null, address: any } }> }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any, netBorrowApr: any, rewardBorrowApr: any, borrowApr: any } }> };
+export type AllMarketsQuery = { __typename?: 'Query', markets: Array<{ __typename?: 'Market', id: any, cometProxy: any, configuration: { __typename?: 'MarketConfiguration', baseBorrowMin: any, baseToken: { __typename?: 'BaseToken', priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, address: any, decimals?: number | null } }, collateralTokens: Array<{ __typename?: 'CollateralToken', borrowCollateralFactor: any, liquidateCollateralFactor: any, liquidationFactor: any, supplyCap: any, priceFeed: any, token: { __typename?: 'Token', name: string, symbol: string, decimals?: number | null, address: any } }> }, accounting: { __typename?: 'MarketAccounting', baseSupplyIndex: any, totalBasePrincipalSupply: any, totalBaseSupply: any, totalBaseSupplyUsd: any, lastAccrualTime: any, netSupplyApr: any, rewardSupplyApr: any, supplyApr: any, netBorrowApr: any, rewardBorrowApr: any, borrowApr: any } }> };
 
 export type MarketsByQueryVariables = Exact<{
   where?: InputMaybe<Market_Filter>;
@@ -8312,6 +8312,7 @@ export const AllMarketsDocument = gql`
     id
     cometProxy
     configuration {
+      baseBorrowMin
       baseToken {
         priceFeed
         token {

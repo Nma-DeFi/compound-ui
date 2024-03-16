@@ -135,7 +135,7 @@ export default function Collateral() {
                     <h2 className="mb-2">Collateral</h2>
                     { isMarkets && 
                         <>
-                            <span className="fs-5 text-body-secondary">{getBaseTokenOrNativeCurrency(markets[marketIndex], chainId).symbol}</span>
+                            <span className="fs-5 text-body-secondary">{getBaseTokenOrNativeCurrency(markets[marketIndex], chainId)?.symbol}</span>
                             <span className="text-body-secondary ps-2">Market</span> 
                             {isConnected && 
                                 <span className="text-body-tertiary ps-2">: <PriceAsync asyncPrice={{ 
@@ -153,8 +153,8 @@ export default function Collateral() {
                     <div className="d-flex justify-content-around justify-content-sm-end pt-5 pt-sm-0">
                         { isMarkets && markets.map((market, index) =>
                             <div key={market.id} className={marketlinkCss(index)} onClick={() => setMarketIndex(index)}>
-                                <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} css={`me-2 ${css['market-icon']}`} />
-                                {getBaseTokenOrNativeCurrency(market, chainId).symbol} <span className="text-body-tertiary ps-1">Market</span>
+                                <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} css={`me-2 ${css['market-icon']}`} />
+                                {getBaseTokenOrNativeCurrency(market, chainId)?.symbol} <span className="text-body-tertiary ps-1">Market</span>
                             </div>
                         )}
                     </div>
@@ -170,10 +170,10 @@ export default function Collateral() {
                 <div key={collateral.token.address} className="row g-0 bg-body shadow border rounded p-3 mb-4">
                     <div className="col-12 col-sm-5">
                         <div className="d-flex align-items-center justify-content-start mb-5 mb-sm-0">
-                            <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token).symbol} width="48" />
+                            <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="48" />
                             <div className={css['collateral-name']}>
-                                <div className="fs-5 fw-semibold">{getTokenOrNativeCurrency(chainId, collateral.token).symbol}</div>
-                                <div className="text-body-secondary">{getTokenOrNativeCurrency(chainId, collateral.token).name}</div>
+                                <div className="fs-5 fw-semibold">{getTokenOrNativeCurrency(chainId, collateral.token)?.symbol}</div>
+                                <div className="text-body-secondary">{getTokenOrNativeCurrency(chainId, collateral.token)?.name}</div>
                             </div>
                         </div>
                     </div>

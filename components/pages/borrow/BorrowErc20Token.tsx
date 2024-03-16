@@ -17,7 +17,7 @@ export const BORROW_ERC20_MODAL = 'borrow-erc20-borrow'
 const enum Mode {
   Init,
   BorrowReady,
-  ConfirmationOfTransaction,
+  ConfirmTransaction,
   WaitingForTransaction,
 }
 
@@ -50,7 +50,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
 
   
   useEffect(() => {
-    if (mode === Mode.ConfirmationOfTransaction && transactionHash) {
+    if (mode === Mode.ConfirmTransaction && transactionHash) {
       setMode(Mode.WaitingForTransaction)
       //setWithdrawInfo({ action: withdrawType, token, amount, hash: transactionHash })
       hideModal(BORROW_ERC20_MODAL)
@@ -71,7 +71,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
   }
 
   function handleBorrow() {
-    setMode(Mode.ConfirmationOfTransaction)
+    setMode(Mode.ConfirmTransaction)
     withdrawService.withdrawErc20Token({ token, amount }).then(setTransactionHash)
   }
 
@@ -103,7 +103,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
               { mode === Mode.BorrowReady &&
                 <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Withdraw {token?.symbol}</button>
               }
-              { mode === Mode.ConfirmationOfTransaction &&
+              { mode === Mode.ConfirmTransaction &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
               }
             </div>

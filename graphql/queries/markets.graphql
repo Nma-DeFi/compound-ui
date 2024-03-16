@@ -10,6 +10,7 @@ query AllMarkets {
         id
         cometProxy
         configuration {
+            baseBorrowMin
             baseToken {
                 priceFeed
                 token {

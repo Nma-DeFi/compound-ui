@@ -129,12 +129,12 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
               <Step label="Enable loan"/>
               <Step label="Confirm loan" />
             </Stepper>*/}
-            <div className="d-grid">
+            <div className="d-grid mt-4">
               { mode === Mode.Init &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
               }
               { mode === Mode.BorrowReady &&
-                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Withdraw {token?.symbol}</button>
+                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {token?.symbol}</button>
               }
               { mode === Mode.ConfirmLoan &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>

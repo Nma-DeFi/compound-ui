@@ -96,12 +96,12 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
               <div className="me-auto">Borrow APR : <span className="text-body-tertiary">{nf(borrowApr)}<small>%</small></span></div>
               <div>Liquidation risk : <span className="text-success">{NoData}</span></div>
             </div>
-            <div className="d-grid pt-1">
+            <div className="d-grid mt-4">
               { mode === Mode.Init &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
               }
               { mode === Mode.BorrowReady &&
-                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Withdraw {token?.symbol}</button>
+                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {token?.symbol}</button>
               }
               { mode === Mode.ConfirmTransaction &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>

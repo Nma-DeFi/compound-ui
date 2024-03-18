@@ -17,36 +17,10 @@ import WithdrawErc20Token, { WITHDRAW_ERC20_TOKEN_MODAL } from '../../components
 import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from '../../components/withdraw/WithdrawNativeCurrency';
 import { useCollateralPositions } from '../../hooks/useCollateralPositions';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
-import { getCollateralUsdBalanceByMarket } from '../../redux/helpers/collateral';
 import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
-import { usePriceService } from '../../hooks/usePriceService';
-import { usePublicClient } from 'wagmi';
 import PriceAsync from '../../components/PriceAsync';
-import { useQuery } from '@tanstack/react-query';
-
-
-export function useTotalUsdCollateralForMarket({ asyncCollateralPositions, asyncMarkets, marketIndex }) {
-
-    const { isSuccess: isCollateralPositions, data: collateralPositions } = asyncCollateralPositions
-    const { isSuccess: isMarkets, data: markets } = asyncMarkets
-    
-    const { isConnected } = useCurrentAccount()
-    const { currentChainId: chainId } = useCurrentChain()
-
-    const publicClient = usePublicClient({ chainId })
-
-    const marketId = isMarkets ? cometProxy(markets[marketIndex]) : undefined
-
-    const priceService = usePriceService({ chainId, publicClient})
-
-    return useQuery({
-        queryKey: ['TotalUsdCollateralForMarket', chainId, marketId, collateralPositions],
-        queryFn: () => getCollateralUsdBalanceByMarket({ marketId, collateralPositions, priceService }),
-        enabled: !!(isConnected && isCollateralPositions && isMarkets && marketId && priceService),
-        staleTime: (2 * 60 * 1000),
-    })
-}
+import { useTotalUsdCollateral } from '../../hooks/useTotalUsdCollateral';
 
 export default function Collateral() {
 
@@ -73,7 +47,7 @@ export default function Collateral() {
         isSuccess: isSuccessUsdCollateral, 
         isError: isErrorUsdCollateral, 
         data: usdCollateral, 
-    } = useTotalUsdCollateralForMarket({ asyncCollateralPositions, asyncMarkets, marketIndex })
+    } = useTotalUsdCollateral({ asyncCollateralPositions, asyncMarkets, marketIndex })
 
     useEffect(() => setMarketIndex(0), [chainId])
 

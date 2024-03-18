@@ -5,10 +5,10 @@ import { useBootstrap } from "../../hooks/useBootstrap"
 import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
 import { useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
-import { getBaseTokenOrNativeCurrency, getPriceFeedKind } from "../../utils/markets"
+import { getBaseTokenOrNativeCurrency, getPriceFeedKind, isNativeCurrencyMarket } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
-import { Zero, bn, bnf } from "../../utils/bn"
-import { baseBorrowMinScaled, baseTokePriceFeed, baseToken, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
+import { Zero, bn } from "../../utils/bn"
+import { baseBorrowMinScaled, baseTokePriceFeed, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
 import AmountInput from "../../components/AmountInput"
@@ -25,6 +25,7 @@ import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/bor
 import { nf } from "../../utils/number"
 import { SmallSpinner } from "../../components/Spinner"
 import Amount from "../../components/Amount"
+import BorrowNativeCurrency, { BORROW_NATIVE_CURRENCY } from "../../components/pages/borrow/BorrowNativeCurrency"
 
 const enum Mode {
   Loading,
@@ -128,7 +129,11 @@ export default function Borrow() {
     function handleBorrow() {
       if (amount.isZero()) return
       setBorrowInfo({ comet: marketId, token, amount, priceFeed, borrowApr })
-      openModal(BORROW_ERC20_MODAL)
+      if (isNativeCurrencyMarket(selectedMarket, chainId)) {
+        openModal(BORROW_NATIVE_CURRENCY)
+      } else {
+        openModal(BORROW_ERC20_MODAL)
+      }
     }
     
     function setInput(value: string) {
@@ -145,6 +150,7 @@ export default function Borrow() {
         </Head>
         <SelectTokenToBorrow onSelect={setSelectedMarket} />
         <BorrowErc20Token  {...borrowInfo} />
+        <BorrowNativeCurrency  {...borrowInfo} />
         <div className="col-12 col-xl-6 col-xxl-5 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>

@@ -11,17 +11,21 @@ import { SmallSpinner } from "../../Spinner"
 import { Hash } from "viem"
 import { useWithdrawService } from "../../../hooks/useWithdrawService"
 import { useCurrentAccount } from "../../../hooks/useCurrentAccount"
+//import { Step, Stepper } from "react-form-stepper"
 
-export const BORROW_ERC20_MODAL = 'borrow-erc20-borrow'
+export const BORROW_NATIVE_CURRENCY = 'borrow-native-currency'
 
 const enum Mode {
   Init,
+  BulkerNotApproved,
+  ConfirmBulkerApproval,
+  WaitingForBulkerApproval,
   BorrowReady,
-  ConfirmTransaction,
-  WaitingForTransaction,
+  ConfirmLoan,
+  WaitingForLoan,
 }
 
-export default function BorrowErc20Token({ comet, token, amount, priceFeed, borrowApr }) {
+export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, borrowApr }) {
   
   const [ mode, setMode ] = useState<Mode>()
   const [ transactionHash, setTransactionHash ] = useState<Hash>()
@@ -38,7 +42,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
 
   const price = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
 
-  const modalEvent = useModalEvent(BORROW_ERC20_MODAL)
+  const modalEvent = useModalEvent(BORROW_NATIVE_CURRENCY)
 
   const { hideModal } = useBootstrap()
 
@@ -50,10 +54,10 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
 
   
   useEffect(() => {
-    if (mode === Mode.ConfirmTransaction && transactionHash) {
-      setMode(Mode.WaitingForTransaction)
+    if (mode === Mode.ConfirmLoan && transactionHash) {
+      setMode(Mode.WaitingForLoan)
       //setWithdrawInfo({ action: withdrawType, token, amount, hash: transactionHash })
-      hideModal(BORROW_ERC20_MODAL)
+      hideModal(BORROW_NATIVE_CURRENCY)
     }
   }, [mode, transactionHash])
   
@@ -71,17 +75,17 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
   }
 
   function handleBorrow() {
-    setMode(Mode.ConfirmTransaction)
+    setMode(Mode.ConfirmLoan)
     withdrawService.withdrawErc20Token({ token, amount }).then(setTransactionHash)
   }
 
   return (
-    <div id={BORROW_ERC20_MODAL} className="modal" tabIndex={-1}>
+    <div id={BORROW_NATIVE_CURRENCY} className="modal" tabIndex={-1}>
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-body">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3 className="m-0">Borrow</h3>
+              <h3 className="m-0">Borrow native</h3>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="text-center rounded py-3 px-3 mb-2 bg-body-tertiary">
@@ -92,18 +96,47 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
                 <PriceAsync asyncPrice={price} />
               </div>
             </div>  
-            <div className="d-flex small mb-4">
+            <div className="d-flex small">
               <div className="me-auto">Borrow APR : <span className="text-body-tertiary">{nf(borrowApr)}<small>%</small></span></div>
               <div>Liquidation risk : <span className="text-success">{NoData}</span></div>
             </div>
-            <div className="d-grid pt-1">
+            {/*<Stepper activeStep={1} 
+              connectorStyleConfig={{ 
+                size: 2, 
+                disabledColor: '#bdbdbd',
+                activeColor: '#ed1d24',
+                completedColor: '#a10308',
+                style: 'solid',
+                stepSize: '2em'
+              }}
+              styleConfig={{ 
+                  size: 30,  
+                  activeBgColor : undefined,
+                  activeTextColor : undefined,
+                  completedBgColor : undefined,
+                  completedTextColor : undefined,
+                  inactiveBgColor : undefined,
+                  inactiveTextColor : undefined,
+                  circleFontSize : undefined,
+                  labelFontSize : undefined,
+                  borderRadius : undefined,
+                  fontWeight : undefined,
+                }}>
+              <Step label="Enable loan" active={false} completed={false} />
+              <Step label="Confirm loan" />
+              </Stepper>
+            <Stepper activeStep={1} className="my-2 rounded border">
+              <Step label="Enable loan"/>
+              <Step label="Confirm loan" />
+            </Stepper>*/}
+            <div className="d-grid">
               { mode === Mode.Init &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
               }
               { mode === Mode.BorrowReady &&
                 <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Withdraw {token?.symbol}</button>
               }
-              { mode === Mode.ConfirmTransaction &&
+              { mode === Mode.ConfirmLoan &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
               }
             </div>

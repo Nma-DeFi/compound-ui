@@ -17,7 +17,7 @@ import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useBorrowCapacity } from "../../hooks/useBorrowCapacity"
 import BigNumber from "bignumber.js"
 import PriceAsync from "../../components/PriceAsync"
-import { PriceFeed } from "../../types"
+import { ActionInfo, PriceFeed } from "../../types"
 import { usePublicClient } from "wagmi"
 import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
@@ -26,6 +26,7 @@ import { nf } from "../../utils/number"
 import { SmallSpinner } from "../../components/Spinner"
 import Amount from "../../components/Amount"
 import BorrowNativeCurrency, { BORROW_NATIVE_CURRENCY } from "../../components/pages/borrow/BorrowNativeCurrency"
+import ActionResult from "../../components/action-result/ActionResult"
 
 const enum Mode {
   Loading,
@@ -36,13 +37,15 @@ const enum Mode {
   ReadyToBorrow,
 }
 
+export const BORROW_RESULT_TOAST = 'borrow-result-toast'
+
 export default function Borrow() {
 
     const [ mode, setMode ] = useState<Mode>(Mode.Loading)
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
-    const [ borrowApr, setBorrowApr ] = useState<Number>()
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
+    const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ selectedMarket, setSelectedMarket ] = useState(null)
 
     const marketId = cometProxy(selectedMarket)
@@ -63,8 +66,11 @@ export default function Borrow() {
 
     const { openModal } = useBootstrap()
 
-    const minBorrowAmount = baseBorrowMinScaled(selectedMarket)
     const token = getBaseTokenOrNativeCurrency(selectedMarket, chainId)
+    const borrowApr = netBorrowAprScaled(selectedMarket)
+    const minBorrowAmount = baseBorrowMinScaled(selectedMarket)
+    const priceFeedAddress = baseTokePriceFeed(selectedMarket)
+    const priceFeedKind = getPriceFeedKind(selectedMarket, chainId)
 
     const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
     const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountUsd
@@ -93,12 +99,8 @@ export default function Borrow() {
 
     useEffect(() => {
       if (selectedMarket) {
-        const borrowApr = Number(netBorrowAprScaled(selectedMarket))
-        const priceFeedAddress = baseTokePriceFeed(selectedMarket)
-        const priceFeedKind = getPriceFeedKind(selectedMarket, chainId)
         setAmount(Zero)
         setInput(null)
-        setBorrowApr(borrowApr)
         setPriceFeed({ address: priceFeedAddress, kind: priceFeedKind })
       }
     }, [chainId, selectedMarket])
@@ -128,7 +130,13 @@ export default function Borrow() {
 
     function handleBorrow() {
       if (amount.isZero()) return
-      setBorrowInfo({ comet: marketId, token, amount, priceFeed, borrowApr })
+      const borrowInfo = { 
+        comet: marketId, 
+        token, amount, 
+        priceFeed, borrowApr, 
+        onBorrow: setBorrowResult 
+      }
+      setBorrowInfo(borrowInfo)
       if (isNativeCurrencyMarket(selectedMarket, chainId)) {
         openModal(BORROW_NATIVE_CURRENCY)
       } else {
@@ -151,6 +159,7 @@ export default function Borrow() {
         <SelectTokenToBorrow onSelect={setSelectedMarket} />
         <BorrowErc20Token  {...borrowInfo} />
         <BorrowNativeCurrency  {...borrowInfo} />
+        <ActionResult {...{id: BORROW_RESULT_TOAST, ...borrowResult}} />
         <div className="col-12 col-xl-6 col-xxl-5 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>

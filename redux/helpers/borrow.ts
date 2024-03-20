@@ -11,27 +11,27 @@ export async function getBorrowCapacity({ marketId, borrowPositions, collateralP
     priceService: PriceService
   }) {
 
-    const { borrowBalance, priceFeed: baseTokenPriceFeed } = borrowPositions[marketId]
-    const collatPositions = Object.values(collateralPositions[marketId]).filter(p => p.balance.gt(Zero));
-    const collatPriceFeeds = collatPositions.map(p => p.priceFeed)
+  const { borrowBalance, priceFeed: baseTokenPriceFeed } = borrowPositions[marketId]
+  const collatPositions = Object.values(collateralPositions[marketId]).filter(p => p.balance.gt(Zero));
+  const collatPriceFeeds = collatPositions.map(p => p.priceFeed)
 
-    console.log('getBorrowCapacity executed', marketId, borrowPositions, collateralPositions, priceService)
-    
-    const prices = await priceService.getAllPricesFromFeeds([baseTokenPriceFeed, ...collatPriceFeeds])
+  console.log('getBorrowCapacity executed', marketId, borrowPositions, collateralPositions, priceService)
+  
+  const prices = await priceService.getAllPricesFromFeeds([baseTokenPriceFeed, ...collatPriceFeeds])
 
-    let borrowCapacity = borrowBalance.times(-1).times(prices[0])
+  let borrowCapacity = borrowBalance.times(-1).times(prices[0])
 
-    console.log('borrowCapacity init', bnf(borrowCapacity))
+  console.log('borrowCapacity init', bnf(borrowCapacity))
 
-    for (let index = 0; index < collatPositions.length; index++) {
-      const price = prices[index + 1]
-      const balance = collatPositions[index].balance
-      const factor = collatPositions[index].collateralFactor
-      borrowCapacity = borrowCapacity.plus(balance.times(price).times(factor))
-      console.log('borrowCapacity', index, bnf(borrowCapacity))
-    }
+  for (let index = 0; index < collatPositions.length; index++) {
+    const price = prices[index + 1]
+    const balance = collatPositions[index].balance
+    const factor = collatPositions[index].collateralFactor
+    borrowCapacity = borrowCapacity.plus(balance.times(price).times(factor))
+    console.log('borrowCapacity', index, bnf(borrowCapacity))
+  }
 
-    console.log('borrowCapacity final', bnf(borrowCapacity))
+  console.log('borrowCapacity final', bnf(borrowCapacity))
 
   return borrowCapacity
 }

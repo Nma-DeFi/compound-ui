@@ -29,7 +29,15 @@ export const supplyPositionsSlice = createSlice({
     supplyPositionsReset: (state: SupplyPositionsState) => {
       state.data = undefined
       Object.assign(state, AsyncStatus.Idle)
-    }
+    },
+    supplyPositionsIncrease: (state, action) => {
+      const oldSupplyBalance = state.data[action.payload.comet].supplyBalance
+      state.data[action.payload.comet].supplyBalance = oldSupplyBalance.plus(action.payload.value)
+    },
+    /*supplyPositionsDecrease: (state: SupplyPositionsState, action: PayloadAction<{comet: Address, value: BigNumber}>) => {
+      state.data = action.payload
+      Object.assign(state, AsyncStatus.Success)
+    }*/
   },
   extraReducers(builder) {
       builder

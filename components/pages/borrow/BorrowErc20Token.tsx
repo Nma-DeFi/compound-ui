@@ -11,8 +11,8 @@ import { SmallSpinner } from "../../Spinner"
 import { Hash } from "viem"
 import { useWithdrawService } from "../../../hooks/useWithdrawService"
 import { useCurrentAccount } from "../../../hooks/useCurrentAccount"
-
-export const BORROW_ERC20_MODAL = 'borrow-erc20-borrow'
+import { ActionType } from "../../../types"
+import { BORROW_RESULT_TOAST } from "../../../pages/borrow"
 
 const enum Mode {
   Init,
@@ -21,7 +21,9 @@ const enum Mode {
   WaitingForTransaction,
 }
 
-export default function BorrowErc20Token({ comet, token, amount, priceFeed, borrowApr }) {
+export const BORROW_ERC20_MODAL = 'borrow-erc20-borrow'
+
+export default function BorrowErc20Token({ comet, token, amount, priceFeed, borrowApr, onBorrow }) {
   
   const [ mode, setMode ] = useState<Mode>()
   const [ transactionHash, setTransactionHash ] = useState<Hash>()
@@ -40,19 +42,18 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
 
   const modalEvent = useModalEvent(BORROW_ERC20_MODAL)
 
-  const { hideModal } = useBootstrap()
+  const { hideModal, openToast } = useBootstrap()
 
   useEffect(() => {
     if (mode === Mode.Init && withdrawService && price.isSuccess) {
       setMode(Mode.BorrowReady)
     }
   }, [mode, withdrawService, price])
-
   
   useEffect(() => {
     if (mode === Mode.ConfirmTransaction && transactionHash) {
       setMode(Mode.WaitingForTransaction)
-      //setWithdrawInfo({ action: withdrawType, token, amount, hash: transactionHash })
+      onBorrow({ action: ActionType.Borrow, token, amount, hash: transactionHash })
       hideModal(BORROW_ERC20_MODAL)
     }
   }, [mode, transactionHash])
@@ -62,12 +63,21 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
       case 'show':
         onOpen()
         break
+      case 'hidden':
+        onHide()
+        break
     } 
   }, [modalEvent])
 
   function onOpen() {
     setMode(Mode.Init)
     setTransactionHash(null)
+  }
+
+  function onHide() {
+    if (mode === Mode.WaitingForTransaction) {
+      openToast(BORROW_RESULT_TOAST)
+    }
   }
 
   function handleBorrow() {

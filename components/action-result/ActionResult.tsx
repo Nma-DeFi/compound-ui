@@ -9,6 +9,7 @@ import { ActionInfo, ActionType } from "../../types";
 import { ActionLabels } from "./ActionsLabels";
 import { collateralPositionsReset } from "../../redux/slices/positions/collateralPositions";
 import Amount from "../Amount";
+import { borrowPositionsReset } from "../../redux/slices/positions/borrowPositions";
 
 type ActionResultParam = { id : string } & ActionInfo
 
@@ -24,13 +25,14 @@ export default function ActionResult({ id, action, token, amount, hash } : Actio
             switch (action) {
                 case ActionType.DepositBaseToken:
                 case ActionType.WithdrawBaseToken:
-                    //dispatch(supplyPositionsInit())
                     dispatch(supplyPositionsReset())
                     break
                 case ActionType.DepositCollateral:
                 case ActionType.WithdrawCollateral:
-                    //dispatch(collateralPositionsInit())
                     dispatch(collateralPositionsReset())
+                    break
+                case ActionType.Borrow:
+                    dispatch(borrowPositionsReset())
                     break
             }
         }
@@ -50,7 +52,7 @@ export default function ActionResult({ id, action, token, amount, hash } : Actio
                             <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                         <div className="toast-body text-center px-0 py-4">
-                            <h5 className="mb-4">{ActionLabels[action].content} of <span className="text-body-secondary"><Amount value={amount} /> { token?.symbol }</span></h5>
+                            <h5 className="mb-4">{ActionLabels[action].content} <span className="text-body-secondary"><Amount value={amount} /> { token?.symbol }</span></h5>
                             <div className="fs-6 text-body-secondary">Wait please <SmallSpinner /></div>
                         </div>
                     </>

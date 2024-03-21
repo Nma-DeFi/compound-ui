@@ -44,7 +44,7 @@ export default function Collateral() {
 
     const { isSuccess: isMarkets, data: markets } = asyncMarkets
 
-    const comet = currentMarket.cometProxy
+    const comet = currentMarket?.cometProxy
 
     const { 
         isPending: isPendingUsdCollateral, 

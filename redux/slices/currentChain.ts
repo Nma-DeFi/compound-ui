@@ -2,6 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { createPublicClient, http } from 'viem';
 import { chainFromId, fixGoerliRpc, isUnsupportedChain } from '../../utils/chains';
 import { publicClientUpdated } from './publicClient';
+import currentMarket, { marketReset } from './currentMarket';
 
 interface CurrentChainState {
     chainId: number
@@ -31,6 +32,7 @@ export const chainSwitched = newChainId => {
             const client = createCustomPublicClient(newChainId)
             dispatch(chainIdUpdated(newChainId))
             dispatch(publicClientUpdated(client))
+            dispatch(marketReset())
         }
     }
 }

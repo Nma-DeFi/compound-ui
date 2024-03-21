@@ -8,7 +8,7 @@ import ProtocolStats from './ProtocolStats';
 export const Path = {
     Index: '/',
     Borrow: '/borrow',
-    Farm: '/farm',
+    Earn: '/earn',
     Claim: '/claim',
 } 
 
@@ -36,7 +36,7 @@ export default function Layout({ children }) {
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav d-flex d-xl-none py-4 fs-5">
                             <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
-                            <li className="nav-item"><NavLink href={Path.Farm}><i className="bi bi-flower2 me-1"></i> Farm</NavLink></li>
+                            <li className="nav-item"><NavLink href={Path.Earn}><i className="bi bi-flower2 me-1"></i> Earn</NavLink></li>
                             <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-stars me-1"></i> Claim</NavLink></li>
                         </ul>
                         <div className="d-none d-xl-flex justify-content-center flex-grow-1 text-center">
@@ -57,7 +57,7 @@ export default function Layout({ children }) {
                             <div id="pages-navigation" className="bg-body px-3 py-4 border rounded-4 shadow">
                                 <ul className="nav nav-pills flex-column mb-auto">
                                     <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
-                                    <li className="nav-item"><NavLink href={Path.Farm}><i className="bi bi-flower2 me-1"></i> Farm</NavLink></li>
+                                    <li className="nav-item"><NavLink href={Path.Earn}><i className="bi bi-flower2 me-1"></i> Earn</NavLink></li>
                                     <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-stars me-1"></i> Claim</NavLink></li>
                                 </ul>
                             </div>

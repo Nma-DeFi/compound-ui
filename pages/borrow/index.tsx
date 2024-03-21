@@ -17,7 +17,7 @@ import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useBorrowCapacity } from "../../hooks/useBorrowCapacity"
 import BigNumber from "bignumber.js"
 import PriceAsync from "../../components/PriceAsync"
-import { ActionInfo, PriceFeed } from "../../types"
+import { ActionInfo, Market, PriceFeed } from "../../types"
 import { usePublicClient } from "wagmi"
 import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
@@ -27,6 +27,9 @@ import { SmallSpinner } from "../../components/Spinner"
 import Amount from "../../components/Amount"
 import BorrowNativeCurrency, { BORROW_NATIVE_CURRENCY } from "../../components/pages/borrow/BorrowNativeCurrency"
 import ActionResult from "../../components/action-result/ActionResult"
+import { useAppDispatch } from "../../redux/hooks"
+import { marketChanged } from "../../redux/slices/currentMarket"
+import { useCurrentMarket } from "../../hooks/useCurrentMarket"
 
 const enum Mode {
   Loading,
@@ -44,11 +47,12 @@ export default function Borrow() {
     const [ mode, setMode ] = useState<Mode>(Mode.Loading)
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
-    const [ borrowInfo, setBorrowInfo ] = useState(null)
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
-    const [ selectedMarket, setSelectedMarket ] = useState(null)
+    const [ borrowInfo, setBorrowInfo ] = useState(null)
 
-    const marketId = cometProxy(selectedMarket)
+    const currentMarket = useCurrentMarket()
+
+    const comet = cometProxy(currentMarket)
 
     const { isConnected } = useCurrentAccount()
 
@@ -60,17 +64,19 @@ export default function Borrow() {
 
     const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
     
-    const asyncBorrowCapacity  =  useBorrowCapacity({ chainId, publicClient, marketId })
+    const asyncBorrowCapacity  =  useBorrowCapacity({ chainId, publicClient, marketId: comet })
     
     const asyncAmountUsd = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
 
     const { openModal } = useBootstrap()
 
-    const token = getBaseTokenOrNativeCurrency(selectedMarket, chainId)
-    const borrowApr = netBorrowAprScaled(selectedMarket)
-    const minBorrowAmount = baseBorrowMinScaled(selectedMarket)
-    const priceFeedAddress = baseTokePriceFeed(selectedMarket)
-    const priceFeedKind = getPriceFeedKind(selectedMarket, chainId)
+    const dispatch = useAppDispatch()
+
+    const token = getBaseTokenOrNativeCurrency(currentMarket, chainId)
+    const borrowApr = netBorrowAprScaled(currentMarket)
+    const minBorrowAmount = baseBorrowMinScaled(currentMarket)
+    const priceFeedAddress = baseTokePriceFeed(currentMarket)
+    const priceFeedKind = getPriceFeedKind(currentMarket, chainId)
 
     const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
     const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountUsd
@@ -92,27 +98,27 @@ export default function Borrow() {
     })
     
     useEffect(() => {
-      if (isMarkets) {
-        setSelectedMarket(markets[0])
+      if (isMarkets && !currentMarket) {
+        setCurrentMarket(markets[0])
       }
     }, [chainId, markets])
 
     useEffect(() => {
-      if (selectedMarket) {
+      if (currentMarket) {
         setAmount(Zero)
         setInput(null)
         setPriceFeed({ address: priceFeedAddress, kind: priceFeedKind })
       }
-    }, [chainId, selectedMarket])
+    }, [chainId, currentMarket])
 
     function isLoading() {
-      if (!isMarkets || !selectedMarket) return true
+      if (!isMarkets || !currentMarket) return true
       if (isConnected && (!isSupplyPositions || !isBorrowCapacity || !isAmountUsd)) return true
       return false
     }
 
     function isFarmingBaseToken() {
-      return supplyPositions[marketId].supplyBalance.isGreaterThan(Zero)
+      return supplyPositions[comet].supplyBalance.isGreaterThan(Zero)
     }
 
     function isInsufficientBorrowCap() {
@@ -131,13 +137,12 @@ export default function Borrow() {
     function handleBorrow() {
       if (amount.isZero()) return
       const borrowInfo = { 
-        comet: marketId, 
-        token, amount, 
+        comet, token, amount, 
         priceFeed, borrowApr, 
         onBorrow: setBorrowResult 
       }
       setBorrowInfo(borrowInfo)
-      if (isNativeCurrencyMarket(selectedMarket, chainId)) {
+      if (isNativeCurrencyMarket(currentMarket, chainId)) {
         openModal(BORROW_NATIVE_CURRENCY)
       } else {
         openModal(BORROW_ERC20_MODAL)
@@ -151,12 +156,16 @@ export default function Borrow() {
       input.value = value ?? ''
     }
 
+    function setCurrentMarket(market: Market) {
+      dispatch(marketChanged(market))
+    }
+
     return ( 
       <>
         <Head>
           <title>Borrow</title>
         </Head>
-        <SelectTokenToBorrow onSelect={setSelectedMarket} />
+        <SelectTokenToBorrow onSelect={setCurrentMarket} />
         <BorrowErc20Token  {...borrowInfo} />
         <BorrowNativeCurrency  {...borrowInfo} />
         <ActionResult {...{id: BORROW_RESULT_TOAST, ...borrowResult}} />

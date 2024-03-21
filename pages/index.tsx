@@ -1,5 +1,5 @@
-import Borrow from "./borrow";
+import Borrow from "./borrow"
 
 export default function Home() {
-  return <Borrow />;
+  return <Borrow />
 }

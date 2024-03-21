@@ -1,5 +1,10 @@
 import BigNumber from "bignumber.js"
 import { Address, Hash } from "viem"
+import { AllMarketsQuery } from "./graphql/generated/sdk"
+
+type Flatten<Type> = Type extends Array<infer Item> ? Item : Type
+
+export type Market = Flatten<AllMarketsQuery['markets']>
 
 export type Asset = {
   name: string, 

@@ -8,7 +8,7 @@ import { NoData } from "./Layout"
 export default function ProtocolStats() {
 
     const [ totalCollateral, setTotalCollateral ] = useState<string>()
-    const [ totalFarming, setTotalFarming ] = useState<string>()
+    const [ totalEarning, setTotalEarning ] = useState<string>()
     const [ totalBorrowing, setTotalBorrowing ] = useState<string>()
 
     const { currentChainId: chainId } = useCurrentChain()
@@ -16,10 +16,10 @@ export default function ProtocolStats() {
 
     useEffect(() => {
         if (isSuccess) {
-            const totalFarming = totalSupplyUsd(data)
+            const totalEarning = totalSupplyUsd(data)
             const totalBorrowing = totalBorrowUsd(data)
             const totalCollateral = collateralBalanceUsd(data)
-            setTotalFarming(bnf(totalFarming))
+            setTotalEarning(bnf(totalEarning))
             setTotalBorrowing(bnf(totalBorrowing))
             setTotalCollateral(bnf(totalCollateral))
         }
@@ -29,7 +29,7 @@ export default function ProtocolStats() {
         <>
             <Stat {...{ isLoading, isSuccess, name: 'Total collateral', value: totalCollateral }}/>
             <Stat {...{ isLoading, isSuccess, name: 'Total borrowing', value: totalBorrowing }}/>
-            <Stat {...{ isLoading, isSuccess, name: 'Total farming', value: totalFarming }}/>
+            <Stat {...{ isLoading, isSuccess, name: 'Total earning', value: totalEarning }}/>
         </>
     )
 }

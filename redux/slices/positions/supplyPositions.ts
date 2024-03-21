@@ -30,11 +30,11 @@ export const supplyPositionsSlice = createSlice({
       state.data = undefined
       Object.assign(state, AsyncStatus.Idle)
     },
-    supplyPositionsIncrease: (state, action) => {
-      const oldSupplyBalance = state.data[action.payload.comet].supplyBalance
-      state.data[action.payload.comet].supplyBalance = oldSupplyBalance.plus(action.payload.value)
+    supplyPositionIncrease: (state, action) => {
+      const oldBalance = state.data[action.payload.comet].supplyBalance
+      state.data[action.payload.comet].supplyBalance = oldBalance.plus(action.payload.amount)
     },
-    /*supplyPositionsDecrease: (state: SupplyPositionsState, action: PayloadAction<{comet: Address, value: BigNumber}>) => {
+    /*supplyPositionDecrease: (state: SupplyPositionsState, action: PayloadAction<{comet: Address, amount: BigNumber}>) => {
       state.data = action.payload
       Object.assign(state, AsyncStatus.Success)
     }*/

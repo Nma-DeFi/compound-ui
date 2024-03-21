@@ -6,8 +6,8 @@ import SupplyBalance from "../../components/SupplyBalance"
 import UserAccount from "../../components/UserAccount"
 import { DEPOSIT_ERC20_TOKEN_MODAL } from "../../components/deposit/DepositErc20Token"
 import { DEPOSIT_NATIVE_CURRENCY_MODAL } from "../../components/deposit/DepositNativeCurrency"
-import WithdrawBaseTokenErc20 from "../../components/pages/farm/WithdrawBaseTokenErc20"
-import WithdrawBaseTokenNative from "../../components/pages/farm/WithdrawBaseTokenNative"
+import WithdrawBaseTokenErc20 from "../../components/pages/earn/WithdrawBaseTokenErc20"
+import WithdrawBaseTokenNative from "../../components/pages/earn/WithdrawBaseTokenNative"
 import { useBootstrap } from "../../hooks/useBootstrap"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
 import { useMarkets } from "../../hooks/useMarkets"
@@ -18,8 +18,8 @@ import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
 import css from '../../styles/pages/Farm.module.scss'
 import TokenIcon from "../../components/TokenIcon"
-import DepositBaseTokenErc20 from "../../components/pages/farm/DepositBaseTokenErc20"
-import DepositBaseTokenNative from "../../components/pages/farm/DepositBaseTokenNative"
+import DepositBaseTokenErc20 from "../../components/pages/earn/DepositBaseTokenErc20"
+import DepositBaseTokenNative from "../../components/pages/earn/DepositBaseTokenNative"
 import { WITHDRAW_NATIVE_CURRENCY_MODAL } from "../../components/withdraw/WithdrawNativeCurrency"
 import { WITHDRAW_ERC20_TOKEN_MODAL } from "../../components/withdraw/WithdrawErc20Token"
 import { ActionType } from "../../types"
@@ -64,7 +64,7 @@ export default function Farm() {
   return ( 
       <>
         <Head>
-          <title>Farm</title>
+          <title>Earn</title>
         </Head>
         
         <div className="col-12 col-xl-8 px-xl-5">
@@ -75,8 +75,8 @@ export default function Farm() {
             <WithdrawBaseTokenNative {...targetMarket} />
 
             <div className="row g-0 align-items-center p-4 mb-5 bg-body border rounded shadow mb-5">
-                <div className="col-12 col-sm-4"><h2 className="mb-3 mb-sm-0">Farm</h2></div>
-                <div className="col-12 col-sm-8 text-start text-sm-end text-body-tertiary fs-5">Deposit your assets and earn fees</div>
+                <div className="col-12 col-sm-4"><h2 className="mb-3 mb-sm-0">Earn</h2></div>
+                <div className="col-12 col-sm-8 text-start text-sm-end text-body-tertiary fs-5">Deposit your assets and earn interest</div>
             </div>
 
             <div className="row g-0 text-body-secondary px-3 mb-3">

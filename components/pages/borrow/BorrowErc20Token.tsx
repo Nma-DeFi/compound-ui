@@ -53,7 +53,9 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
   useEffect(() => {
     if (mode === Mode.ConfirmTransaction && transactionHash) {
       setMode(Mode.WaitingForTransaction)
-      onBorrow({ action: ActionType.Borrow, token, amount, hash: transactionHash })
+      const action = ActionType.Borrow
+      const hash = structuredClone(transactionHash)
+      onBorrow({ action, token, amount, hash })
       hideModal(BORROW_ERC20_MODAL)
     }
   }, [mode, transactionHash])
@@ -71,13 +73,14 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
 
   function onOpen() {
     setMode(Mode.Init)
-    setTransactionHash(null)
   }
 
   function onHide() {
     if (mode === Mode.WaitingForTransaction) {
       openToast(BORROW_RESULT_TOAST)
     }
+    setMode(null)
+    setTransactionHash(null)
   }
 
   function handleBorrow() {

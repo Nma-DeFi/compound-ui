@@ -4,6 +4,8 @@ import { cometAbi } from "../abi/cometAbi";
 import { PublicClient } from "viem";
 import { PriceFeed, PriceFeedKind } from "../types";
 
+export const PRICE_STALE_TIME = 2 * 60 * 1000
+
 type CompoundSdk = { getPrice: (token: string) => Promise<number> }
 
 export class PriceService {

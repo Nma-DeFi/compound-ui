@@ -2,7 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { createPublicClient, http } from 'viem';
 import { chainFromId, fixGoerliRpc, isUnsupportedChain } from '../../utils/chains';
 import { publicClientUpdated } from './publicClient';
-import currentMarket, { marketReset } from './currentMarket';
+import { marketReset } from './currentMarket';
 
 interface CurrentChainState {
     chainId: number

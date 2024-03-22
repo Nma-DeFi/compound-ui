@@ -208,16 +208,22 @@ export default function Borrow() {
                   }
                 </button>
             </div>
-            <div className="d-flex flex-wrap justify-content-between mb-4">
+            <div className="d-flex flex-wrap align-items-center justify-content-between mb-4">
                 <div>
                 { mode === Mode.Loading  &&
                   <div style={{ width: '20rem'}}>
-                    <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} css="d-block mb-1" />
+                    {/*<PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} css="d-block mb-1" />*/}
                     <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} />
                   </div>
                 }
                 { mode === Mode.NotConnected &&
-                  <>Connect your wallet</>
+                  <div className="">
+                    <span className="pe-2">Collaterals</span> 
+                    <span className="text-body-tertiary ps-2">UNI</span> 
+                    <span className="text-body-tertiary ps-2">WBTC</span> 
+                    <span className="text-body-tertiary ps-2">LINK</span>
+                    <span className="text-body-tertiary ps-2">COMP</span>
+                    </div>
                 }
                 { mode === Mode.FarmingBaseToken &&
                   <>Cannot supply and borrow at the same time</>
@@ -266,7 +272,9 @@ export default function Borrow() {
                 </div>
             </div>
             <div className="d-grid">
-                { mode === Mode.Loading ? (
+                { mode === Mode.NotConnected ? (
+                    <button className="btn btn-lg btn-primary text-white" type="button">Connect Wallet</button>
+                  ) : mode === Mode.Loading ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Loading <SmallSpinner /></button>
                   ) : (
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {token?.symbol}</button>

@@ -1,6 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { Address } from 'viem'
 
-export const NotConnected = {
+
+interface CurrentAccountState {
+    address: Address
+    isConnected: boolean
+}
+
+export const NotConnected : CurrentAccountState = {
     address: undefined,
     isConnected: false,
 }

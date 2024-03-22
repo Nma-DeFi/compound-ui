@@ -4,6 +4,7 @@ import { useCurrentChain } from "./useCurrentChain"
 import { usePriceService } from "./usePriceService"
 import { useQuery } from "@tanstack/react-query"
 import { getCollateralUsdBalanceByMarket } from "../redux/helpers/collateral"
+import { PRICE_STALE_TIME } from "../services/price-service"
 
 export function useMarketCollateralUsd({ asyncCollateralPositions, currentMarket }) {
 
@@ -14,14 +15,14 @@ export function useMarketCollateralUsd({ asyncCollateralPositions, currentMarket
 
     const publicClient = usePublicClient({ chainId })
 
-    const marketId = currentMarket?.cometProxy
-
     const priceService = usePriceService({ chainId, publicClient})
+
+    const marketId = currentMarket?.cometProxy
 
     return useQuery({
         queryKey: ['TotalUsdCollateralForMarket', chainId, marketId, collateralPositions],
         queryFn: () => getCollateralUsdBalanceByMarket({ marketId, collateralPositions, priceService }),
         enabled: !!(isConnected && isCollateralPositions && marketId && priceService),
-        staleTime: (2 * 60 * 1000),
+        staleTime: PRICE_STALE_TIME,
     })
 }

@@ -82,6 +82,12 @@ export default function Collateral() {
     }
 
     useEffect(() => {
+        if (isMarkets && !currentMarket) {
+            setCurrentMarket(markets[0])
+        }
+    }, [chainId, markets])
+
+    useEffect(() => {
         document.getElementById(DEPOSIT_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
         document.getElementById(DEPOSIT_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
         document.getElementById(WITHDRAW_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
@@ -90,7 +96,12 @@ export default function Collateral() {
 
     function marketCss(market: Market) {
         const linkCss = 'text-body d-flex align-items-center border-bottom border-3 border-primary py-2'
-        return `${linkCss} ${market.id === currentMarket.id ? css['market-link-active'] : css['market-link']}`
+        return `${linkCss} ${market.id === currentMarket?.id ? css['market-link-active'] : css['market-link']}`
+    }
+
+    
+    function setCurrentMarket(market: Market) {
+        dispatch(marketChanged(market))
     }
 
     return (
@@ -121,7 +132,7 @@ export default function Collateral() {
                 <div className="col-12 col-sm-7 order-3 order-sm-2">
                     <div className="d-flex justify-content-around justify-content-sm-end pt-5 pt-sm-0">
                         { isMarkets && markets.map((market) =>
-                            <div key={market.id} className={marketCss(market)} onClick={() => dispatch(marketChanged(market))}>
+                            <div key={market.id} className={marketCss(market)} onClick={() => setCurrentMarket(market)}>
                                 <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} css={`me-2 ${css['market-icon']}`} />
                                 {getBaseTokenOrNativeCurrency(market, chainId)?.symbol} <span className="text-body-tertiary ps-1">Market</span>
                             </div>

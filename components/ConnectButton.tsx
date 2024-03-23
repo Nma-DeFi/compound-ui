@@ -25,7 +25,7 @@ export default function ConnectButton() {
             </>
         ) : (
             <button className="btn btn-primary text-white shadow-sm" type="button" onClick={() => openWeb3Modal()}>
-                <i className="bi bi-wallet me-1"></i> Connect wallet
+                <i className="bi bi-wallet me-1"></i> Connect Wallet
             </button>
         )
 }

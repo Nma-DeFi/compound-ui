@@ -4,7 +4,6 @@ import { usePriceFromFeed } from "../../../hooks/usePriceFromFeed"
 import { useCurrentChain } from "../../../hooks/useCurrentChain"
 import PriceAsync from "../../PriceAsync"
 import { nf } from "../../../utils/number"
-import { NoData } from "../../Layout"
 import { useEffect, useState } from "react"
 import { useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
 import { SmallSpinner } from "../../Spinner"
@@ -13,6 +12,7 @@ import { useWithdrawService } from "../../../hooks/useWithdrawService"
 import { useCurrentAccount } from "../../../hooks/useCurrentAccount"
 import { ActionType } from "../../../types"
 import { BORROW_RESULT_TOAST } from "../../../pages/borrow"
+import TokenIcon from "../../TokenIcon"
 
 const enum Mode {
   Init,
@@ -94,21 +94,41 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
         <div className="modal-content">
           <div className="modal-body">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3 className="m-0">Borrow</h3>
+              <h3 className="m-0">Confirm loan</h3>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div className="text-center rounded py-3 px-3 mb-2 bg-body-tertiary">
-              <div className="fs-2 mb-2">
-                <Amount value={amount} /> {token?.symbol}
-              </div>
-              <div className="fs-5 text-secondary">
-                <PriceAsync asyncPrice={price} />
-              </div>
-            </div>  
-            <div className="d-flex small mb-4">
-              <div className="me-auto">Borrow APR : <span className="text-body-tertiary">{nf(borrowApr)}<small>%</small></span></div>
-              <div>Liquidation risk : <span className="text-success">{NoData}</span></div>
-            </div>
+            <table className="table">
+              <tbody>
+                <tr>
+                  <th scope="row" className="table-light" style={{ width: '40%'}}>Borrow amount</th>
+                  <td className="d-flex justify-content-center align-items-center">
+                    <TokenIcon symbol={ token?.symbol } css="me-2" width="20" />
+                    <Amount value={ amount } /> 
+                    <span className="text-body-secondary ps-1">{ token?.symbol }</span>
+                    <small className="ps-3 text-body-secondary">(<PriceAsync asyncPrice={price} />)</small>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row" className="table-light" style={{ width: '40%'}}>Borrow APR</th>
+                  <td className="text-center">{ nf(borrowApr) }<small className="text-body-secondary">%</small></td>
+                </tr>
+                <tr>
+                  <th scope="row" className="table-light" style={{ width: '40%'}}>Liquidation risk</th>
+                  <td className="align-middle px-3">
+                    <div className="progress" 
+                      role="progressbar" 
+                      aria-label="Liquidation risk" 
+                      aria-valuenow={25} 
+                      aria-valuemin={0} 
+                      aria-valuemax={100} 
+                      style={{height: '20px'}} 
+                      title="Liquidation risk : 5%">
+                        <div className="progress-bar text-bg-success overflow-visible px-1" style={{width: '5%'}}>5%</div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
             <div className="d-grid mt-4">
               { mode === Mode.Init &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>

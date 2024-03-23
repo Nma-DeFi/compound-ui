@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Path } from "../../components/Layout"
 import { useBootstrap } from "../../hooks/useBootstrap"
 import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
-import { useEffect, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
 import { getBaseTokenOrNativeCurrency, getPriceFeed, getPriceFeedKind, isNativeCurrencyMarket } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
@@ -21,7 +21,6 @@ import { ActionInfo, Market, PriceFeed, Token } from "../../types"
 import { usePublicClient } from "wagmi"
 import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
-import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/borrow/BorrowErc20Token"
 import { nf } from "../../utils/number"
 import { SmallSpinner } from "../../components/Spinner"
 import Amount from "../../components/Amount"
@@ -35,6 +34,7 @@ import { getLiquidationRisk, getLiquidationRiskByBorrowBalance } from "../../red
 import { useBorrowPositions } from "../../hooks/useBorrowPositions"
 import { useCollateralPositions } from "../../hooks/useCollateralPositions"
 import { usePriceService } from "../../hooks/usePriceService"
+import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/borrow/BorrowErc20Token"
 
 const enum Mode {
   Loading,
@@ -153,11 +153,12 @@ export default function Borrow() {
         onBorrow: setBorrowResult 
       }
       setBorrowInfo(borrowInfo)
-      if (isNativeCurrencyMarket(currentMarket, chainId)) {
+      /*if (isNativeCurrencyMarket(currentMarket, chainId)) {
         openModal(BORROW_NATIVE_CURRENCY)
       } else {
         openModal(BORROW_ERC20_MODAL)
-      }
+      }*/
+      openModal(BORROW_ERC20_MODAL)
     }
     
     function setInput(value: string) {
@@ -219,79 +220,67 @@ export default function Borrow() {
                   }
                 </button>
             </div>
-            <div className="d-flex flex-wrap align-items-center justify-content-between mb-4 pt-1">
-                <div>
-                { mode === Mode.Loading  &&
-                  <div style={{ width: '20rem'}}>
-                    <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} />
-                  </div>
-                }
-                { mode === Mode.NotConnected &&
-                  <div className="d-flex align-items-center">
-                    <span className="pe-2" style={{ fontSize: '110%' }}>
-                      { collaterals.length > 1 ? 'Collaterals' : 'Collateral' }
+            { mode === Mode.Loading  &&    
+              <BorrowPanel {...{ mode, borrowApr, css: 'pb-1' }}>
+                <div style={{ width: '20rem'}}>
+                  <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} />
+                </div>
+              </BorrowPanel>
+            }
+            { mode === Mode.NotConnected &&
+              <BorrowPanel {...{ mode, borrowApr, css: 'pb-2' }}>
+                <div className="d-flex align-items-center">
+                  <span className="pe-2" style={{ fontSize: '110%' }}>
+                  { collaterals.length > 1 ? 'Collaterals' : 'Collateral' }
+                  </span>
+                  { collaterals.map((collateral) =>
+                    <span key={collateral.token.address} className="text-body-tertiary ps-2">
+                      <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
                     </span>
-                    { collaterals.map((collateral) =>
-                      <span key={collateral.token.address} className="text-body-tertiary ps-2">
-                        <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
-                      </span>
-                    )}
-                    <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">
-                      <i className="bi bi-three-dots text-body ps-4" style={{ fontSize: '110%'}}></i>
-                      {/*<i className="bi bi-three-dots-vertical text-body ps-4" style={{ fontSize: '110%'}}></i>
-                      <i className="bi bi-box-arrow-up-right text-body ps-4" style={{ fontSize: '110%'}}></i>*/}
-                    </Link>
-                  </div>
-                }
-                { mode === Mode.FarmingBaseToken &&
-                  <>Cannot supply and borrow at the same time</>
-                }
-                { mode === Mode.InsufficientBorrowCapacity &&
-                  <>
-                  <div className="mb-1">
-                    { borrowCapacity?.isEqualTo(Zero) ?
-                      <>No borrowing capacity</>
-                    :
-                      <>Insufficient borrowing capacity</>
-                    }
-                    </div>
-                    <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Add collateral <i className="bi bi-arrow-right"></i></Link>
-                  </>
-                }
-                { mode === Mode.InsufficientBorrowAmount &&
-                  <>Minimum borrow amount : <Amount value={minBorrowAmount} /> { token?.symbol }</>
-                }
-                { mode === Mode.ReadyToBorrow &&
-                  <>
-                    <div className="mb-1">Maximum borrowing : <span className="text-body-tertiary">
-                      <PriceAsync asyncPrice={{ 
-                        isIdle: asyncBorrowCapacity.isPending, 
-                        isLoading: asyncBorrowCapacity.isLoading, 
-                        isSuccess: asyncBorrowCapacity.isSuccess, 
-                        isError: asyncBorrowCapacity.isError, 
-                        data: asyncBorrowCapacity.data 
-                      }} /></span></div>
-                    <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Increase your borrowing capacity <i className="bi bi-arrow-right"></i></Link>
-                  </>
-                }
+                  )}
                 </div>
-                <div className="my-2 my-sm-0">
-                    <div className="px-2 py-1 me-1 shadow-sm rounded small">
-                      { mode === Mode.Loading ? 
-                      (
-                        <div style={{ width: '6rem'}}>
-                          <PlaceHolder size={PlaceHolderSize.SMALL} col={12} />
-                        </div>
-                      ) : (
-                        <>Borrow APR : <span className="text-body-tertiary">{nf(borrowApr)}<small>%</small></span></>
-                      )
-                    }
-                    </div>
+              </BorrowPanel>
+            }
+            { mode === Mode.FarmingBaseToken &&
+              <BorrowPanel {...{ mode, borrowApr }}>
+                Cannot supply and borrow at the same time
+              </BorrowPanel>
+            }
+            { mode === Mode.InsufficientBorrowCapacity &&
+              <BorrowPanel {...{ mode, borrowApr }}>
+                <div className="mb-1">
+                  { borrowCapacity?.isEqualTo(Zero) ?
+                    <>No borrowing capacity</>
+                  :
+                    <>Insufficient borrowing capacity</>
+                  }
                 </div>
-            </div>
+                <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">
+                  Add collateral <i className="bi bi-arrow-right"></i>
+                </Link>
+              </BorrowPanel>
+            }
+            { mode === Mode.InsufficientBorrowAmount &&
+              <BorrowPanel {...{ mode, borrowApr }}>
+                Minimum borrow amount : <Amount value={minBorrowAmount} /> { token?.symbol }
+              </BorrowPanel>
+            }
+            { mode === Mode.ReadyToBorrow &&
+              <BorrowPanel {...{ mode, borrowApr }}>
+                <div className="mb-1">Maximum borrowing : <span className="text-body-tertiary">
+                  <PriceAsync asyncPrice={{ 
+                    isIdle: asyncBorrowCapacity.isPending, 
+                    isLoading: asyncBorrowCapacity.isLoading, 
+                    isSuccess: asyncBorrowCapacity.isSuccess, 
+                    isError: asyncBorrowCapacity.isError, 
+                    data: asyncBorrowCapacity.data 
+                  }} /></span></div>
+                <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Increase your borrowing capacity <i className="bi bi-arrow-right"></i></Link>
+              </BorrowPanel>
+            }
             <div className="d-grid">
                 { mode === Mode.NotConnected ? (
-                    <button className="btn btn-lg btn-primary text-white" type="button">Connect Wallet</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button"  onClick={handleBorrow}>Connect Wallet</button>
                   ) : mode === Mode.Loading ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Loading <SmallSpinner /></button>
                   ) : (
@@ -368,5 +357,32 @@ export default function Borrow() {
         </div>
       </>
     )
+}
+
+function BorrowPanel({ children, mode, borrowApr, css = ''} : { children: ReactNode, mode: Mode; borrowApr: number; css?: string }) {
+  return (
+    <div className={`d-flex flex-wrap justify-content-between mb-4 pt-1 ${css}`}>
+      <div>{ children }</div>
+      <div className="my-2 my-sm-0">
+        <BorrowApr {...{ mode, borrowApr }} />
+      </div>
+    </div>
+  )
+}
+
+function BorrowApr({ mode, borrowApr} : { mode: Mode; borrowApr: number }) {
+  return (
+    <div className="px-2 py-1 me-1 shadow-sm rounded small">
+      { mode === Mode.Loading ? 
+        (
+          <div style={{ width: '6rem'}}>
+            <PlaceHolder size={PlaceHolderSize.SMALL} col={12} />
+          </div>
+        ) : (
+          <>Borrow APR : <span className="text-body-tertiary">{nf(borrowApr)}<small>%</small></span></>
+        )
+      }
+    </div>
+  )
 }
   

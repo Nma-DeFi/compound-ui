@@ -46,7 +46,6 @@ export default function Borrow() {
 
     const [ mode, setMode ] = useState<Mode>(Mode.Loading)
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
-    const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
 
@@ -60,23 +59,25 @@ export default function Borrow() {
 
     const publicClient = usePublicClient({ chainId })
 
+    const { openModal } = useBootstrap()
+
+    const dispatch = useAppDispatch()
+
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
 
     const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
     
     const asyncBorrowCapacity  =  useBorrowCapacity({ chainId, publicClient, marketId: comet })
+
+    const priceFeedAddress = baseTokePriceFeed(currentMarket)
+    const priceFeedKind = getPriceFeedKind(currentMarket, chainId)
+    const priceFeed = { address: priceFeedAddress, kind: priceFeedKind }
     
     const asyncAmountUsd = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
-
-    const { openModal } = useBootstrap()
-
-    const dispatch = useAppDispatch()
 
     const token = getBaseTokenOrNativeCurrency(currentMarket, chainId)
     const borrowApr = netBorrowAprScaled(currentMarket)
     const minBorrowAmount = baseBorrowMinScaled(currentMarket)
-    const priceFeedAddress = baseTokePriceFeed(currentMarket)
-    const priceFeedKind = getPriceFeedKind(currentMarket, chainId)
 
     const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
     const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountUsd
@@ -107,7 +108,6 @@ export default function Borrow() {
       if (currentMarket) {
         setAmount(Zero)
         setInput(null)
-        setPriceFeed({ address: priceFeedAddress, kind: priceFeedKind })
       }
     }, [chainId, currentMarket])
 
@@ -208,22 +208,21 @@ export default function Borrow() {
                   }
                 </button>
             </div>
-            <div className="d-flex flex-wrap align-items-center justify-content-between mb-4">
+            <div className="d-flex flex-wrap align-items-center justify-content-between mb-4 pt-1">
                 <div>
                 { mode === Mode.Loading  &&
                   <div style={{ width: '20rem'}}>
-                    {/*<PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} css="d-block mb-1" />*/}
                     <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} />
                   </div>
                 }
                 { mode === Mode.NotConnected &&
-                  <div className="">
-                    <span className="pe-2">Collaterals</span> 
-                    <span className="text-body-tertiary ps-2">UNI</span> 
-                    <span className="text-body-tertiary ps-2">WBTC</span> 
-                    <span className="text-body-tertiary ps-2">LINK</span>
-                    <span className="text-body-tertiary ps-2">COMP</span>
-                    </div>
+                  <div className="d-flex align-items-center">
+                    <span className="pe-2" style={{fontSize: '110%'}}>Collaterals</span>
+                    <span className="text-body-tertiary ps-2"><img alt="USDC" className="" width="28" src="/images/tokens/USDC.svg" /></span>
+                    <span className="text-body-tertiary ps-2"><img alt="USDC" className="" width="28" src="/images/tokens/ETH.svg" /></span>
+                    <span className="text-body-tertiary ps-2"><img alt="USDC" className="" width="28" src="/images/tokens/COMP.svg" /></span>
+                    <span className="text-body-tertiary ps-2"><img alt="USDC" className="" width="28" src="/images/tokens/WBTC.svg" /></span>
+                  </div>
                 }
                 { mode === Mode.FarmingBaseToken &&
                   <>Cannot supply and borrow at the same time</>

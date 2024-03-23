@@ -1,6 +1,6 @@
 import { isAddressEqual } from 'viem';
 import { CompoundConfig } from '../compound-config';
-import { arbitrum, goerli } from 'wagmi/chains';
+import { arbitrum, sepolia } from 'wagmi/chains';
 import { Token } from '../types';
 
 export const CHAINS = Object.values(CompoundConfig).map(cfg => cfg.chain)
@@ -22,7 +22,7 @@ export function chainName(id: number) {
 }
 
 export function isTestnet(id: number) {
-    return id === goerli.id
+    return id === sepolia.id
 }
 
 export function isUnsupportedChain(id: number) {
@@ -30,7 +30,10 @@ export function isUnsupportedChain(id: number) {
 }
 
 export function nativeCurrency(id: number) {
-    return chainFromId(id).nativeCurrency
+    const { nativeCurrency } = chainFromId(id)
+    const currency = { ...nativeCurrency }
+    if (sepolia.id === id) currency.symbol = 'ETH'
+    return currency
 }
 
 export function wrappedNativeToken(id: number) {
@@ -59,8 +62,3 @@ export function transactionUrl({ chainId, txHash }) {
     return `${blockExplorer}/tx/${txHash}`
 }
 
-export function fixGoerliRpc(chainId: number) {
-    return chainId === goerli.id
-        ? process.env.NEXT_PUBLIC_GOERLI_RPC
-        : undefined
-}

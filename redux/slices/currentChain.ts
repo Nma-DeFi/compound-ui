@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { createPublicClient, http } from 'viem';
-import { chainFromId, fixGoerliRpc, isUnsupportedChain } from '../../utils/chains';
+import { chainFromId, isUnsupportedChain } from '../../utils/chains';
 import { publicClientUpdated } from './publicClient';
 import { marketReset } from './currentMarket';
 
@@ -40,7 +40,7 @@ export const chainSwitched = newChainId => {
 export function createCustomPublicClient(chainId: number) {
     return createPublicClient({
         chain: chainFromId(chainId),
-        transport: http(fixGoerliRpc(chainId)),
+        transport: http(),
     })
 }
 

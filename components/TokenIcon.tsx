@@ -16,5 +16,5 @@ export default function TokenIcon({ symbol, css, width } : TokenIconParam) {
         setIcon(icon)
     }, [symbol])
 
-    return <img src={icon} alt={symbol} className={css} width={width} /> 
+    return <img src={icon} alt={symbol} title={symbol} className={css} width={width} /> 
 }

@@ -36,11 +36,11 @@ export default function Collateral() {
 
     const { openModal } = useBootstrap()
 
+    const dispatch = useAppDispatch()
+
     const asyncCollateralPositions = useCollateralPositions()
 
     const asyncMarkets = useMarkets({ chainId })
-
-    const dispatch = useAppDispatch()
 
     const { isSuccess: isMarkets, data: markets } = asyncMarkets
 
@@ -150,10 +150,10 @@ export default function Collateral() {
                 <div key={collateral.token.address} className="row g-0 bg-body shadow border rounded p-3 mb-4">
                     <div className="col-12 col-sm-5">
                         <div className="d-flex align-items-center justify-content-start mb-5 mb-sm-0">
-                            <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="48" />
+                            <TokenIcon symbol={ getTokenOrNativeCurrency(chainId, collateral.token)?.symbol } width="48" />
                             <div className={css['collateral-name']}>
-                                <div className="fs-5 fw-semibold">{getTokenOrNativeCurrency(chainId, collateral.token)?.symbol}</div>
-                                <div className="text-body-secondary">{getTokenOrNativeCurrency(chainId, collateral.token)?.name}</div>
+                                <div className="fs-5 fw-semibold">{ getTokenOrNativeCurrency(chainId, collateral.token)?.symbol }</div>
+                                <div className="text-body-secondary">{ getTokenOrNativeCurrency(chainId, collateral.token)?.name }</div>
                             </div>
                         </div>
                     </div>

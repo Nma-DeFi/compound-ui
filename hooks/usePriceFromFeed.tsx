@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AsyncBigNumber, IdleData, LoadingData, SuccessData } from "../utils/async";
 import { usePriceService } from "./usePriceService";
 import { useQuery } from "@tanstack/react-query";
+import { PRICE_STALE_TIME } from "../services/price-service";
 
 export function usePriceFromFeed({ chainId, publicClient, priceFeed, amount = One }) {
 
@@ -14,7 +15,7 @@ export function usePriceFromFeed({ chainId, publicClient, priceFeed, amount = On
         queryKey: ['PriceFromFeed', chainId, priceFeed],
         queryFn: () => priceService.getPriceFromFeed(priceFeed),
         enabled: !!(priceService && priceFeed),
-        staleTime: (2 * 60 * 1000),
+        staleTime: PRICE_STALE_TIME,
     })
 
     useEffect(() => {

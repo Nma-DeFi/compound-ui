@@ -59,8 +59,6 @@ export class PriceService {
 
     async getAllPricesFromFeeds(priceFeeds : PriceFeed[]) {
 
-        console.log('getAllPricesFromFeeds in', priceFeeds)
-
         const multicallParams = priceFeeds.map(({ address }) => ({
             ...this.cometContract,
             functionName: 'getPrice',
@@ -98,8 +96,6 @@ export class PriceService {
             const [ [ priceScale, ...rawPrices ] ] = await Promise.all(promises)
             prices = rawPrices.map(rawPrice => (Number(rawPrice) / Number(priceScale)))
         }
-
-        console.log('getAllPricesFromFeeds out', prices)
 
         return prices
     }

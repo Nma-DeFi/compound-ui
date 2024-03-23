@@ -5,10 +5,10 @@ import { useBootstrap } from "../../hooks/useBootstrap"
 import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
 import { useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
-import { getBaseTokenOrNativeCurrency, getPriceFeedKind, isNativeCurrencyMarket } from "../../utils/markets"
+import { getBaseTokenOrNativeCurrency, getPriceFeed, getPriceFeedKind, isNativeCurrencyMarket } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
-import { Zero, bn } from "../../utils/bn"
-import { baseBorrowMinScaled, baseTokePriceFeed, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
+import { Zero, bn, bnf } from "../../utils/bn"
+import { baseBorrowMinScaled, baseTokePriceFeed, collateralTokens, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
 import AmountInput from "../../components/AmountInput"
@@ -17,7 +17,7 @@ import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useBorrowCapacity } from "../../hooks/useBorrowCapacity"
 import BigNumber from "bignumber.js"
 import PriceAsync from "../../components/PriceAsync"
-import { ActionInfo, Market, PriceFeed } from "../../types"
+import { ActionInfo, Market, PriceFeed, Token } from "../../types"
 import { usePublicClient } from "wagmi"
 import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
@@ -30,6 +30,11 @@ import ActionResult from "../../components/action-result/ActionResult"
 import { useAppDispatch } from "../../redux/hooks"
 import { marketChanged } from "../../redux/slices/currentMarket"
 import { useCurrentMarket } from "../../hooks/useCurrentMarket"
+import { getTokenOrNativeCurrency } from "../../utils/chains"
+import { getLiquidationRisk, getLiquidationRiskByBorrowBalance } from "../../redux/helpers/liquidation"
+import { useBorrowPositions } from "../../hooks/useBorrowPositions"
+import { useCollateralPositions } from "../../hooks/useCollateralPositions"
+import { usePriceService } from "../../hooks/usePriceService"
 
 const enum Mode {
   Loading,
@@ -66,18 +71,21 @@ export default function Borrow() {
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
 
     const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
-    
+    const { isSuccess: isBorrowPositions, data: borrowPositions } = useBorrowPositions()
+    const { isSuccess: isCollateralPositions, data: collateralPositions } = useCollateralPositions()
+
     const asyncBorrowCapacity  =  useBorrowCapacity({ chainId, publicClient, marketId: comet })
 
-    const priceFeedAddress = baseTokePriceFeed(currentMarket)
-    const priceFeedKind = getPriceFeedKind(currentMarket, chainId)
-    const priceFeed = { address: priceFeedAddress, kind: priceFeedKind }
+    const priceService = usePriceService({ chainId, publicClient })
+
+    const priceFeed = getPriceFeed(currentMarket, chainId)
     
     const asyncAmountUsd = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
 
     const token = getBaseTokenOrNativeCurrency(currentMarket, chainId)
     const borrowApr = netBorrowAprScaled(currentMarket)
     const minBorrowAmount = baseBorrowMinScaled(currentMarket)
+    const collaterals = collateralTokens(currentMarket)
 
     const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
     const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountUsd
@@ -94,6 +102,8 @@ export default function Borrow() {
       }  else if (isInsufficientBorrowAmount()) {
         setMode(Mode.InsufficientBorrowAmount)
       } else {
+        getLiquidationRisk({ chainId, market: currentMarket, borrowPositions, collateralPositions, priceService })
+        getLiquidationRiskByBorrowBalance({ chainId, market: currentMarket, collateralPositions, priceService, borrowBalance: bn(100) })
         setMode(Mode.ReadyToBorrow)
       }
     })
@@ -113,7 +123,8 @@ export default function Borrow() {
 
     function isLoading() {
       if (!isMarkets || !currentMarket) return true
-      if (isConnected && (!isSupplyPositions || !isBorrowCapacity || !isAmountUsd)) return true
+      if (isConnected &&  (!isSupplyPositions || !isBorrowPositions || !isCollateralPositions 
+        || !priceService || !isBorrowCapacity || !isAmountUsd)) return true
       return false
     }
 
@@ -217,11 +228,19 @@ export default function Borrow() {
                 }
                 { mode === Mode.NotConnected &&
                   <div className="d-flex align-items-center">
-                    <span className="pe-2" style={{fontSize: '110%'}}>Collaterals</span>
-                    <span className="text-body-tertiary ps-2"><img alt="USDC" className="" width="28" src="/images/tokens/USDC.svg" /></span>
-                    <span className="text-body-tertiary ps-2"><img alt="USDC" className="" width="28" src="/images/tokens/ETH.svg" /></span>
-                    <span className="text-body-tertiary ps-2"><img alt="USDC" className="" width="28" src="/images/tokens/COMP.svg" /></span>
-                    <span className="text-body-tertiary ps-2"><img alt="USDC" className="" width="28" src="/images/tokens/WBTC.svg" /></span>
+                    <span className="pe-2" style={{ fontSize: '110%' }}>
+                      { collaterals.length > 1 ? 'Collaterals' : 'Collateral' }
+                    </span>
+                    { collaterals.map((collateral) =>
+                      <span key={collateral.token.address} className="text-body-tertiary ps-2">
+                        <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
+                      </span>
+                    )}
+                    <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">
+                      <i className="bi bi-three-dots text-body ps-4" style={{ fontSize: '110%'}}></i>
+                      {/*<i className="bi bi-three-dots-vertical text-body ps-4" style={{ fontSize: '110%'}}></i>
+                      <i className="bi bi-box-arrow-up-right text-body ps-4" style={{ fontSize: '110%'}}></i>*/}
+                    </Link>
                   </div>
                 }
                 { mode === Mode.FarmingBaseToken &&

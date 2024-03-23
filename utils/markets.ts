@@ -1,5 +1,5 @@
-import { baseToken } from "../selectors/market-selector"
-import { PriceFeedKind } from "../types"
+import { baseTokePriceFeed, baseToken } from "../selectors/market-selector"
+import { PriceFeed, PriceFeedKind } from "../types"
 import { getTokenOrNativeCurrency, isWrappedNativeToken, nativeCurrency } from "./chains"
 
   
@@ -21,4 +21,12 @@ export function getPriceFeedKind(market, chainId) {
         return PriceFeedKind.USD_PRICE
     }
 }
+
+export function getPriceFeed(market, chainId) : PriceFeed {
+    if (!chainId || !market || !baseToken(market)) return undefined
+    const priceFeedAddress = baseTokePriceFeed(market)
+    const priceFeedKind = getPriceFeedKind(market, chainId)
+    return { address: priceFeedAddress, kind: priceFeedKind }
+}
+
 

@@ -15,6 +15,7 @@ export type CollateralPositionsByMarket = Record<Address, {
     balance: BigNumber
     priceFeed: PriceFeed
     collateralFactor: number
+    liquidationThreshold: number
 }>
 
 export type CollateralPositionsData = Record<Address, CollateralPositionsByMarket>
@@ -69,11 +70,12 @@ export const collateralPositionsInit = createAsyncThunk<any, void, ThunkApiField
             const balances = await positionsService.collateralBalancesOf({ account, tokens })
             let positionsByMarket : CollateralPositionsByMarket = {}
             for (let index = 0; index < tokens.length; index++) {
-                const { token, priceFeed: address, borrowCollateralFactor } = tokens[index]
+                const { token, priceFeed: address, borrowCollateralFactor, liquidateCollateralFactor } = tokens[index]
                 const balance = fromBigInt(balances[index], token.decimals)
                 const priceFeed = { address, kind: getPriceFeedKind(market, chainId) } 
                 const collateralFactor = Number(borrowCollateralFactor)
-                const positionData = { token, balance, priceFeed, collateralFactor }
+                const liquidationThreshold = Number(liquidateCollateralFactor)
+                const positionData = { token, balance, priceFeed, collateralFactor, liquidationThreshold }
                 positionsByMarket = { ...positionsByMarket,  [token.address]: positionData }
             }
             positions = { ...positions, [comet]: positionsByMarket }  

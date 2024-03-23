@@ -27,8 +27,8 @@ export default function SelectTokenToBorrow({ onSelect }) {
     <div id={SELECT_TOKEN_TO_BORROW_MODAL} className="modal" tabIndex={-1}>
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-          <div className="modal-body">
-            <div className="d-flex justify-content-between align-items-center mb-5">
+          <div className="modal-body pb-5">
+            <div className="d-flex justify-content-between align-items-center">
               <h3 className="m-0">Borrow token</h3>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -42,12 +42,12 @@ export default function SelectTokenToBorrow({ onSelect }) {
             }
 
             { isSuccess && markets.map((market) =>
-              <div key={market.id} className={`bg-body shadow rounded px-4 py-3 mx-2 mb-5 ${css['item-hover']}`} onClick={() => handleSelect(market)}>
+              <div key={market.id} className={`bg-body shadow rounded px-4 py-3 mx-2 mt-5 ${css['item-hover']}`} onClick={() => handleSelect(market)}>
                 <div className="d-flex justify-content-between align-items-center mb-5">
                     <div className="d-flex justify-content-start">
-                        <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} width="42" />
+                        <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} width="45" />
                         <div className="ps-3">
-                            <div className="fs-5">{getBaseTokenOrNativeCurrency(market, chainId).symbol}</div>
+                            <div className="fs-4">{getBaseTokenOrNativeCurrency(market, chainId).symbol}</div>
                             <small className="text-body-secondary">{getBaseTokenOrNativeCurrency(market, chainId).name}</small>
                         </div>
                     </div>
@@ -58,8 +58,8 @@ export default function SelectTokenToBorrow({ onSelect }) {
                 </div>
 
                 <div className="d-flex flex-wrap justify-content-center align-items-center small">
-                    <div className="me-1  text-body-secondary">Collaterals</div> 
-                    <div className={`d-flex flex-wrap text-body-tertiary py-1 ${css['collateral-list']}`}>
+                    <div className="pe-1 text-body-secondary">Collaterals</div> 
+                    <div className="d-flex flex-wrap text-body-tertiary">
                         {collateralTokens(market).map((collateral, index) =>
                           <div key={index} className={`${collateralTokens(market).length === (index + 1) ? '' : 'border-end'} px-2`}>
                             {getTokenOrNativeCurrency(chainId, collateral.token).symbol}

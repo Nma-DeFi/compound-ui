@@ -98,7 +98,6 @@ export default function Collateral() {
         const linkCss = 'text-body d-flex align-items-center border-bottom border-3 border-primary py-2'
         return `${linkCss} ${market.id === currentMarket?.id ? css['market-link-active'] : css['market-link']}`
     }
-
     
     function setCurrentMarket(market: Market) {
         dispatch(marketChanged(market))

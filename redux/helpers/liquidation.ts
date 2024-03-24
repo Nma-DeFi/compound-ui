@@ -14,17 +14,17 @@ export async function getLiquidationRisk({ chainId, market, borrowPositions, col
     priceService: PriceService
   }) {
 
-  const { borrowBalance } = borrowPositions[market.cometProxy]
+  const { borrowBalance: borrowAmount } = borrowPositions[market.cometProxy]
 
-  return getLiquidationRiskByBorrowBalance({ chainId, market, collateralPositions, priceService, borrowBalance })
+  return getLiquidationRiskByBorrowAmount({ chainId, market, collateralPositions, priceService, borrowAmount })
 }
 
-export async function getLiquidationRiskByBorrowBalance({ chainId, market, collateralPositions, priceService, borrowBalance } : {
+export async function getLiquidationRiskByBorrowAmount({ chainId, market, collateralPositions, priceService, borrowAmount } : {
   chainId: number
   market: Market
   collateralPositions: CollateralPositionsData
   priceService: PriceService
-  borrowBalance: BigNumber
+  borrowAmount: BigNumber
 }) {
 
   const marketId = market.cometProxy
@@ -34,7 +34,7 @@ export async function getLiquidationRiskByBorrowBalance({ chainId, market, colla
 
   const prices = await priceService.getAllPricesFromFeeds([borrowTokenPriceFeed, ...collatPriceFeeds])
 
-  const borrowCurrent = borrowBalance.times(prices[0])
+  const borrowCurrent = borrowAmount.times(prices[0])
 
   let borrowMax = Zero
 

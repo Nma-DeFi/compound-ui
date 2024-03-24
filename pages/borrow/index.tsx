@@ -30,11 +30,12 @@ import { useAppDispatch } from "../../redux/hooks"
 import { marketChanged } from "../../redux/slices/currentMarket"
 import { useCurrentMarket } from "../../hooks/useCurrentMarket"
 import { getTokenOrNativeCurrency } from "../../utils/chains"
-import { getLiquidationRisk, getLiquidationRiskByBorrowBalance } from "../../redux/helpers/liquidation"
+import { getLiquidationRisk, getLiquidationRiskByBorrowAmount } from "../../redux/helpers/liquidation"
 import { useBorrowPositions } from "../../hooks/useBorrowPositions"
 import { useCollateralPositions } from "../../hooks/useCollateralPositions"
 import { usePriceService } from "../../hooks/usePriceService"
 import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/borrow/BorrowErc20Token"
+import BorrowPositions from "../../components/pages/borrow/BorrowPositions"
 
 const enum Mode {
   Loading,
@@ -103,7 +104,7 @@ export default function Borrow() {
         setMode(Mode.InsufficientBorrowAmount)
       } else {
         getLiquidationRisk({ chainId, market: currentMarket, borrowPositions, collateralPositions, priceService })
-        getLiquidationRiskByBorrowBalance({ chainId, market: currentMarket, collateralPositions, priceService, borrowBalance: bn(100) })
+        getLiquidationRiskByBorrowAmount({ chainId, market: currentMarket, collateralPositions, priceService, borrowAmount: bn(100) })
         setMode(Mode.ReadyToBorrow)
       }
     })
@@ -177,10 +178,6 @@ export default function Borrow() {
         <Head>
           <title>Borrow</title>
         </Head>
-        <SelectTokenToBorrow onSelect={setCurrentMarket} />
-        <BorrowErc20Token  {...borrowInfo} />
-        <BorrowNativeCurrency  {...borrowInfo} />
-        <ActionResult {...{id: BORROW_RESULT_TOAST, ...borrowResult}} />
         <div className="col-12 col-xl-6 col-xxl-5 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
@@ -290,71 +287,15 @@ export default function Borrow() {
             </div>
           </div>
         </div>
-        <div className="col-12 col-lg-3 col-xxl-2">
-          {/*<div className="bg-body p-3 rounded border shadow">
-            <h4 className="mb-4">Your positions</h4>
-            <table className="table table-borderless align-middle">
-                <tbody>
-                  <tr>
-                    <td className="w-50">
-                        <div className="d-flex justify-content-start">
-                            <img src="/images/tokens/USDC.svg" alt="USDC" width="35" />
-                            <div className="ps-2">
-                                <div>520 <small className="text-body-secondary">USDC</small></div>
-                                <div className="small text-body-secondary">$520</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td className="text-center">
-                        <div className="small">Liquidation risk</div> 
-                        <div className="text-warning">67.23%</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="w-50">                                
-                        <button type="button" className="btn btn-light border border-light-subtle w-100">Repay</button>
-                    </td>
-                    <td className="text-center">
-                        <div className="small">Borrow APR</div> 
-                        <div className="text-body-secondary">4.12%</div>
-                    </td>
-                  </tr>
-                </tbody>
-            </table>
-            <hr className="mx-2 text-body-tertiary" />
-            <table className="table table-borderless align-middle">
-                <tbody>
-                  <tr>
-                    <td className="w-50">
-                        <div className="d-flex justify-content-start">
-                            <img src="/images/tokens/ETH.svg" alt="ETH" width="35" />
-                            <div className="ps-2">
-                                <div>3 <small className="text-body-secondary">ETH</small></div>
-                                <div className="small text-body-secondary">$4800</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td className="text-center">
-                        <div className="small">Liquidation risk</div> 
-                        <div className="text-success">12.32%</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="w-50">                                
-                        <button type="button" className="btn btn-light border border-light-subtle w-100">Repay</button>
-                    </td>
-                    <td className="text-center">
-                        <div className="small">Borrow APR</div> 
-                        <div className="text-body-secondary">4.34%</div>
-                    </td>
-                  </tr>
-                </tbody>
-            </table>
-          </div>
-          <p className="h6 p-3 pt-4">
-            Your collaterals : <span className="ps-2 text-body-secondary">$896 <i className="bi bi-box-arrow-up-right"></i></span>
-          </p>*/}
+        <div className="col-12 col-xl-3 col-xxl-2">
+          { isConnected &&
+            <BorrowPositions />
+          }
         </div>
+        <SelectTokenToBorrow onSelect={setCurrentMarket} />
+        <BorrowErc20Token  {...borrowInfo} />
+        <BorrowNativeCurrency  {...borrowInfo} />
+        <ActionResult {...{id: BORROW_RESULT_TOAST, ...borrowResult}} />
       </>
     )
 }

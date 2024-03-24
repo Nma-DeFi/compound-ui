@@ -95,7 +95,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
         <div className="modal-content">
           <div className="modal-body">
             <div className={`${css['title']} d-flex justify-content-between align-items-center`}>
-              <h3 className="m-0">Confirm loan</h3>
+              <h3 className="m-0">Confirm borrowing</h3>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <table className="table">

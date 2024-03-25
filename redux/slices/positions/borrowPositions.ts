@@ -9,7 +9,6 @@ import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
 import { log } from '../../helpers/borrow';
-import { bnf } from '../../../utils/bn';
 
 export type BorrowBalance = {
   borrowBalance: BigNumber
@@ -33,9 +32,8 @@ export const borrowPositionsSlice = createSlice({
       state.data = undefined
       Object.assign(state, AsyncStatus.Idle)
     },
-    borrowPositionsIncrease: (state, action) => {
+    borrowPositionsIncrease: (state: BorrowPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
       const { comet, amount } = action.payload
-      console.log('borrowPositionsIncrease', comet, bnf(amount))
       const oldBalance = state.data[comet].borrowBalance
       state.data[comet].borrowBalance = oldBalance.plus(amount)
     }

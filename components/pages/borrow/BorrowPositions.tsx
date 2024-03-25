@@ -12,7 +12,7 @@ import Spinner, { GrowSpinners } from "../../Spinner"
 
 export default function BorrowPositions() {
 
-    const [borrowPositions, setBorrowPositions] = useState<Array<BorrowBalance>>([])
+    const [borrowPositions, setBorrowPositions] = useState([])
 
     const { isLoading, isSuccess, data } = useBorrowPositions()
 

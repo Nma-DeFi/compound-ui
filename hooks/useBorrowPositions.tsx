@@ -1,9 +1,9 @@
 import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { borrowPositionsInit } from "../redux/slices/positions/borrowPositions"
+import { BorrowPositionsState, borrowPositionsInit } from "../redux/slices/positions/borrowPositions"
 import { useCurrentAccount } from "./useCurrentAccount"
 
-export function useBorrowPositions() {
+export function useBorrowPositions() : BorrowPositionsState {
 
     const borrowPositions = useAppSelector(state => state.borrowPositions)
     const { isConnected } = useCurrentAccount()

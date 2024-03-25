@@ -4,16 +4,19 @@ import { Address } from 'viem';
 import * as MarketSelector from '../../../selectors/market-selector';
 import { MarketDataService } from '../../../services/market-data-service';
 import { PositionsService } from '../../../services/positions-service';
-import { PriceFeed, Token } from '../../../types';
+import { Market, PriceFeed, Token } from '../../../types';
 import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
 import { log } from '../../helpers/borrow';
+import { bnf } from '../../../utils/bn';
 
 export type BorrowBalance = {
-  baseToken: Token
   borrowBalance: BigNumber
+  borrowApr: number
+  baseToken: Token
   priceFeed: PriceFeed
+  market: Market
 }
 
 export type BorrowPositionsData = Record<Address, BorrowBalance>
@@ -29,6 +32,12 @@ export const borrowPositionsSlice = createSlice({
     borrowPositionsReset: (state: BorrowPositionsState) => {
       state.data = undefined
       Object.assign(state, AsyncStatus.Idle)
+    },
+    borrowPositionsIncrease: (state, action) => {
+      const { comet, amount } = action.payload
+      console.log('borrowPositionsIncrease', comet, bnf(amount))
+      const oldBalance = state.data[comet].borrowBalance
+      state.data[comet].borrowBalance = oldBalance.plus(amount)
     }
   },
   extraReducers(builder) {
@@ -64,19 +73,20 @@ export const borrowPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
       for (const market of markets) {
           const comet = MarketSelector.cometProxy(market)
           const baseToken = MarketSelector.baseToken(market)
+          const borrowApr = MarketSelector.netBorrowAprScaled(market)
           const priceFeed = {
             address: MarketSelector.baseTokePriceFeed(market),
             kind: MarketUtils.getPriceFeedKind(market, chainId)
           } 
           const positionsService = new PositionsService({comet, publicClient })
           const borrowBalance = await positionsService.borrowBalanceOf(address)
-          positions = { ...positions, [comet]: { baseToken, borrowBalance, priceFeed } }  
+          positions = { ...positions, [comet]: { borrowBalance, borrowApr, baseToken, priceFeed, market } }  
       }
       log(chainId, positions)
       return positions
     }
 )
 
-export const { borrowPositionsReset } = borrowPositionsSlice.actions
+export const { borrowPositionsReset, borrowPositionsIncrease } = borrowPositionsSlice.actions
 
 export default borrowPositionsSlice.reducer

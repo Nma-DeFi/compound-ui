@@ -19,7 +19,7 @@ import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
 import PriceAsync from '../../components/PriceAsync';
-import { useMarketCollateralUsd } from '../../hooks/useMarketCollateralUsd';
+import { useTotalMarketCollateralUsd } from '../../hooks/useTotalMarketCollateralUsd';
 import { useCurrentMarket } from '../../hooks/useCurrentMarket';
 import { marketChanged } from '../../redux/slices/currentMarket';
 import { useAppDispatch } from '../../redux/hooks';
@@ -52,7 +52,7 @@ export default function Collateral() {
         isSuccess: isSuccessUsdCollateral, 
         isError: isErrorUsdCollateral, 
         data: usdCollateral, 
-    } = useMarketCollateralUsd({ asyncCollateralPositions, currentMarket })
+    } = useTotalMarketCollateralUsd({ asyncCollateralPositions, currentMarket })
 
     function showModal(action: ActionType, market, collateral) {
         const priceFeed : PriceFeed = {
@@ -132,7 +132,7 @@ export default function Collateral() {
                     <div className="d-flex justify-content-around justify-content-sm-end pt-5 pt-sm-0">
                         { isMarkets && markets.map((market) =>
                             <div key={market.id} className={marketCss(market)} onClick={() => setCurrentMarket(market)}>
-                                <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} css={`me-2 ${css['market-icon']}`} />
+                                <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} width={25} css={`me-2 ${css['market-icon']}`} />
                                 {getBaseTokenOrNativeCurrency(market, chainId)?.symbol} <span className="text-body-tertiary ps-1">Market</span>
                             </div>
                         )}

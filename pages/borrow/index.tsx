@@ -5,10 +5,10 @@ import { useBootstrap } from "../../hooks/useBootstrap"
 import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
 import { ReactNode, useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
-import { getBaseTokenOrNativeCurrency, getPriceFeed, getPriceFeedKind, isNativeCurrencyMarket } from "../../utils/markets"
+import { getBaseTokenOrNativeCurrency, getPriceFeed } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
-import { Zero, bn, bnf } from "../../utils/bn"
-import { baseBorrowMinScaled, baseTokePriceFeed, collateralTokens, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
+import { Zero, bn } from "../../utils/bn"
+import { baseBorrowMinScaled, collateralTokens, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
 import AmountInput from "../../components/AmountInput"
@@ -17,25 +17,25 @@ import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useBorrowCapacity } from "../../hooks/useBorrowCapacity"
 import BigNumber from "bignumber.js"
 import PriceAsync from "../../components/PriceAsync"
-import { ActionInfo, Market, PriceFeed, Token } from "../../types"
+import { ActionInfo, Market } from "../../types"
 import { usePublicClient } from "wagmi"
 import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
-import { nf } from "../../utils/number"
 import { SmallSpinner } from "../../components/Spinner"
 import Amount from "../../components/Amount"
-import BorrowNativeCurrency, { BORROW_NATIVE_CURRENCY } from "../../components/pages/borrow/BorrowNativeCurrency"
+import BorrowNativeCurrency from "../../components/pages/borrow/BorrowNativeCurrency"
 import ActionResult from "../../components/action-result/ActionResult"
 import { useAppDispatch } from "../../redux/hooks"
 import { marketChanged } from "../../redux/slices/currentMarket"
 import { useCurrentMarket } from "../../hooks/useCurrentMarket"
 import { getTokenOrNativeCurrency } from "../../utils/chains"
-import { getLiquidationRisk, getLiquidationRiskByBorrowAmount } from "../../redux/helpers/liquidation"
+import { getLiquidationRiskByBorrowAmount } from "../../redux/helpers/liquidation"
 import { useBorrowPositions } from "../../hooks/useBorrowPositions"
 import { useCollateralPositions } from "../../hooks/useCollateralPositions"
 import { usePriceService } from "../../hooks/usePriceService"
 import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/borrow/BorrowErc20Token"
 import BorrowPositions from "../../components/pages/borrow/BorrowPositions"
+import Apr from "../../components/Apr"
 
 const enum Mode {
   Loading,
@@ -54,6 +54,8 @@ export default function Borrow() {
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
+    const [ newLiquidationRisk, setNewLiquidationRisk ] = useState<number>()
+
 
     const currentMarket = useCurrentMarket()
 
@@ -103,9 +105,10 @@ export default function Borrow() {
       }  else if (isInsufficientBorrowAmount()) {
         setMode(Mode.InsufficientBorrowAmount)
       } else {
-        getLiquidationRisk({ chainId, market: currentMarket, borrowPositions, collateralPositions, priceService })
-        getLiquidationRiskByBorrowAmount({ chainId, market: currentMarket, collateralPositions, priceService, borrowAmount: bn(100) })
         setMode(Mode.ReadyToBorrow)
+        const { borrowBalance } = borrowPositions[comet]
+        const borrowAmount = borrowBalance.plus(amount)
+        getLiquidationRiskByBorrowAmount({ chainId, market: currentMarket, collateralPositions, priceService, borrowAmount }).then(setNewLiquidationRisk)
       }
     })
     
@@ -124,8 +127,16 @@ export default function Borrow() {
 
     function isLoading() {
       if (!isMarkets || !currentMarket) return true
+      console.log('isLoading', 
+        'isConnected', isConnected, 
+        'isSupplyPositions', isSupplyPositions,
+        'isBorrowPositions', isBorrowPositions,
+        'isCollateralPositions', isCollateralPositions,
+        'priceService', !!priceService,
+        'isBorrowCapacity', isBorrowCapacity,
+        'isAmountUsd', isAmountUsd,)
       if (isConnected &&  (!isSupplyPositions || !isBorrowPositions || !isCollateralPositions 
-        || !priceService || !isBorrowCapacity || !isAmountUsd)) return true
+        || !!!priceService || !isBorrowCapacity || !isAmountUsd)) return true
       return false
     }
 
@@ -151,8 +162,10 @@ export default function Borrow() {
       const borrowInfo = { 
         comet, token, amount, 
         priceFeed, borrowApr, 
+        liquidationRisk: newLiquidationRisk,
         onBorrow: setBorrowResult 
       }
+      //console.log('borrowInfo !!', borrowInfo)
       setBorrowInfo(borrowInfo)
       /*if (isNativeCurrencyMarket(currentMarket, chainId)) {
         openModal(BORROW_NATIVE_CURRENCY)
@@ -295,7 +308,7 @@ export default function Borrow() {
         <SelectTokenToBorrow onSelect={setCurrentMarket} />
         <BorrowErc20Token  {...borrowInfo} />
         <BorrowNativeCurrency  {...borrowInfo} />
-        <ActionResult {...{id: BORROW_RESULT_TOAST, ...borrowResult}} />
+        <ActionResult {...{id: BORROW_RESULT_TOAST, comet, ...borrowResult}} />
       </>
     )
 }
@@ -320,7 +333,7 @@ function BorrowApr({ mode, borrowApr} : { mode: Mode; borrowApr: number }) {
             <PlaceHolder size={PlaceHolderSize.SMALL} col={12} />
           </div>
         ) : (
-          <>Borrow APR : <span className="text-body-tertiary">{nf(borrowApr)}<small>%</small></span></>
+          <>Borrow APR : <span className="text-body-tertiary"><Apr value={borrowApr} /></span></>
         )
       }
     </div>

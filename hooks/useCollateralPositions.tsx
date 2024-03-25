@@ -1,9 +1,9 @@
 import { useEffect } from "react"
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { useCurrentAccount } from "./useCurrentAccount"
-import { collateralPositionsInit } from "../redux/slices/positions/collateralPositions"
+import { CollateralPositionsState, collateralPositionsInit } from "../redux/slices/positions/collateralPositions"
 
-export function useCollateralPositions() {
+export function useCollateralPositions() : CollateralPositionsState {
 
     const collateralPositions = useAppSelector(state => state.collateralPositions)
     const { isConnected } = useCurrentAccount()

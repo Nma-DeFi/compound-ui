@@ -14,6 +14,7 @@ import { ActionType } from "../../../types"
 import { BORROW_RESULT_TOAST } from "../../../pages/borrow"
 import TokenIcon from "../../TokenIcon"
 import css from '../../../styles/components/borrow/BorrowErc20Token.module.scss'
+import { LiquidationRiskProgress } from "../../LiquidationRisk"
 
 const enum Mode {
   Init,
@@ -24,7 +25,7 @@ const enum Mode {
 
 export const BORROW_ERC20_MODAL = 'borrow-erc20-borrow'
 
-export default function BorrowErc20Token({ comet, token, amount, priceFeed, borrowApr, onBorrow }) {
+export default function BorrowErc20Token({ comet, token, amount, priceFeed, borrowApr, liquidationRisk, onBorrow }) {
   
   const [ mode, setMode ] = useState<Mode>()
   const [ transactionHash, setTransactionHash ] = useState<Hash>()
@@ -102,11 +103,13 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
               <tbody>
                 <tr>
                   <td className={`${css['table-label']} table-light fw-semibold`}>Borrow amount</td>
-                  <td className="d-flex justify-content-center align-items-center">
-                    <TokenIcon symbol={ token?.symbol } css="me-2" width="20" />
-                    <Amount value={ amount } /> 
-                    <span className="text-body-secondary ps-1">{ token?.symbol }</span>
-                    <small className="ps-3 text-body-secondary">(<PriceAsync asyncPrice={price} />)</small>
+                  <td>
+                    <div className="d-flex justify-content-center align-items-center">
+                      <TokenIcon symbol={ token?.symbol } css="me-1" width="20" />
+                      <Amount value={ amount } /> 
+                      <span className="text-body-secondary ps-1">{ token?.symbol }</span>
+                      <small className="ps-3 text-body-secondary">(<PriceAsync asyncPrice={price} />)</small>
+                    </div>
                   </td>
                 </tr>
                 <tr>
@@ -116,16 +119,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
                 <tr>
                   <td className={`${css['table-label']} table-light fw-semibold`}>Liquidation risk</td>
                   <td className="align-middle px-3">
-                    <div className="progress" 
-                      role="progressbar" 
-                      aria-label="Liquidation risk" 
-                      aria-valuenow={15} 
-                      aria-valuemin={0} 
-                      aria-valuemax={100} 
-                      style={{height: '20px'}} 
-                      title="Liquidation risk : 15%">
-                        <div className="progress-bar text-bg-success overflow-visible px-1" style={{width: '15%'}}>15%</div>
-                    </div>
+                    <LiquidationRiskProgress {...{ risk: liquidationRisk, css: '', style: {height: '20px'} }} />
                   </td>
                 </tr>
               </tbody>

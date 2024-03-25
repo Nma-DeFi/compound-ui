@@ -31,7 +31,8 @@ export type ActionInfo = {
   action: ActionType
   token: Asset
   amount: BigNumber
-  hash: Hash
+  hash: Hash, 
+  comet?: Address
 }
 
 export type WithdrawType = ActionType.WithdrawBaseToken | ActionType.WithdrawCollateral

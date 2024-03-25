@@ -12,7 +12,7 @@ export async function getLiquidationRisk({ chainId, market, borrowPositions, col
     borrowPositions: BorrowPositionsData
     collateralPositions: CollateralPositionsData
     priceService: PriceService
-  }) {
+  }): Promise<number> {
 
   const { borrowBalance: borrowAmount } = borrowPositions[market.cometProxy]
 
@@ -25,7 +25,7 @@ export async function getLiquidationRiskByBorrowAmount({ chainId, market, collat
   collateralPositions: CollateralPositionsData
   priceService: PriceService
   borrowAmount: BigNumber
-}) {
+}) : Promise<number> {
 
   const marketId = market.cometProxy
   const collatPositions = Object.values(collateralPositions[marketId]).filter(p => p.balance.gt(Zero))
@@ -45,11 +45,11 @@ export async function getLiquidationRiskByBorrowAmount({ chainId, market, collat
     borrowMax = borrowMax.plus(balance.times(price).times(factor))
   }
 
-  console.log('getLiquidationRiskByBorrowBalance', 
+  console.log('getLiquidationRiskByBorrowAmount', 
     'borrowCurrent', bnf(borrowCurrent), 
     'borrowMax', bnf(borrowMax), 
-    'liquidationRisk', borrowCurrent.div(borrowMax).toNumber())
+    'liquidationRisk', borrowCurrent.div(borrowMax).times(100).toNumber())
 
-  return borrowCurrent.div(borrowMax).toNumber()
+  return borrowCurrent.div(borrowMax).times(100).toNumber()
 }
 

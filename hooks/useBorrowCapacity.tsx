@@ -4,6 +4,7 @@ import { useBorrowPositions } from "./useBorrowPositions"
 import { usePriceService } from "./usePriceService"
 import { getBorrowCapacity } from "../redux/helpers/borrow"
 import { useCurrentAccount } from "./useCurrentAccount"
+import { PRICE_STALE_TIME } from "../services/price-service"
 
 export function useBorrowCapacity({ chainId, publicClient, marketId }) {
 
@@ -18,6 +19,6 @@ export function useBorrowCapacity({ chainId, publicClient, marketId }) {
     queryKey: ['BorrowCapacity', chainId, marketId, borrowPositions, collateralPositions],
     queryFn: () => getBorrowCapacity({ marketId, borrowPositions, collateralPositions, priceService }),
     enabled: !!(isConnected && marketId && isCollateralPositions && isBorrowPositions && priceService),
-    staleTime: (2 * 60 * 1000),
+    staleTime: PRICE_STALE_TIME,
   })
 }

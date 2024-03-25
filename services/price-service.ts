@@ -24,10 +24,17 @@ export class PriceService {
     }
 
     async getPriceFromSymbol(symbol: string) {
-        return await this.compoundSdk.getPrice(symbol)
+        try {
+
+            return await this.compoundSdk.getPrice(symbol)
+
+        } catch(e) {
+            console.error('getPriceFromSymbol', e)
+        }
     }
 
     async getPriceFromFeed({ address, kind } : PriceFeed) {
+        try {
 
         let promises: Promise<any>[] = [ 
             this.publicClient.multicall({
@@ -55,9 +62,14 @@ export class PriceService {
         const price = (Number(feedPrice) / Number(feedScale))
 
         return (kind === PriceFeedKind.ETH_PRICE) ? price * ethPrice : price
+        
+        } catch(e) {
+            console.error('getPriceFromFeed', e)
+        }
     }
 
     async getAllPricesFromFeeds(priceFeeds : PriceFeed[]) {
+        try {
 
         const multicallParams = priceFeeds.map(({ address }) => ({
             ...this.cometContract,
@@ -98,6 +110,10 @@ export class PriceService {
         }
 
         return prices
+        
+        } catch(e) {
+            console.error('getAllPricesFromFeeds', e)
+        }
     }
 
 }

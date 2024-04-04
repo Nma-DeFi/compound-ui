@@ -155,6 +155,11 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
       loadAsyncData(promise, setAsyncBalance);
     }
 
+    function loadBulkerPermission() {
+      const promise = allowanceService.hasPermission(account, bulker)
+      loadAsyncData(promise, setBulkerPermission)
+    }
+
     function initState(initWithdrawData = true) {
       setAmount(Zero)
       setMode(null)
@@ -166,11 +171,6 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType } : 
         setWithdrawHash(null)
         setWithdrawInfo(null)
       }
-    }
-
-    function loadBulkerPermission() {
-      const promise = allowanceService.hasPermission(account, bulker)
-      loadAsyncData(promise, setBulkerPermission)
     }
     
     function setInput(value: string) {

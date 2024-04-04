@@ -32,7 +32,6 @@ export default function ActionResult({ id, comet, action, token, amount, hash } 
                     dispatch(collateralPositionsReset())
                     break
                 case ActionType.Borrow:
-                    //dispatch(borrowPositionsReset())
                     dispatch(borrowPositionsIncrease({ comet, amount }))
                     break
             }

@@ -5,7 +5,7 @@ import { useBootstrap } from "../../hooks/useBootstrap"
 import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
 import { ReactNode, useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
-import { getBaseTokenOrNativeCurrency, getPriceFeed } from "../../utils/markets"
+import { getBaseTokenOrNativeCurrency, getPriceFeed, isNativeCurrencyMarket } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
 import { Zero, bn } from "../../utils/bn"
 import { baseBorrowMinScaled, collateralTokens, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
@@ -23,7 +23,7 @@ import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
 import { SmallSpinner } from "../../components/Spinner"
 import Amount from "../../components/Amount"
-import BorrowNativeCurrency from "../../components/pages/borrow/BorrowNativeCurrency"
+import BorrowNativeCurrency, { BORROW_NATIVE_MODAL } from "../../components/pages/borrow/BorrowNativeCurrency"
 import ActionResult from "../../components/action-result/ActionResult"
 import { useAppDispatch } from "../../redux/hooks"
 import { marketChanged } from "../../redux/slices/currentMarket"
@@ -55,7 +55,6 @@ export default function Borrow() {
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
     const [ newLiquidationRisk, setNewLiquidationRisk ] = useState<number>()
-
 
     const currentMarket = useCurrentMarket()
 
@@ -108,7 +107,13 @@ export default function Borrow() {
         setMode(Mode.ReadyToBorrow)
         const { borrowBalance } = borrowPositions[comet]
         const borrowAmount = borrowBalance.plus(amount)
-        getLiquidationRiskByBorrowAmount({ chainId, market: currentMarket, collateralPositions, priceService, borrowAmount }).then(setNewLiquidationRisk)
+        getLiquidationRiskByBorrowAmount({ 
+          chainId, 
+          market: currentMarket, 
+          collateralPositions, 
+          priceService, 
+          borrowAmount 
+        }).then(setNewLiquidationRisk)
       }
     })
     
@@ -127,7 +132,8 @@ export default function Borrow() {
 
     function isLoading() {
       if (!isMarkets || !currentMarket) return true
-      console.log('isLoading', 
+      console.log(
+        'isLoading', 
         'isConnected', isConnected, 
         'isSupplyPositions', isSupplyPositions,
         'isBorrowPositions', isBorrowPositions,
@@ -135,8 +141,9 @@ export default function Borrow() {
         'priceService', !!priceService,
         'isBorrowCapacity', isBorrowCapacity,
         'isAmountUsd', isAmountUsd,)
-      if (isConnected &&  (!isSupplyPositions || !isBorrowPositions || !isCollateralPositions 
-        || !!!priceService || !isBorrowCapacity || !isAmountUsd)) return true
+      if (isConnected &&  
+        (!isSupplyPositions || !isBorrowPositions || !isCollateralPositions 
+        || !priceService || !isBorrowCapacity || !isAmountUsd)) return true
       return false
     }
 
@@ -165,14 +172,12 @@ export default function Borrow() {
         liquidationRisk: newLiquidationRisk,
         onBorrow: setBorrowResult 
       }
-      //console.log('borrowInfo !!', borrowInfo)
       setBorrowInfo(borrowInfo)
-      /*if (isNativeCurrencyMarket(currentMarket, chainId)) {
-        openModal(BORROW_NATIVE_CURRENCY)
+      if (isNativeCurrencyMarket(currentMarket, chainId)) {
+        openModal(BORROW_NATIVE_MODAL)
       } else {
         openModal(BORROW_ERC20_MODAL)
-      }*/
-      openModal(BORROW_ERC20_MODAL)
+      }
     }
     
     function setInput(value: string) {
@@ -281,16 +286,16 @@ export default function Borrow() {
                   <PriceAsync asyncPrice={{ 
                     isIdle: asyncBorrowCapacity.isPending, 
                     isLoading: asyncBorrowCapacity.isLoading, 
-                    isSuccess: asyncBorrowCapacity.isSuccess, 
                     isError: asyncBorrowCapacity.isError, 
-                    data: asyncBorrowCapacity.data 
+                    isSuccess: isBorrowCapacity, 
+                    data: borrowCapacity
                   }} /></span></div>
                 <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Increase your borrowing capacity <i className="bi bi-arrow-right"></i></Link>
               </BorrowPanel>
             }
             <div className="d-grid">
                 { mode === Mode.NotConnected ? (
-                    <button className="btn btn-lg btn-primary text-white" type="button"  onClick={handleBorrow}>Connect Wallet</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Connect Wallet</button>
                   ) : mode === Mode.Loading ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Loading <SmallSpinner /></button>
                   ) : (

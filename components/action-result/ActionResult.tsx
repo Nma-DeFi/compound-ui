@@ -9,7 +9,7 @@ import { ActionInfo, ActionType } from "../../types";
 import { ActionLabels } from "./ActionsLabels";
 import { collateralPositionsReset } from "../../redux/slices/positions/collateralPositions";
 import Amount from "../Amount";
-import { borrowPositionsReset, borrowPositionsIncrease } from "../../redux/slices/positions/borrowPositions";
+import { borrowPositionsDecrease, borrowPositionsIncrease } from "../../redux/slices/positions/borrowPositions";
 
 type ActionResultParam = { id : string } & ActionInfo
 
@@ -33,6 +33,9 @@ export default function ActionResult({ id, comet, action, token, amount, hash } 
                     break
                 case ActionType.Borrow:
                     dispatch(borrowPositionsIncrease({ comet, amount }))
+                    break
+                case ActionType.Repay:
+                    dispatch(borrowPositionsDecrease({ comet, amount }))
                     break
             }
         }

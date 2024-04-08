@@ -16,7 +16,7 @@ import TokenIcon from "../../TokenIcon"
 import { LiquidationRiskProgress } from "../../LiquidationRisk"
 import { useAllowanceService } from "../../../hooks/useAllowanceService"
 import { usePositionsService } from "../../../hooks/usePositionsService"
-import { AsyncBigNumber, AsyncData, IdleData, loadAsyncData } from "../../../utils/async"
+import { AsyncBigNumber, AsyncBoolean, IdleData, loadAsyncData } from "../../../utils/async"
 import { CompoundConfig } from "../../../compound-config"
 import { BORROW_RESULT_TOAST } from "../../../pages/borrow"
 import { ActionType } from "../../../types"
@@ -39,7 +39,7 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
   const [ bulkerApprovalHash, setBulkerApprovalHash ] = useState<Hash>()
   const [ borrowHash, setBorrowHash ] = useState<Hash>()
   const [ asyncBorrowBalance, setAsyncBorrowBalance ] = useState<AsyncBigNumber>(IdleData)
-  const [ bulkerPermission, setBulkerPermission ] = useState<AsyncData<boolean>>(IdleData)
+  const [ bulkerPermission, setBulkerPermission ] = useState<AsyncBoolean>(IdleData)
 
   const { address: account } = useCurrentAccount()
 

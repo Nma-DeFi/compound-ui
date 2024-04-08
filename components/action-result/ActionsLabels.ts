@@ -21,4 +21,8 @@ export const ActionLabels = {
         header : 'Borrow',
         content : 'Borrowing',
     },
+    [ActionType.Repay] : {
+        header : 'Repay',
+        content : 'Repaying',
+    },
 }

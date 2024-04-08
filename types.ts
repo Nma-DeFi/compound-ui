@@ -24,7 +24,7 @@ export enum ActionType {
   DepositCollateral,
   WithdrawBaseToken,
   WithdrawCollateral,
-  Borrow,
+  Borrow, Repay
 }
 
 export type ActionInfo = {

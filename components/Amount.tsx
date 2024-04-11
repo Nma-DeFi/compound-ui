@@ -5,6 +5,7 @@ import { NoData } from "./Layout";
 
 export const AMOUNT_DP = 4
 export const AMOUNT_RM = BigNumber.ROUND_UP
+export const AMOUNT_TRIM_ZERO = true
 
 type AmountConfig = {
     dp?: number
@@ -18,7 +19,7 @@ type AmountParam = {
 
 const DefaultConfig: AmountConfig = {
     dp: AMOUNT_DP,
-    trimZeros: true,
+    trimZeros: AMOUNT_TRIM_ZERO,
 }
 
 export default function Amount({ value, config = DefaultConfig } : AmountParam) {

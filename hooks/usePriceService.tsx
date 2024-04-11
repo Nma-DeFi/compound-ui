@@ -6,7 +6,7 @@ export function usePriceService({ chainId, publicClient }) : PriceService {
     
     const [ priceService, setPriceService ] = useState<PriceService>()
 
-    const comet =  useComet({ chainId })
+    const comet = useComet({ chainId })
 
     useEffect(() => {
         if (publicClient &&  comet) {
@@ -15,7 +15,7 @@ export function usePriceService({ chainId, publicClient }) : PriceService {
         } else {
             setPriceService(null)
         }
-    }, [publicClient, comet])
+    }, [chainId, publicClient, comet])
 
     return priceService
 }

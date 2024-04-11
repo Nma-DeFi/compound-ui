@@ -1,22 +1,22 @@
 import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
-import { Zero, bn, bnf } from '../../../utils/bn'
+import { Zero, bn, bnf, fromBigInt } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
 import AmountPercent from '../../AmountPercent'
-import { SmallSpinner } from '../../Spinner'
 import TokenIcon from '../../TokenIcon'
-import css from '../../../styles/components/borrow/RepayErc20.module.scss'
 import PriceFromFeed from '../../PriceFromFeed'
+import css from '../../../styles/components/borrow/RepayNativeCurrency.module.scss'
 import { useCurrentChain } from '../../../hooks/useCurrentChain'
+import * as ChainUtils from '../../../utils/chains'
 import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
-import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi'
-import { useErc20Service } from '../../../hooks/useErc20Service'
+import { usePublicClient, useWalletClient } from 'wagmi'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
 import AsyncAmount from '../../AmountAsync'
-import { Hash } from 'viem'
 import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../../Amount'
+import { SmallSpinner } from '../../Spinner'
 import { useSupplyService } from '../../../hooks/useSupplyService'
+import { Hash } from 'viem'
 import { ActionType } from '../../../types'
 import { REPAY_RESULT_TOAST } from './BorrowPositions'
 import { usePositionsService } from '../../../hooks/usePositionsService'
@@ -24,68 +24,60 @@ import { usePositionsService } from '../../../hooks/usePositionsService'
 const enum Mode {
   Init,
   ExceedMaximumRepayment,
-  InsufficientAllowance,
-  ConfirmationOfApproval,
-  WaitingForApproval,
   RepaymentReady,
   ConfirmationOfRepayment,
   WaitingForRepayment,
 }
 
-export const REPAY_ERC20_TOKEN_MODAL = 'repay-erc20-modal'
+export const REPAY_NATIVE_CURRENCY = 'repay-native-currency'
 
-export default function RepayErc20Token({ comet, token, onRepay }) {
+export default function RepayNativeCurrency({ comet, token, onRepay }) {
+
+    const { currentChainId: chainId } = useCurrentChain()
+    const { address } = useCurrentAccount()
     
     const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
-    const [ approvalHash, setApprovalHash ] = useState<Hash>()
     const [ repayHash, setRepayHash ] = useState<Hash>()
-    const [ asyncAllowance, setAsyncAllowance ] = useState<AsyncBigNumber>(IdleData)
-    const [ asyncBorrowBalance, setAsyncBorrowBalance ] = useState<AsyncBigNumber>(IdleData)
-
-    const { isSuccess: isAllowance, data: allowance } = asyncAllowance
-    const { isSuccess: isBorrowBalance, data: borrowBalance } = asyncBorrowBalance
-    
-    const { currentChainId: chainId } = useCurrentChain()
-    const { address: account } = useCurrentAccount()
 
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
 
-    const erc20service  = useErc20Service({ token, publicClient, walletClient, account })
-    const supplyService = useSupplyService({ publicClient, walletClient, account, comet })
+    const [ asyncBorrowBalance, setAsyncBorrowBalance ] = useState<AsyncBigNumber>(IdleData)
+    const { isSuccess: isBorrowBalance, data: borrowBalance } = asyncBorrowBalance
+
+    const supplyService = useSupplyService({ publicClient, walletClient, comet, account: address })
     const positionsService = usePositionsService({ comet, publicClient })
 
     const { hideModal, openToast } = useBootstrap()
-    const modalEvent = useModalEvent(REPAY_ERC20_TOKEN_MODAL)
+    const modalEvent = useModalEvent(REPAY_NATIVE_CURRENCY)
 
-    const { 
-      isLoading: isWaitingApproval, 
-      isSuccess: isSuccessApproval 
-    } = useWaitForTransaction({ hash: approvalHash })
+    const nativeCurrency = ChainUtils.nativeCurrency(chainId)
 
     useEffect(() => {
-      if (!isBorrowBalance || !isAllowance) return
+      if (!isBorrowBalance) return
       if (amount.isGreaterThan(borrowBalance)) {
         setMode(Mode.ExceedMaximumRepayment)
-      } else if (amount.isGreaterThan(allowance)) {
-        setMode(Mode.InsufficientAllowance)
       } else {
         setMode(Mode.RepaymentReady)
       }
-    }, [amount, borrowBalance, allowance])
+    }, [amount, borrowBalance])
 
-    useEffect(() => { 
-      if (isWaitingApproval) {
-        setMode(Mode.WaitingForApproval)
-      } 
-    }, [isWaitingApproval])
+    useEffect(() => {
+      if (mode === Mode.ConfirmationOfRepayment && repayHash) {
+        setMode(Mode.WaitingForRepayment)
+        const action = ActionType.Repay
+        const hash = structuredClone(repayHash)
+        onRepay({ action, token, amount, hash })
+        hideModal(REPAY_NATIVE_CURRENCY)
+      }
+    }, [mode, repayHash])
 
-    useEffect(() => { 
-      if (isSuccessApproval) {
-        loadAllowance()
-      } 
-    }, [isSuccessApproval])
+    useEffect(() => {
+      if (mode === Mode.Init && publicClient) {
+        loadBorrowBalance()
+      }
+    }, [mode, publicClient])
 
     useEffect(() => {
       switch (modalEvent) {
@@ -98,23 +90,6 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
       } 
     }, [modalEvent])
 
-    useEffect(() => {
-      if (mode === Mode.Init && erc20service) {
-        loadBalance()
-        loadAllowance()
-      }
-    }, [mode, erc20service])
-
-    useEffect(() => {
-      if (mode === Mode.ConfirmationOfRepayment && repayHash) {
-        setMode(Mode.WaitingForRepayment)
-        const action = ActionType.Repay
-        const hash = structuredClone(repayHash)
-        onRepay({ action, token, amount, hash })
-        hideModal(REPAY_ERC20_TOKEN_MODAL)
-      }
-    }, [mode, repayHash])
-
     function onOpen() {
       setMode(Mode.Init)
     }
@@ -126,28 +101,20 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
       setMode(null)
       setAmount(Zero)
       setInput(null)
-      setAsyncBorrowBalance(IdleData)
-      setAsyncAllowance(IdleData)
-      setApprovalHash(null)
       setRepayHash(null)
     }
 
-    function loadBalance() {
-      const promise = positionsService.borrowBalanceOf(account)
-      loadAsyncData(promise, setAsyncBorrowBalance)
-    }
-
-    function loadAllowance() {
-      const promise = erc20service.allowance(account, comet)
-      loadAsyncData(promise, setAsyncAllowance)
-    }
-    
     function setInput(amount: BigNumber) {
       const newInput = amount ? bnf(amount, AMOUNT_DP, AMOUNT_TRIM_ZERO, AMOUNT_RM) : ''
       const id = css['repay-input']
       const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement
       input.value = newInput
+    }
+    
+    function loadBorrowBalance() {
+      const promise = positionsService.borrowBalanceOf(address)
+      loadAsyncData(promise, setAsyncBorrowBalance)
     }
 
     function handleAmountChange(event) {
@@ -157,12 +124,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
 
     function handleRepay() {
       setMode(Mode.ConfirmationOfRepayment)
-      supplyService.supplyErc20Token({ token, amount }).then(setRepayHash)
-    }
-
-    function handleApproval() {
-      setMode(Mode.ConfirmationOfApproval)
-      erc20service.approve(comet, borrowBalance).then(setApprovalHash)
+      supplyService.supplyNativeCurrency({ amount }).then(setRepayHash)
     }
 
     function handleWalletBalancePercent(factor: number) {
@@ -173,7 +135,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
 
     return (
       <>
-        <div id={REPAY_ERC20_TOKEN_MODAL} className="modal" tabIndex={-1}>
+        <div id={REPAY_NATIVE_CURRENCY} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div id={css['repay-body']} className="modal-body">
@@ -195,12 +157,12 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
                       <div>
                         <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
                             <div className="d-flex align-items-center">
-                                <TokenIcon symbol={token?.symbol} width={30} />
-                                <span className="px-3">{token?.symbol}</span> 
+                                <TokenIcon symbol={nativeCurrency.symbol} width={30} />
+                                <span className="px-3">{nativeCurrency.symbol}</span> 
                             </div>
                         </button>
                         <div className="text-center text-body-secondary small">
-                        Balance : <span className="text-body-tertiary"><AsyncAmount {...asyncBorrowBalance} /></span>
+                          Balance : <span className="text-body-tertiary"><AsyncAmount {...asyncBorrowBalance} /></span>
                         </div>
                       </div>
                   </div>
@@ -215,21 +177,15 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
                   { mode === Mode.ExceedMaximumRepayment &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Maximum repayment : <AsyncAmount {...asyncBorrowBalance} /></button>
                   }
-                  { mode === Mode.InsufficientAllowance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleApproval}>Enable {token?.symbol}</button>
-                  }
-                  { mode === Mode.WaitingForApproval &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Enabling {token?.symbol} ... Wait please <SmallSpinner /></button>
-                  }
-                  { [Mode.ConfirmationOfApproval, Mode.ConfirmationOfRepayment].includes(mode) &&
+                  { mode === Mode.ConfirmationOfRepayment &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
                   }
                   { mode === Mode.RepaymentReady &&
                     <>
                       { amount.isGreaterThan(Zero) ? (
-                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleRepay}>Repay <Amount value={amount} /> {token?.symbol}</button>
+                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleRepay}>Repay <Amount value={amount} /> {nativeCurrency.symbol}</button>
                       ) : (
-                        <button className="btn btn-lg btn-primary text-white" type="button">Repay {token?.symbol}</button>
+                        <button className="btn btn-lg btn-primary text-white" type="button">Repay {nativeCurrency.symbol}</button>
                       )
                       }
                     </>

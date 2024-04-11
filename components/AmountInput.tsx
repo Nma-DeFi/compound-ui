@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export default function AmountInput({ id, onChange, disabled, focused }) {
+export default function AmountInput({ id, onChange, disabled, focused = false }) {
 
     const ref = useRef(null)
 

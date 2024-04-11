@@ -3,6 +3,7 @@ import { Zero, bnf } from '../../utils/bn'
 import { BorrowPositionsData } from '../slices/positions/borrowPositions'
 import { CollateralPositionsData } from '../slices/positions/collateralPositions'
 import { PriceService } from '../../services/price-service'
+import BigNumber from 'bignumber.js'
 
 export async function getBorrowCapacity({ marketId, borrowPositions, collateralPositions, priceService } : {
     marketId: Address
@@ -27,6 +28,25 @@ export async function getBorrowCapacity({ marketId, borrowPositions, collateralP
   }
 
   return borrowCapacity
+}
+
+export async function getTotalBorrowingsUsdBalance(
+  { borrowPositions, priceService } : {
+      borrowPositions: BorrowPositionsData
+      priceService: PriceService
+  }): Promise<BigNumber> {
+
+  const positions = Object.values(borrowPositions).filter(p => p.borrowBalance.gt(Zero))
+  const prices = await priceService.getAllPricesFromFeeds(positions.map(p => p.priceFeed))
+
+  let totalBorrowingsUsd: BigNumber = Zero;
+  for (let index = 0; index < positions.length; index++) {
+      const price = prices[index]
+      const balance = positions[index].borrowBalance
+      totalBorrowingsUsd = totalBorrowingsUsd.plus(balance.times(price))
+  }    
+
+  return totalBorrowingsUsd
 }
 
 export function log(chainId: number, positions: BorrowPositionsData) {

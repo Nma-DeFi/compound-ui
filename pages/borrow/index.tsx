@@ -7,7 +7,7 @@ import { ReactNode, useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
 import { getBaseTokenOrNativeCurrency, getPriceFeed, isNativeCurrencyMarket } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
-import { Zero, bn } from "../../utils/bn"
+import { Zero, bn, bnf } from "../../utils/bn"
 import { baseBorrowMinScaled, collateralTokens, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
@@ -22,7 +22,7 @@ import { usePublicClient } from "wagmi"
 import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
 import { SmallSpinner } from "../../components/Spinner"
-import Amount from "../../components/Amount"
+import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from "../../components/Amount"
 import BorrowNativeCurrency, { BORROW_NATIVE_MODAL } from "../../components/pages/borrow/BorrowNativeCurrency"
 import ActionResult from "../../components/action-result/ActionResult"
 import { useAppDispatch } from "../../redux/hooks"
@@ -109,10 +109,10 @@ export default function Borrow() {
         const borrowAmount = borrowBalance.plus(amount)
         getLiquidationRiskByBorrowAmount({ 
           chainId, 
-          market: currentMarket, 
           collateralPositions, 
           priceService, 
-          borrowAmount 
+          borrowAmount,
+          market: currentMarket
         }).then(setNewLiquidationRisk)
       }
     })
@@ -140,11 +140,18 @@ export default function Borrow() {
         'isCollateralPositions', isCollateralPositions,
         'priceService', !!priceService,
         'isBorrowCapacity', isBorrowCapacity,
-        'isAmountUsd', isAmountUsd,)
+        'isAmountUsd', isAmountUsd)
       if (isConnected &&  
         (!isSupplyPositions || !isBorrowPositions || !isCollateralPositions 
         || !priceService || !isBorrowCapacity || !isAmountUsd)) return true
       return false
+    }
+
+    function isShowPositions() {
+      if (!isConnected) return false
+      if (!isBorrowPositions) return false
+      const activePositions = Object.values(borrowPositions).filter(p => p.borrowBalance.gt(Zero))
+      return activePositions.length > 0
     }
 
     function isFarmingBaseToken() {
@@ -179,12 +186,12 @@ export default function Borrow() {
         openModal(BORROW_ERC20_MODAL)
       }
     }
-    
-    function setInput(value: string) {
+
+    function setInput(newInput) {
       const id = css['borrow-input']
       const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement
-      input.value = value ?? ''
+      input.value = newInput ?? ''
     }
 
     function setCurrentMarket(market: Market) {
@@ -277,7 +284,7 @@ export default function Borrow() {
             }
             { mode === Mode.InsufficientBorrowAmount &&
               <BorrowPanel {...{ mode, borrowApr }}>
-                Minimum borrow amount : <Amount value={minBorrowAmount} /> { token?.symbol }
+                <div className="text-warning">Minimum borrow amount : <Amount value={minBorrowAmount} /> { token?.symbol }</div>
               </BorrowPanel>
             }
             { mode === Mode.ReadyToBorrow &&
@@ -290,7 +297,9 @@ export default function Borrow() {
                     isSuccess: isBorrowCapacity, 
                     data: borrowCapacity
                   }} /></span></div>
-                <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">Increase your borrowing capacity <i className="bi bi-arrow-right"></i></Link>
+                <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none" style={{ fontSize: '95%' }}>
+                  Increase your borrowing capacity <i className="bi bi-arrow-right"></i>
+                </Link>
               </BorrowPanel>
             }
             <div className="d-grid">
@@ -306,7 +315,7 @@ export default function Borrow() {
           </div>
         </div>
         <div className="col-12 col-xl-3 col-xxl-2">
-          { isConnected &&
+          { isShowPositions() &&
             <BorrowPositions />
           }
         </div>
@@ -320,7 +329,7 @@ export default function Borrow() {
 
 function BorrowPanel({ children, mode, borrowApr, css = ''} : { children: ReactNode, mode: Mode; borrowApr: number; css?: string }) {
   return (
-    <div className={`d-flex flex-wrap justify-content-between mb-4 pt-1 ${css}`}>
+    <div className={`d-flex flex-wrap justify-content-between align-items-center mb-4 pt-1 ${css}`}>
       <div>{ children }</div>
       <div className="my-2 my-sm-0">
         <BorrowApr {...{ mode, borrowApr }} />

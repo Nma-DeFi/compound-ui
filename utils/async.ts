@@ -39,5 +39,5 @@ export function SuccessData<T>(value: T) : AsyncData<T> {
 export function loadAsyncData<T>(promise: Promise<T>, setData: (d: AsyncData<T>) => void) : void {
     setData({ data: undefined, ...AsyncStatus.Loading })
     promise.then(d => setData({data: d, ...AsyncStatus.Success }))
-         .catch(() => setData({data: undefined, ...AsyncStatus.Error }))
+          .catch(e => setData({data: e, ...AsyncStatus.Error }))
 }

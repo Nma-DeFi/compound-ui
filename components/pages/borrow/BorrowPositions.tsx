@@ -14,6 +14,8 @@ import { BorrowBalance } from "../../../redux/slices/positions/borrowPositions"
 import * as MarketSelector from "../../../selectors/market-selector"
 import * as MarketUtils from "../../../utils/markets"
 import ActionResult from "../../action-result/ActionResult"
+import RepayNativeCurrency, { REPAY_NATIVE_CURRENCY } from "./RepayNativeCurrency"
+import { Zero } from "../../../utils/bn"
 
 export const REPAY_RESULT_TOAST = 'repay-result-toast'
 
@@ -41,62 +43,71 @@ export default function BorrowPositions() {
 
     useEffect(() => {
         if (isSuccess) {
-            const borrowPositions = Object.values(data)
+            const borrowPositions = Object.values(data).filter(p => p.borrowBalance.gt(Zero))
             setBorrowPositions(borrowPositions)
         }
     }, [isSuccess, data])
 
     function handleRepay(market: Market) {
         setMarket(market)
-        openModal(REPAY_ERC20_TOKEN_MODAL)
+        if (MarketUtils.isNativeCurrencyMarket(market, chainId)) {
+            openModal(REPAY_NATIVE_CURRENCY)
+        } else {
+            openModal(REPAY_ERC20_TOKEN_MODAL)
+        }
     }
 
     return (
         <div className="bg-body p-3 rounded border shadow pb-4">     
-            <h4 className="mb-4">Your { borrowPositions.length > 1 ? 'borrowings' : 'borrowing' }</h4>
+            <h4 style={{ marginBottom: '1.25rem' }}>Your { borrowPositions.length > 1 ? 'borrowings' : 'borrowing' }</h4>
             { isLoading &&
-                <Spinner css="d-flex mx-auto mt-4 mb-3 text-body-tertiary" />
+                <div className="py-4">
+                    <Spinner css="d-flex mx-auto text-secondary text-opacity-25" />
+                </div>
             }
             { isSuccess && borrowPositions.map((borrowPosition, index) => 
-                <>       
-                    <table className="table table-borderless align-middle mb-0">
-                        <tbody>
-                        <tr>
-                            <td className="w-50">
-                                <div className="d-flex justify-content-start">
-                                    <TokenIcon symbol={borrowPosition.baseToken.symbol} width={35} />
-                                    <div className="ps-2">
-                                        <div><Amount value={borrowPosition.borrowBalance} /> {/*<small className="text-body-secondary">{borrowPosition.baseToken.symbol}</small>*/}</div>
-                                        <div className="small text-body-secondary">
-                                            <PriceFromFeed priceFeed={borrowPosition.priceFeed} amount={borrowPosition.borrowBalance} placeHolderCfg={{ col: 8 }} />
+                <div key={index}>
+                    <div style={{ padding: '0.6rem 0'}}>       
+                        <table className="table table-borderless align-middle mb-0">
+                            <tbody>
+                            <tr>
+                                <td className="px-0 py-2 w-50">
+                                    <div className="d-flex justify-content-start">
+                                        <TokenIcon symbol={borrowPosition.baseToken.symbol} width={35} />
+                                        <div className="ps-2">
+                                            <div><Amount value={borrowPosition.borrowBalance} /></div>
+                                            <div className="small text-body-secondary">
+                                                <PriceFromFeed priceFeed={borrowPosition.priceFeed} amount={borrowPosition.borrowBalance} placeHolderCfg={{ col: 12 }} />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td className="text-center">
-                                <div className="small">Liquidation risk</div> 
-                                <LiquidationRisk market={ borrowPosition.market } css="mx-2" style={{ marginTop: '0.4rem' }} minRiskLabel={30} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td className="w-50">                                
-                                <button type="button" className="btn btn-light border border-light-subtle w-100" onClick={ () => handleRepay(borrowPosition.market)}>
-                                    <i className="bi bi-box-arrow-in-down me-1"></i> Repay
-                                </button>
-                            </td>
-                            <td className="text-center">
-                                <div className="small">Borrow APR</div> 
-                                <div className="text-body-secondary"><Apr value={ borrowPosition.borrowApr } /></div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                                </td>
+                                <td className="px-0 py-2 text-center">
+                                    <div className="small">Liquidation risk</div> 
+                                    <LiquidationRisk market={ borrowPosition.market } css="mx-3" style={{ marginTop: '0.4rem' }} minRiskLabel={50} />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td className="px-0 py-2 w-50">                                
+                                    <button type="button" className="btn btn-light border border-light-subtle" onClick={() => handleRepay(borrowPosition.market)} style={{ width: '90%'}}>
+                                        <i className="bi bi-box-arrow-in-down me-1"></i> Repay
+                                    </button>
+                                </td>
+                                <td className="px-0 py-2 text-center small">
+                                    <div className="">Borrow APR</div> 
+                                    <div className="text-body-secondary"><Apr value={ borrowPosition.borrowApr } /></div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     { index + 1 < borrowPositions.length &&
                         <hr className="mx-2 my-4 text-body-tertiary" />
                     }
-                </>
+                </div>
             )}
             <RepayErc20Token comet={comet} token={token} onRepay={setRepayResult} />
+            <RepayNativeCurrency comet={comet} token={token} onRepay={setRepayResult} />
             <ActionResult {...{id: REPAY_RESULT_TOAST, comet, ...repayResult}} />
         </div>
     )

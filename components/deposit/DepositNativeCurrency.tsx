@@ -106,8 +106,8 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
 
     function initState(initSupplyData = true) {
       setAmount(Zero)
-      setMode(null)
       setInput(null)
+      setMode(null)
       setAsyncBalance(IdleData)
       if (initSupplyData) {
         setSupplyHash(null)

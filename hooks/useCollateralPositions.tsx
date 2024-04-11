@@ -13,7 +13,7 @@ export function useCollateralPositions() : CollateralPositionsState {
         if (isConnected && collateralPositions.isIdle) {
           dispatch(collateralPositionsInit())
         } 
-      }, [isConnected, collateralPositions])
+    }, [isConnected, collateralPositions])
 
     return collateralPositions
 }

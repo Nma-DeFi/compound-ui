@@ -71,7 +71,7 @@ export default function BorrowPositions() {
                         <table className="table table-borderless align-middle mb-0">
                             <tbody>
                             <tr>
-                                <td className="px-0 py-2 w-50">
+                                <td className="w-50" style={{ padding: '0.5rem 0 1rem 0' }}>
                                     <div className="d-flex justify-content-start">
                                         <TokenIcon symbol={borrowPosition.baseToken.symbol} width={35} />
                                         <div className="ps-2">
@@ -82,9 +82,9 @@ export default function BorrowPositions() {
                                         </div>
                                     </div>
                                 </td>
-                                <td className="px-0 py-2 text-center">
-                                    <div className="small">Liquidation risk</div> 
-                                    <LiquidationRisk market={ borrowPosition.market } css="mx-3" style={{ marginTop: '0.4rem' }} minRiskLabel={50} />
+                                <td className="text-center" style={{ padding: '0.5rem 0 1rem 0' }}>
+                                    <div className="small pb-1">Liquidation risk</div> 
+                                    <LiquidationRisk market={ borrowPosition.market } css="mx-3" minRiskLabel={100} />
                                 </td>
                             </tr>
                             <tr>

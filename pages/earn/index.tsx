@@ -67,7 +67,7 @@ export default function Farm() {
           <title>Earn</title>
         </Head>
         
-        <div className="col-12 col-xl-8 px-xl-5">
+        <div className="col-12 col-xl-8 px-0 px-xl-5">
 
             <DepositBaseTokenErc20 {...targetMarket} />
             <DepositBaseTokenNative {...targetMarket} />
@@ -142,7 +142,7 @@ export default function Farm() {
             )}
         </div>
 
-        <div className="col-12 col-xl-2">
+        <div className="col-12 col-xl-2 px-0 pt-4 pt-xl-0">
           <UserAccount />
         </div>
       </>

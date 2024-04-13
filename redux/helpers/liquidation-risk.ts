@@ -45,11 +45,13 @@ export async function getLiquidationRiskByBorrowAmount({ chainId, market, collat
     borrowMax = borrowMax.plus(balance.times(price).times(factor))
   }
 
+  const liquidationRisk = borrowCurrent.div(borrowMax).times(100).toNumber()
+
   console.log('getLiquidationRiskByBorrowAmount', 
     'borrowCurrent', bnf(borrowCurrent), 
     'borrowMax', bnf(borrowMax), 
-    'liquidationRisk', borrowCurrent.div(borrowMax).times(100).toNumber())
+    'liquidationRisk', liquidationRisk)
 
-  return borrowCurrent.div(borrowMax).times(100).toNumber()
+  return liquidationRisk
 }
 

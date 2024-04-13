@@ -39,7 +39,8 @@ export async function getTotalBorrowingsUsdBalance(
   const positions = Object.values(borrowPositions).filter(p => p.borrowBalance.gt(Zero))
   const prices = await priceService.getAllPricesFromFeeds(positions.map(p => p.priceFeed))
 
-  let totalBorrowingsUsd: BigNumber = Zero;
+  let totalBorrowingsUsd: BigNumber = Zero
+  
   for (let index = 0; index < positions.length; index++) {
       const price = prices[index]
       const balance = positions[index].borrowBalance

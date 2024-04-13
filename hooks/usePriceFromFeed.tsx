@@ -1,7 +1,6 @@
 import { One } from "../utils/bn";
 import { useEffect, useState } from "react";
 import { AsyncBigNumber, IdleData, LoadingData, SuccessData } from "../utils/async";
-import { usePriceService } from "./usePriceService";
 import { useQuery } from "@tanstack/react-query";
 import { PRICE_STALE_TIME, PriceService } from "../services/price-service";
 import { MarketDataService } from "../services/market-data-service";
@@ -19,12 +18,8 @@ export function usePriceFromFeed({ chainId, publicClient, priceFeed, amount = On
 
     const [ asyncPrice, setAsyncPrice ] = useState<AsyncBigNumber>(IdleData)
 
-    //const priceService = usePriceService({ chainId, publicClient })
-
-    const { isLoading, isSuccess, data: price } =  useQuery({
+    const { isLoading, isSuccess, isError, data: price, error } =  useQuery({
         queryKey: ['PriceFromFeed', chainId, priceFeed],
-        //queryFn: () => priceService.getPriceFromFeed(priceFeed),
-        //enabled: !!(priceService && priceFeed),
         queryFn: () => priceFromFeed(chainId, publicClient, priceFeed),
         enabled: !!(publicClient && priceFeed?.address),
         staleTime: PRICE_STALE_TIME,
@@ -36,9 +31,10 @@ export function usePriceFromFeed({ chainId, publicClient, priceFeed, amount = On
         } else if (isSuccess)  {
             setAsyncPrice(SuccessData(amount.times(price)))
         } else {
+            if (isError) console.error(error)
             setAsyncPrice(IdleData)
         }
-    }, [isLoading, isSuccess, amount])
+    }, [isLoading, isSuccess, isError, amount, error])
 
     return asyncPrice
 }

@@ -5,7 +5,7 @@ import { usePriceService } from "./usePriceService"
 import { useCurrentAccount } from "./useCurrentAccount"
 import { PublicClient } from "wagmi"
 import { Market } from "../types"
-import { getLiquidationRisk } from "../redux/helpers/liquidation"
+import { getLiquidationRisk } from "../redux/helpers/liquidation-risk"
 
 export function useLiquidationRisk({ chainId, publicClient, market } : 
   { 

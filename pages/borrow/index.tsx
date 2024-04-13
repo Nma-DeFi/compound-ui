@@ -7,7 +7,7 @@ import { ReactNode, useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
 import { getBaseTokenOrNativeCurrency, getPriceFeed, isNativeCurrencyMarket } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
-import { Zero, bn, bnf } from "../../utils/bn"
+import { Zero, bn } from "../../utils/bn"
 import { baseBorrowMinScaled, collateralTokens, cometProxy, netBorrowAprScaled } from "../../selectors/market-selector"
 import { useMarkets } from "../../hooks/useMarkets"
 import css from '../../styles/pages/Borrow.module.scss'
@@ -22,20 +22,21 @@ import { usePublicClient } from "wagmi"
 import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
 import { SmallSpinner } from "../../components/Spinner"
-import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from "../../components/Amount"
+import Amount from "../../components/Amount"
 import BorrowNativeCurrency, { BORROW_NATIVE_MODAL } from "../../components/pages/borrow/BorrowNativeCurrency"
 import ActionResult from "../../components/action-result/ActionResult"
 import { useAppDispatch } from "../../redux/hooks"
 import { marketChanged } from "../../redux/slices/currentMarket"
 import { useCurrentMarket } from "../../hooks/useCurrentMarket"
 import { getTokenOrNativeCurrency } from "../../utils/chains"
-import { getLiquidationRiskByBorrowAmount } from "../../redux/helpers/liquidation"
+import { getLiquidationRiskByBorrowAmount } from "../../redux/helpers/liquidation-risk"
 import { useBorrowPositions } from "../../hooks/useBorrowPositions"
 import { useCollateralPositions } from "../../hooks/useCollateralPositions"
 import { usePriceService } from "../../hooks/usePriceService"
 import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/borrow/BorrowErc20Token"
 import BorrowPositions from "../../components/pages/borrow/BorrowPositions"
 import Apr from "../../components/Apr"
+import { useWeb3Modal } from "@web3modal/wagmi/react"
 
 const enum Mode {
   Loading,
@@ -54,7 +55,9 @@ export default function Borrow() {
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
-    const [ newLiquidationRisk, setNewLiquidationRisk ] = useState<number>()
+    const [ liquidationRisk, setLiquidationRisk ] = useState<number>()
+
+    const { open: openWeb3Modal } = useWeb3Modal()
 
     const currentMarket = useCurrentMarket()
 
@@ -113,7 +116,7 @@ export default function Borrow() {
           priceService, 
           borrowAmount,
           market: currentMarket
-        }).then(setNewLiquidationRisk)
+        }).then(setLiquidationRisk)
       }
     })
     
@@ -125,8 +128,7 @@ export default function Borrow() {
 
     useEffect(() => {
       if (currentMarket) {
-        setAmount(Zero)
-        setInput(null)
+        resetAmount()
       }
     }, [chainId, currentMarket])
 
@@ -176,8 +178,8 @@ export default function Borrow() {
       const borrowInfo = { 
         comet, token, amount, 
         priceFeed, borrowApr, 
-        liquidationRisk: newLiquidationRisk,
-        onBorrow: setBorrowResult 
+        liquidationRisk, 
+        onBorrow: setBorrowResult
       }
       setBorrowInfo(borrowInfo)
       if (isNativeCurrencyMarket(currentMarket, chainId)) {
@@ -193,6 +195,11 @@ export default function Borrow() {
       const input = elem as HTMLInputElement
       input.value = newInput ?? ''
     }
+    
+    function resetAmount() {
+      setAmount(Zero)
+      setInput(null)
+    }
 
     function setCurrentMarket(market: Market) {
       dispatch(marketChanged(market))
@@ -203,16 +210,12 @@ export default function Borrow() {
         <Head>
           <title>Borrow</title>
         </Head>
-        <div className="col-12 col-xl-6 col-xxl-5 px-xl-5">
+        <div className="col-12 col-xl-6 col-xxl-5 px-0 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
             <div className="d-flex border align-items-center p-3 rounded mb-2">
                 <div className="flex-grow-1">
-                    <AmountInput 
-                      id={css['borrow-input']} 
-                      onChange={handleAmountChange} 
-                      disabled={false} 
-                      focused={true} />
+                    <AmountInput id={css['borrow-input']} onChange={handleAmountChange} />
                     <small className="text-body-tertiary">
                     { mode === Mode.Loading ? (
                         <PlaceHolder col={2} />
@@ -304,17 +307,19 @@ export default function Borrow() {
             }
             <div className="d-grid">
                 { mode === Mode.NotConnected ? (
-                    <button className="btn btn-lg btn-primary text-white" type="button">Connect Wallet</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={() => openWeb3Modal()}>Connect Wallet</button>
                   ) : mode === Mode.Loading ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Loading <SmallSpinner /></button>
+                  ) : mode === Mode.ReadyToBorrow ? (
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={() => handleBorrow()}>Borrow {token?.symbol}</button>
                   ) : (
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {token?.symbol}</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Borrow {token?.symbol}</button>
                   )
                 }
             </div>
           </div>
         </div>
-        <div className="col-12 col-xl-3 col-xxl-2">
+        <div className="col-12 col-xl-3 col-xxl-2 px-0 pt-4 pt-xl-0">
           { isShowPositions() &&
             <BorrowPositions />
           }
@@ -322,7 +327,7 @@ export default function Borrow() {
         <SelectTokenToBorrow onSelect={setCurrentMarket} />
         <BorrowErc20Token  {...borrowInfo} />
         <BorrowNativeCurrency  {...borrowInfo} />
-        <ActionResult {...{id: BORROW_RESULT_TOAST, comet, ...borrowResult}} />
+        <ActionResult {...{id: BORROW_RESULT_TOAST, comet, ...borrowResult, onSuccess: resetAmount}} />
       </>
     )
 }

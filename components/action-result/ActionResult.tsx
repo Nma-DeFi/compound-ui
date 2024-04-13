@@ -11,9 +11,12 @@ import { collateralPositionsReset } from "../../redux/slices/positions/collatera
 import Amount from "../Amount";
 import { borrowPositionsDecrease, borrowPositionsIncrease } from "../../redux/slices/positions/borrowPositions";
 
-type ActionResultParam = { id : string } & ActionInfo
+type ActionResultParam = { 
+    id : string 
+    onSuccess?: () => void 
+} & ActionInfo
 
-export default function ActionResult({ id, comet, action, token, amount, hash } : ActionResultParam) {
+export default function ActionResult({ id, comet, action, token, amount, hash, onSuccess } : ActionResultParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const { isLoading, isSuccess, isError, data, error } = useWaitForTransaction({ hash  })
@@ -38,6 +41,7 @@ export default function ActionResult({ id, comet, action, token, amount, hash } 
                     dispatch(borrowPositionsDecrease({ comet, amount }))
                     break
             }
+            onSuccess?.()
         }
     }, [isSuccess])
 

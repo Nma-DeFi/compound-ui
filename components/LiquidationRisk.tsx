@@ -4,7 +4,7 @@ import { useLiquidationRisk } from "../hooks/useLiquidationRisk"
 
 const DEFAULT_MIN_RISK_LABEL = 8
 
-export default function LiquidationRisk({ market, css, style, minRiskLabel = DEFAULT_MIN_RISK_LABEL }) {
+export default function LiquidationRisk({ market, css, style = undefined, minRiskLabel = DEFAULT_MIN_RISK_LABEL }) {
 
     const { currentChainId: chainId } = useCurrentChain()
 

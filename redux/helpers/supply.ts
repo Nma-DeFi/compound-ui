@@ -12,7 +12,8 @@ export async function getTotalEarningsUsdBalance(
   const positions = Object.values(supplyPositions).filter(p => p.supplyBalance.gt(Zero))
   const prices = await priceService.getAllPricesFromFeeds(positions.map(p => p.priceFeed))
 
-  let totalEarningsUsd: BigNumber = Zero;
+  let totalEarningsUsd: BigNumber = Zero
+  
   for (let index = 0; index < positions.length; index++) {
       const price = prices[index]
       const balance = positions[index].supplyBalance

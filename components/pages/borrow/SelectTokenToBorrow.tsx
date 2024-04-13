@@ -24,7 +24,7 @@ export default function SelectTokenToBorrow({ onSelect }) {
   }
 
   return (
-    <div id={SELECT_TOKEN_TO_BORROW_MODAL} className="modal" tabIndex={-1}>
+    <div id={SELECT_TOKEN_TO_BORROW_MODAL} className="modal p-0" tabIndex={-1}>
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-body pb-5">

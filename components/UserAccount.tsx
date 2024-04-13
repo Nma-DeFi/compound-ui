@@ -74,7 +74,7 @@ export function UserAccount(positionsState : PositionsState) {
 
 
     return isConnected && (
-        <div id={css['user-account']} className="bg-body py-4 border rounded shadow text-center rounded-4 mt-4 mt-xl-0">
+        <div id={css['user-account']} className="bg-body py-4 border rounded shadow text-center rounded-4">
             <h4 className={css['title']}>Your account</h4>
             <div className="d-flex justify-content-around justify-content-xl-between mb-3 small">
                 <div>

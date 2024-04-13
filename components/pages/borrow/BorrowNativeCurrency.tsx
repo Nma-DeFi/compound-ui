@@ -142,7 +142,7 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
 
   function loadBorrowBalance() {
     const promise = positionsService.borrowBalanceOf(account)
-    loadAsyncData(promise, setAsyncBorrowBalance);
+    loadAsyncData(promise, setAsyncBorrowBalance)
   }
 
   function loadBulkerPermission() {

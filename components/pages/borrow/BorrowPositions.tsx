@@ -83,7 +83,7 @@ export default function BorrowPositions() {
                                     </div>
                                 </td>
                                 <td className="text-center" style={{ padding: '0.5rem 0 1rem 0' }}>
-                                    <div className="small pb-1">Liquidation risk</div> 
+                                    <div className="small pb-2">Liquidation risk</div> 
                                     <LiquidationRisk market={ borrowPosition.market } css="mx-4" minRiskLabel={100} />
                                 </td>
                             </tr>

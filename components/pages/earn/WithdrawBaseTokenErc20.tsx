@@ -18,5 +18,5 @@ export default function WithdrawBaseTokenErc20(market) {
 
     const token: Token = {...baseToken, priceFeed }
 
-    return <WithdrawErc20Token comet={comet} token={token} withdrawType={ActionType.WithdrawBaseToken} />
+    return <WithdrawErc20Token comet={comet} token={token} withdrawType={ActionType.WithdrawBaseToken} onWithdraw={market.onAction} />
 }

@@ -8,36 +8,35 @@ import { useCurrentChain } from '../../hooks/useCurrentChain'
 import { useErc20Service } from '../../hooks/useErc20Service'
 import { useSupplyService } from '../../hooks/useSupplyService'
 import { Zero, bn, bnf } from '../../utils/bn'
-import { AMOUNT_DP } from '../Amount'
+import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../Amount'
 import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
 import { SmallSpinner } from '../Spinner'
-import ActionResult from '../action-result/ActionResult'
 import TokenIcon from '../TokenIcon'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
 import css from '../../styles/components/farm/DepositErc20.module.scss'
 import AsyncAmount from '../AmountAsync'
-import { ActionInfo, DepositParam } from '../../types'
+import { DepositParam } from '../../types'
 import PriceFromFeed from '../PriceFromFeed'
+import { ACTION_RESULT_TOAST } from '../action-result/ActionResult'
 
-const Mode = {
-  NotConnected: 0,
-  Init: 1,
-  InsufficientBalance: 2,
-  InsufficientAllowance: 3,
-  ConfirmationOfApproval: 4,
-  WaitingForApproval: 5,
-  DepositReady: 6,
-  ConfirmationOfDeposit: 7,
-  WaitingForDeposit: 8,
+const enum Mode {
+  NotConnected,
+  Init,
+  InsufficientBalance,
+  InsufficientAllowance,
+  ConfirmationOfApproval,
+  WaitingForApproval,
+  DepositReady,
+  ConfirmationOfDeposit,
+  WaitingForDeposit,
 }
 
 export const DEPOSIT_ERC20_TOKEN_MODAL = 'deposit-erc20-modal'
-export const DEPOSIT_ERC20_TOKEN_TOAST = 'deposit-erc20-toast'
 
-export default function DepositErc20Token({ comet, token, depositType } : DepositParam) {
+export default function DepositErc20Token({ comet, token, depositType, onDeposit } : DepositParam) {
     
-    const [ mode, setMode ] = useState<number>()
+    const [ mode, setMode ] = useState<Mode>()
 
     const [ asyncAllowance, setAsyncAllowance ] = useState<AsyncBigNumber>(IdleData)
     const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
@@ -49,7 +48,6 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
 
     const [ approvalHash, setApprovalHash ] = useState<Hash>()
     const [ supplyHash, setSupplyHash ] = useState<Hash>()
-    const [ supplyInfo, setSupplyInfo ] = useState<ActionInfo>()
 
     const { currentChainId: chainId } = useCurrentChain()
     const { isConnected, address: account } = useCurrentAccount()
@@ -101,7 +99,10 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
     useEffect(() => {
       if (mode === Mode.ConfirmationOfDeposit && supplyHash) {
         setMode(Mode.WaitingForDeposit)
-        setSupplyInfo({ action: depositType, token, amount, hash: supplyHash })
+        const action = depositType
+        const amountCopy = bn(amount)
+        const hashCopy = structuredClone(supplyHash)
+        onDeposit({ comet, action, token, amount: amountCopy, hash: hashCopy })
         hideModal(DEPOSIT_ERC20_TOKEN_MODAL)
       }
     }, [mode, supplyHash])
@@ -118,7 +119,6 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
     }, [modalEvent])
 
     function onOpen() {
-      initState()
       if (!isConnected) {
         setMode(Mode.NotConnected)
       } else {
@@ -127,31 +127,28 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
     }
 
     function onHide() {
-      let clearSupplyData = true
       if (mode === Mode.WaitingForDeposit) {
-        openToast(DEPOSIT_ERC20_TOKEN_TOAST)
-        clearSupplyData = false
+        openToast(ACTION_RESULT_TOAST)
       }
-      initState(clearSupplyData)
+      resetState()
     }
     
-    function initState(initSupplyData = true) {
+    function resetState() {
       setAmount(Zero)
       setMode(null)
       setInput(null)
       setApprovalHash(null)
       setAsyncBalance(IdleData)
       setAsyncAllowance(IdleData)
-      if (initSupplyData) {
-        setSupplyHash(null)
-        setSupplyInfo(null)
-      }
+      setSupplyHash(null)
     }
 
-    function setInput(value: string) {
-      const elem = document.getElementById(css['deposit-input']) 
+    function setInput(amount: BigNumber) {
+      const newInput = amount ? bnf(amount, AMOUNT_DP, AMOUNT_TRIM_ZERO, AMOUNT_RM) : ''
+      const id = css['deposit-input']
+      const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement
-      input.value = value ?? ''
+      input.value = newInput
     }
 
     function loadBalance() {
@@ -170,10 +167,8 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
     }
 
     function handleDeposit() {
-      if (amount.isGreaterThan(Zero)) {
-        setMode(Mode.ConfirmationOfDeposit)
-        supplyService.supplyErc20Token({ token, amount }).then(setSupplyHash)
-      }
+      setMode(Mode.ConfirmationOfDeposit)
+      supplyService.supplyErc20Token({ token, amount }).then(setSupplyHash)
     }
 
     function handleAmountChange(event) {
@@ -184,14 +179,11 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
     function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount, AMOUNT_DP)
       setAmount(newAmount)
-      setInput(newInput)
+      setInput(newAmount)
     }
 
     return (
-      <>
-        <ActionResult {...{id: DEPOSIT_ERC20_TOKEN_TOAST, ...supplyInfo}} />
         <div id={DEPOSIT_ERC20_TOKEN_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
@@ -206,8 +198,7 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
                         <AmountInput 
                           id={css['deposit-input']} 
                           onChange={handleAmountChange} 
-                          disabled={Mode.Init === mode} 
-                          focused={false} />
+                          disabled={Mode.Init === mode} />
                         <div className="small text-body-tertiary">
                           <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
@@ -220,7 +211,7 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
                             </div>
                         </button>
                         <div className="text-center text-body-secondary small">
-                          Wallet : <span className="text-body-tertiary"><AsyncAmount {...asyncBalance} /></span>
+                          Wallet : <span className="text-body-tertiary"><AsyncAmount { ...asyncBalance } /></span>
                         </div>
                       </div>
                   </div>
@@ -244,18 +235,24 @@ export default function DepositErc20Token({ comet, token, depositType } : Deposi
                   { mode === Mode.WaitingForApproval &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Enabling {token?.symbol} ... Wait please <SmallSpinner /></button>
                   }
-                  { mode === Mode.DepositReady &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit {token?.symbol}</button>
-                  }
                   { ([Mode.ConfirmationOfApproval, Mode.ConfirmationOfDeposit].includes(mode)) &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
+                  }
+                  { mode === Mode.DepositReady &&
+                    <>
+                      { amount.isGreaterThan(Zero) ? (
+                          <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit <Amount value={amount} /> {token?.symbol}</button>
+                        ) : (
+                          <button className="btn btn-lg btn-primary text-white" type="button">Deposit {token?.symbol}</button>
+                        )
+                      }
+                    </>
                   }
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </>
     )
 }
 

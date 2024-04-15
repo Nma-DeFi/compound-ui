@@ -11,10 +11,11 @@ import { Hash } from "viem"
 import { useWithdrawService } from "../../../hooks/useWithdrawService"
 import { useCurrentAccount } from "../../../hooks/useCurrentAccount"
 import { ActionType } from "../../../types"
-import { BORROW_RESULT_TOAST } from "../../../pages/borrow"
 import TokenIcon from "../../TokenIcon"
 import css from '../../../styles/components/borrow/BorrowErc20Token.module.scss'
 import { LiquidationRiskProgress } from "../../LiquidationRisk"
+import { bn } from "../../../utils/bn"
+import { ACTION_RESULT_TOAST } from "../../action-result/ActionResult"
 
 const enum Mode {
   Init,
@@ -56,8 +57,9 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
     if (mode === Mode.ConfirmTransaction && transactionHash) {
       setMode(Mode.WaitingForTransaction)
       const action = ActionType.Borrow
-      const hash = structuredClone(transactionHash)
-      onBorrow({ action, token, amount, hash })
+      const amountCopy = bn(amount)
+      const hashCopy = structuredClone(transactionHash)
+      onBorrow({ comet, action, token, amount: amountCopy, hash: hashCopy })
       hideModal(BORROW_ERC20_MODAL)
     }
   }, [mode, transactionHash])
@@ -79,7 +81,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
 
   function onHide() {
     if (mode === Mode.WaitingForTransaction) {
-      openToast(BORROW_RESULT_TOAST)
+      openToast(ACTION_RESULT_TOAST)
     }
     setMode(null)
     setTransactionHash(null)

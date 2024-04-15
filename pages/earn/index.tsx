@@ -22,9 +22,10 @@ import DepositBaseTokenErc20 from "../../components/pages/earn/DepositBaseTokenE
 import DepositBaseTokenNative from "../../components/pages/earn/DepositBaseTokenNative"
 import { WITHDRAW_NATIVE_CURRENCY_MODAL } from "../../components/withdraw/WithdrawNativeCurrency"
 import { WITHDRAW_ERC20_TOKEN_MODAL } from "../../components/withdraw/WithdrawErc20Token"
-import { ActionType } from "../../types"
+import { ActionInfo, ActionType } from "../../types"
+import ActionResult from "../../components/action-result/ActionResult"
 
-export default function Farm() {
+export default function Earn() {
 
   useSupplyPositions()
 
@@ -32,7 +33,9 @@ export default function Farm() {
   const { currentChainId: chainId } = useCurrentChain()
   const { isLoading, isError, isSuccess, data: markets } = useMarkets({ chainId })
   
-  const [ targetMarket, setTargetMarket ] = useState(null)
+  const [ earnActionInfo, setEarnActionInfo ] = useState(null)
+  const [ earnActionResult, setEarnActionResult ] = useState<ActionInfo>()
+
   const { openModal } = useBootstrap()
 
   function showModal(market, action) {
@@ -50,15 +53,15 @@ export default function Farm() {
         modal = WITHDRAW_ERC20_TOKEN_MODAL
       }
     }
-    setTargetMarket(market)
+    setEarnActionInfo({ ...market, onAction: setEarnActionResult })
     openModal(modal)
   }
 
   useEffect(() => {
-    document.getElementById(DEPOSIT_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
-    document.getElementById(DEPOSIT_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
-    document.getElementById(WITHDRAW_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
-    document.getElementById(WITHDRAW_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setTargetMarket(null))
+    document.getElementById(DEPOSIT_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setEarnActionInfo(null))
+    document.getElementById(DEPOSIT_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setEarnActionInfo(null))
+    document.getElementById(WITHDRAW_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setEarnActionInfo(null))
+    document.getElementById(WITHDRAW_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setEarnActionInfo(null))
   }, [])
 
   return ( 
@@ -68,11 +71,12 @@ export default function Farm() {
         </Head>
         
         <div className="col-12 col-xl-8 px-0 px-xl-5">
-
-            <DepositBaseTokenErc20 {...targetMarket} />
-            <DepositBaseTokenNative {...targetMarket} />
-            <WithdrawBaseTokenErc20 {...targetMarket} />
-            <WithdrawBaseTokenNative {...targetMarket} />
+          
+            <DepositBaseTokenErc20 { ...earnActionInfo } />
+            <DepositBaseTokenNative { ...earnActionInfo } />
+            <WithdrawBaseTokenErc20 { ...earnActionInfo } />
+            <WithdrawBaseTokenNative { ...earnActionInfo } />
+            <ActionResult { ...earnActionResult } />
 
             <div className="row g-0 align-items-center p-4 mb-5 bg-body border rounded shadow mb-5">
                 <div className="col-12 col-sm-4"><h2 className="mb-3 mb-sm-0">Earn</h2></div>

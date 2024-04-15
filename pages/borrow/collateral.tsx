@@ -10,7 +10,7 @@ import DepositErc20Token, { DEPOSIT_ERC20_TOKEN_MODAL } from '../../components/d
 import DepositNativeCurrency, { DEPOSIT_NATIVE_CURRENCY_MODAL } from '../../components/deposit/DepositNativeCurrency';
 import { collateralTokens } from '../../selectors/market-selector';
 import { useBootstrap } from '../../hooks/useBootstrap';
-import { ActionType, Market, PriceFeed, Token } from '../../types';
+import { ActionInfo, ActionType, Market, PriceFeed, Token } from '../../types';
 import { percent } from '../../utils/number';
 import WithdrawErc20Token, { WITHDRAW_ERC20_TOKEN_MODAL } from '../../components/withdraw/WithdrawErc20Token';
 import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from '../../components/withdraw/WithdrawNativeCurrency';
@@ -23,6 +23,7 @@ import { useTotalMarketCollateralUsd } from '../../hooks/useTotalMarketCollatera
 import { useCurrentMarket } from '../../hooks/useCurrentMarket';
 import { marketChanged } from '../../redux/slices/currentMarket';
 import { useAppDispatch } from '../../redux/hooks';
+import ActionResult from '../../components/action-result/ActionResult';
 
 export default function Collateral() {
 
@@ -32,7 +33,10 @@ export default function Collateral() {
     const { currentChainId: chainId } = useCurrentChain()
     const currentMarket = useCurrentMarket()
 
-    const [ token, setToken ] = useState<Token>()
+    const [ _, setToken ] = useState<Token>()
+
+    const [ collatActionInfo, setCollatActionInfo ] = useState(null)
+    const [ collatActionResult, setCollatActionResult ] = useState<ActionInfo>()
 
     const { openModal } = useBootstrap()
 
@@ -65,12 +69,22 @@ export default function Collateral() {
         } 
         let modal: string
         if (action === DepositCollateral) {
+            setCollatActionInfo({ 
+                comet, token, 
+                depositType: DepositCollateral, 
+                onDeposit: setCollatActionResult 
+            })
             if (isWrappedNativeToken(chainId, token)) {
                 modal = DEPOSIT_NATIVE_CURRENCY_MODAL
             } else {
                 modal = DEPOSIT_ERC20_TOKEN_MODAL
             }
         } else  {
+            setCollatActionInfo({ 
+                comet, token, 
+                withdrawType: WithdrawCollateral, 
+                onWithdraw: setCollatActionResult 
+            })
             if (isWrappedNativeToken(chainId, token)) {
                 modal = WITHDRAW_NATIVE_CURRENCY_MODAL
             } else {
@@ -104,11 +118,14 @@ export default function Collateral() {
     }
 
     return (
-        <div className="col-12 col-xl-8 col-xxl-7 px-xl-5">
-            <DepositNativeCurrency {...{ comet, token, depositType: DepositCollateral }} />
-            <DepositErc20Token {...{ comet, token, depositType: DepositCollateral }} />
-            <WithdrawNativeCurrency {...{ comet, token, withdrawType: WithdrawCollateral }} />
-            <WithdrawErc20Token {...{ comet, token, withdrawType: WithdrawCollateral }} />
+        <div className="col-12 col-xl-8 col-xxl-7 px-0 px-xl-5">
+
+            <DepositNativeCurrency { ...collatActionInfo } />
+            <DepositErc20Token { ...collatActionInfo } />
+            <WithdrawNativeCurrency { ...collatActionInfo } />
+            <WithdrawErc20Token { ...collatActionInfo } />
+            <ActionResult { ...collatActionResult } />
+            
             <div className="row g-0 align-items-center bg-body shadow border rounded-4 p-4 mb-5">
                 <div className="col-9 col-sm-4">
                     <h2 className="mb-2">Collateral</h2>
@@ -129,7 +146,7 @@ export default function Collateral() {
                     }
                 </div>
                 <div className="col-12 col-sm-7 order-3 order-sm-2">
-                    <div className="d-flex justify-content-around justify-content-sm-end pt-5 pt-sm-0">
+                    <div className="d-flex justify-content-center justify-content-sm-end pt-5 pt-sm-0">
                         { isMarkets && markets.map((market) =>
                             <div key={market.id} className={marketCss(market)} onClick={() => setCurrentMarket(market)}>
                                 <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} width={25} css={`me-2 ${css['market-icon']}`} />

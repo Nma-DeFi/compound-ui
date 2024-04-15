@@ -18,8 +18,9 @@ import { useAllowanceService } from "../../../hooks/useAllowanceService"
 import { usePositionsService } from "../../../hooks/usePositionsService"
 import { AsyncBigNumber, AsyncBoolean, IdleData, loadAsyncData } from "../../../utils/async"
 import { CompoundConfig } from "../../../compound-config"
-import { BORROW_RESULT_TOAST } from "../../../pages/borrow"
 import { ActionType } from "../../../types"
+import { bn } from "../../../utils/bn"
+import { ACTION_RESULT_TOAST } from "../../action-result/ActionResult"
 
 const enum Mode {
   Init,
@@ -108,8 +109,9 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
     if (mode === Mode.ConfirmBorrowing && borrowHash) {
       setMode(Mode.WaitingForBorrowing)
       const action = ActionType.Borrow
-      const hash = structuredClone(borrowHash)
-      onBorrow({ action, token, amount, hash })
+      const amountCopy = bn(amount)
+      const hashCopy = structuredClone(borrowHash)
+      onBorrow({ comet, action, token, amount: amountCopy, hash: hashCopy })
       hideModal(BORROW_NATIVE_MODAL)
     }
   }, [mode, borrowHash])
@@ -131,7 +133,7 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
 
   function onHide() {
     if (mode === Mode.WaitingForBorrowing) {
-      openToast(BORROW_RESULT_TOAST)
+      openToast(ACTION_RESULT_TOAST)
     }
     setMode(null)
     setAsyncBorrowBalance(IdleData)
@@ -203,11 +205,11 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
               { mode === Mode.WaitingForBulkerApproval &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Activating borrowing ... Wait please <SmallSpinner /></button>
               }
-              { mode === Mode.BorrowReady &&
-                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {nativeCurrency.symbol}</button>
-              }
               { [Mode.ConfirmBulkerApproval, Mode.ConfirmBorrowing].includes(mode) &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
+              }
+              { mode === Mode.BorrowReady &&
+                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {nativeCurrency.symbol}</button>
               }
             </div>
           </div>        

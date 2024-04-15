@@ -31,6 +31,18 @@ export const collateralPositionsSlice = createSlice({
         collateralPositionsReset: (state: CollateralPositionsState) => {
             state.data = undefined
             Object.assign(state, AsyncStatus.Idle)
+        },
+        collateralPositionIncrease: (state: CollateralPositionsState, 
+            action: PayloadAction<{ comet: Address, token: Token, amount: BigNumber }>) => {
+            const { comet, token, amount } = action.payload
+            const oldBalance = state.data[comet][token.address].balance
+            state.data[comet][token.address].balance = oldBalance.plus(amount)
+        },
+        collateralPositionDecrease: (state: CollateralPositionsState, 
+            action: PayloadAction<{ comet: Address, token: Token, amount: BigNumber }>) => {
+            const { comet, token, amount } = action.payload
+            const oldBalance = state.data[comet][token.address].balance
+            state.data[comet][token.address].balance = oldBalance.minus(amount)
         }
     },
     extraReducers(builder) {
@@ -85,6 +97,6 @@ export const collateralPositionsInit = createAsyncThunk<any, void, ThunkApiField
     }
 )
 
-export const { collateralPositionsReset } = collateralPositionsSlice.actions
+export const { collateralPositionsReset, collateralPositionIncrease, collateralPositionDecrease } = collateralPositionsSlice.actions
 
 export default collateralPositionsSlice.reducer

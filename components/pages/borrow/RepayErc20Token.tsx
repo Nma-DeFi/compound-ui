@@ -18,8 +18,8 @@ import { Hash } from 'viem'
 import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../../Amount'
 import { useSupplyService } from '../../../hooks/useSupplyService'
 import { ActionType } from '../../../types'
-import { REPAY_RESULT_TOAST } from './BorrowPositions'
 import { usePositionsService } from '../../../hooks/usePositionsService'
+import { REPAY_RESULT_TOAST } from './BorrowPositions'
 
 const enum Mode {
   Init,
@@ -109,8 +109,9 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
       if (mode === Mode.ConfirmationOfRepayment && repayHash) {
         setMode(Mode.WaitingForRepayment)
         const action = ActionType.Repay
-        const hash = structuredClone(repayHash)
-        onRepay({ action, token, amount, hash })
+        const amountCopy = bn(amount)
+        const hashCopy = structuredClone(repayHash)
+        onRepay({ comet, action, token, amount: amountCopy, hash: hashCopy })
         hideModal(REPAY_ERC20_TOKEN_MODAL)
       }
     }, [mode, repayHash])

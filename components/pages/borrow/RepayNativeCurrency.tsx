@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
-import { Zero, bn, bnf, fromBigInt } from '../../../utils/bn'
+import { Zero, bn, bnf } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
 import AmountPercent from '../../AmountPercent'
 import TokenIcon from '../../TokenIcon'
@@ -67,8 +67,9 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
       if (mode === Mode.ConfirmationOfRepayment && repayHash) {
         setMode(Mode.WaitingForRepayment)
         const action = ActionType.Repay
-        const hash = structuredClone(repayHash)
-        onRepay({ action, token, amount, hash })
+        const amountCopy = bn(amount)
+        const hashCopy = structuredClone(repayHash)
+        onRepay({ comet, action, token, amount: amountCopy, hash: hashCopy })
         hideModal(REPAY_NATIVE_CURRENCY)
       }
     }, [mode, repayHash])

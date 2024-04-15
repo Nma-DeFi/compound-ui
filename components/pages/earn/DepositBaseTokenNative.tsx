@@ -18,5 +18,5 @@ export default function DepositBaseTokenNative(market) {
 
     const token: Token = {...baseToken, priceFeed }
 
-    return <DepositNativeCurrency comet={comet} token={token} depositType={ActionType.DepositBaseToken} />
+    return <DepositNativeCurrency comet={comet} token={token} depositType={ActionType.DepositBaseToken} onDeposit={market.onAction} />
 }

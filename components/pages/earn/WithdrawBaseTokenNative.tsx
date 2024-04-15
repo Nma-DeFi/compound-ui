@@ -18,5 +18,5 @@ export default function WithdrawBaseTokenNative(market) {
 
   const token: Token = {...baseToken, priceFeed }
 
-  return <WithdrawNativeCurrency comet={comet} token={token} withdrawType={ActionType.WithdrawBaseToken} />
+  return <WithdrawNativeCurrency comet={comet} token={token} withdrawType={ActionType.WithdrawBaseToken}  onWithdraw={market.onAction} />
 }

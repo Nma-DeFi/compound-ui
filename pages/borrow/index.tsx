@@ -47,8 +47,6 @@ const enum Mode {
   ReadyToBorrow,
 }
 
-export const BORROW_RESULT_TOAST = 'borrow-result-toast'
-
 export default function Borrow() {
 
     const [ mode, setMode ] = useState<Mode>(Mode.Loading)
@@ -268,7 +266,9 @@ export default function Borrow() {
             }
             { mode === Mode.FarmingBaseToken &&
               <BorrowPanel {...{ mode, borrowApr }}>
-                Cannot supply and borrow at the same time
+                <span className="text-body-secondary">
+                  Cannot supply and borrow {token.symbol} at the same time
+                </span>
               </BorrowPanel>
             }
             { mode === Mode.InsufficientBorrowCapacity &&
@@ -327,7 +327,7 @@ export default function Borrow() {
         <SelectTokenToBorrow onSelect={setCurrentMarket} />
         <BorrowErc20Token  {...borrowInfo} />
         <BorrowNativeCurrency  {...borrowInfo} />
-        <ActionResult {...{id: BORROW_RESULT_TOAST, comet, ...borrowResult, onSuccess: resetAmount}} />
+        <ActionResult {...{ ...borrowResult, onSuccess: resetAmount }} />
       </>
     )
 }

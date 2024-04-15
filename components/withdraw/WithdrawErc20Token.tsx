@@ -11,32 +11,31 @@ import { Zero, bn, bnf } from '../../utils/bn';
 import AmountInput from '../AmountInput';
 import AmountPercent from '../AmountPercent';
 import { SmallSpinner } from '../Spinner';
-import ActionResult from '../action-result/ActionResult';
-import { WithdrawParam, ActionType, ActionInfo } from '../../types';
+import { ACTION_RESULT_TOAST } from '../action-result/ActionResult';
+import { WithdrawParam, ActionType } from '../../types';
 import AsyncAmount from '../AmountAsync';
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async';
 import { usePositionsService } from '../../hooks/usePositionsService';
 import PriceFromFeed from '../PriceFromFeed';
 import TokenIcon from '../TokenIcon';
+import { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../Amount';
 
-const Mode = {
-  NotConnected: 0,
-  Init: 1,
-  InsufficientBalance: 2,
-  WithdrawReady: 3,
-  ConfirmationOfWithdrawal: 4,
-  WaitingForWithdrawal: 5
+const enum Mode {
+  NotConnected,
+  Init,
+  InsufficientBalance,
+  WithdrawReady,
+  ConfirmationOfWithdrawal,
+  WaitingForWithdrawal,
 }
 
 export const WITHDRAW_ERC20_TOKEN_MODAL = 'withdraw-erc20-modal'
-export const WITHDRAW_ERC20_TOKEN_TOAST = 'withdraw-erc20-toast'
 
-export default function WithdrawErc20Token({comet, token, withdrawType } : WithdrawParam) {
+export default function WithdrawErc20Token({ comet, token, withdrawType, onWithdraw } : WithdrawParam) {
 
-    const [ mode, setMode ] = useState<number>()
+    const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ withdrawHash, setWithdrawHash ] = useState<Hash>()
-    const [ withdrawInfo, setWithdrawInfo ] = useState<ActionInfo>()
     const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
 
     const { isSuccess: isBalance, data: balance } = asyncBalance
@@ -71,7 +70,10 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
     useEffect(() => {
       if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
         setMode(Mode.WaitingForWithdrawal)
-        setWithdrawInfo({ action: withdrawType, token, amount, hash: withdrawHash })
+        const action = withdrawType
+        const amountCopy = bn(amount)
+        const hashCopy = structuredClone(withdrawHash)
+        onWithdraw({ comet, action, token, amount: amountCopy, hash: hashCopy })
         hideModal(WITHDRAW_ERC20_TOKEN_MODAL)
       }
     }, [mode, withdrawHash])
@@ -88,7 +90,6 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
     }, [modalEvent])
 
     function onOpen() {
-      initState()
       if (!isConnected) {
         setMode(Mode.NotConnected)
       } else {
@@ -97,12 +98,10 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
     }
 
     function onHide() {
-      let clearWithdrawData = true
       if (mode === Mode.WaitingForWithdrawal) {
-        openToast(WITHDRAW_ERC20_TOKEN_TOAST)
-        clearWithdrawData = false
+        openToast(ACTION_RESULT_TOAST)
       }
-      initState(clearWithdrawData)
+      resetState()
     }
 
     function loadBalance() {
@@ -115,21 +114,20 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
       loadAsyncData(promise, setAsyncBalance)
     }
 
-    function initState(initWithdrawData = true) {
+    function resetState() {
       setAmount(Zero)
       setMode(null)
       setInput(null)
       setAsyncBalance(IdleData)
-      if (initWithdrawData) {
-        setWithdrawHash(null)
-        setWithdrawInfo(null)
-      }
+      setWithdrawHash(null)
     }
     
-    function setInput(value: string) {
-      const elem = document.getElementById(css['withdraw-input']) 
+    function setInput(amount: BigNumber) {
+      const newInput = amount ? bnf(amount, AMOUNT_DP, AMOUNT_TRIM_ZERO, AMOUNT_RM) : ''
+      const id = css['withdraw-input']
+      const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement
-      input.value = value ?? ''
+      input.value = newInput
     }
 
     function handleAmountChange(event) {
@@ -147,14 +145,11 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
     function handleBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount)
       setAmount(newAmount)
-      setInput(newInput)
+      setInput(newAmount)
     }
 
     return (
-      <>
-        <ActionResult {...{id: WITHDRAW_ERC20_TOKEN_TOAST, ...withdrawInfo}} />
         <div id={WITHDRAW_ERC20_TOKEN_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
@@ -169,8 +164,7 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
                       <AmountInput 
                           id={css['withdraw-input']} 
                           onChange={handleAmountChange} 
-                          disabled={Mode.Init === mode} 
-                          focused={false} />
+                          disabled={Mode.Init === mode} />
                         <div className="small text-body-tertiary">
                           <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
@@ -212,6 +206,5 @@ export default function WithdrawErc20Token({comet, token, withdrawType } : Withd
             </div>
           </div>
         </div>
-      </>
     )
 }

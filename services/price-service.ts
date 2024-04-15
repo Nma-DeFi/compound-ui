@@ -24,7 +24,6 @@ export class PriceService {
     }
 
     async getPriceFromSymbol(symbol: string) {
-
         return await this.compoundSdk.getPrice(symbol)
     }
 

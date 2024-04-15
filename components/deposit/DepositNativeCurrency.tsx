@@ -9,42 +9,40 @@ import { useSupplyService } from '../../hooks/useSupplyService'
 import css from '../../styles/components/farm/DepositNative.module.scss'
 import { Zero, bn, bnf, fromBigInt } from '../../utils/bn'
 import * as ChainUtils from '../../utils/chains'
-import { AMOUNT_DP } from '../Amount'
+import { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../Amount'
 import AmountInput from '../AmountInput'
 import AmountPercent from '../AmountPercent'
 import { SmallSpinner } from '../Spinner'
-import ActionResult from '../action-result/ActionResult'
 import TokenIcon from '../TokenIcon'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
 import AsyncAmount from '../AmountAsync'
-import { ActionInfo, DepositParam } from '../../types'
+import { DepositParam } from '../../types'
 import PriceFromFeed from '../PriceFromFeed'
+import { ACTION_RESULT_TOAST } from '../action-result/ActionResult'
 
-const Mode = {
-  NotConnected: 0,
-  Init: 1,
-  InsufficientBalance: 2,
-  DepositReady: 3,
-  ConfirmationOfDeposit: 4,
-  WaitingForDeposit: 5,
+const enum Mode {
+  NotConnected,
+  Init,
+  InsufficientBalance,
+  DepositReady,
+  ConfirmationOfDeposit,
+  WaitingForDeposit,
 }
 
 export const DEPOSIT_NATIVE_CURRENCY_MODAL = 'deposit-native-modal'
-export const DEPOSIT_NATIVE_CURRENCY_TOAST = 'deposit-native-toast'
 
-export default function DepositNativeCurrency({ comet, token, depositType }  : DepositParam) {
+export default function DepositNativeCurrency({ comet, token, depositType, onDeposit }  : DepositParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const publicClient = usePublicClient({ chainId })
 
-    const [ mode, setMode ] = useState<number>()
+    const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
 
     const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
     const { isSuccess: isBalance, data: balance } = asyncBalance
 
     const [ supplyHash, setSupplyHash ] = useState<Hash>()
-    const [ supplyInfo, setSupplyInfo ] = useState<ActionInfo>()
 
     const { isConnected, address } = useCurrentAccount()
 
@@ -69,10 +67,19 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
     useEffect(() => {
       if (mode === Mode.ConfirmationOfDeposit && supplyHash) {
         setMode(Mode.WaitingForDeposit)
-        setSupplyInfo({ action: depositType, hash: supplyHash, token: nativeCurrency, amount })
+        const action = depositType
+        const amountCopy = bn(amount)
+        const hashCopy = structuredClone(supplyHash)
+        onDeposit({ comet, action, token, amount: amountCopy, hash: hashCopy })
         hideModal(DEPOSIT_NATIVE_CURRENCY_MODAL)
       }
     }, [mode, supplyHash])
+
+    useEffect(() => {
+      if (mode === Mode.Init && publicClient) {
+        loadBalance()
+      }
+    }, [mode, publicClient])
 
     useEffect(() => {
       switch (modalEvent) {
@@ -86,33 +93,26 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
     }, [modalEvent])
     
     async function onOpen() {
-      initState()
       if (!isConnected) {
         setMode(Mode.NotConnected)
       } else {
         setMode(Mode.Init)
-        loadBalance()
       }
     }
 
     function onHide() {
-      let clearSupplyData = true
       if (mode === Mode.WaitingForDeposit) {
-        openToast(DEPOSIT_NATIVE_CURRENCY_TOAST)
-        clearSupplyData = false
+        openToast(ACTION_RESULT_TOAST)
       }
-      initState(clearSupplyData)
+      resetState()
     }
 
-    function initState(initSupplyData = true) {
+    function resetState() {
       setAmount(Zero)
       setInput(null)
       setMode(null)
       setAsyncBalance(IdleData)
-      if (initSupplyData) {
-        setSupplyHash(null)
-        setSupplyInfo(null)
-      }
+      setSupplyHash(null)
     }
     
     function loadBalance() {
@@ -120,11 +120,12 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
       loadAsyncData(promise, setAsyncBalance)
     }
 
-    function setInput(value: string) {
+    function setInput(amount: BigNumber) {
+      const newInput = amount ? bnf(amount, AMOUNT_DP, AMOUNT_TRIM_ZERO, AMOUNT_RM) : ''
       const id = css['deposit-native-input']
       const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement
-      input.value = value ?? ''
+      input.value = newInput
     }
 
     function handleAmountChange(event) {
@@ -142,14 +143,11 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
     function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
       const newAmount = balance.times(factor)
-      const newInput = bnf(newAmount, AMOUNT_DP)
       setAmount(newAmount)
-      setInput(newInput)
+      setInput(newAmount)
     }
 
     return (
-      <>
-        <ActionResult {...{id: DEPOSIT_NATIVE_CURRENCY_TOAST, ...supplyInfo}} />
         <div id={DEPOSIT_NATIVE_CURRENCY_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
@@ -164,8 +162,7 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
                         <AmountInput 
                           id={css['deposit-native-input']} 
                           onChange={handleAmountChange} 
-                          disabled={Mode.Init === mode} 
-                          focused={[Mode.NotConnected, Mode.DepositReady].includes(mode)} />
+                          disabled={Mode.Init === mode}  />
                         <div className="small text-body-tertiary">
                         <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
@@ -207,7 +204,6 @@ export default function DepositNativeCurrency({ comet, token, depositType }  : D
             </div>
           </div>
         </div>
-      </>
     )
 }
 

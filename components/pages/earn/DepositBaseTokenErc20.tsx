@@ -18,5 +18,5 @@ export default function DepositBaseTokenErc20(market) {
 
     const token: Token = {...baseToken, priceFeed }
 
-    return <DepositErc20Token comet={comet} token={token} depositType={ActionType.DepositBaseToken} />
+    return <DepositErc20Token comet={comet} token={token} depositType={ActionType.DepositBaseToken} onDeposit={market.onAction} />
 }

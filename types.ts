@@ -9,13 +9,13 @@ export type Market = Flatten<AllMarketsQuery['markets']>
 export type Asset = {
   name: string, 
   symbol: string, 
-  decimals: number
+  decimals: number,
+  address?: Address,
 }
 
 export type NativeCurrency = Asset
 
 export type Token = Asset & { 
-  address: Address,
   priceFeed?: PriceFeed,
 }
 
@@ -41,13 +41,15 @@ export type DepositType = ActionType.DepositBaseToken | ActionType.DepositCollat
 export type WithdrawParam = {
   comet: Address,
   token: Token,
-  withdrawType: WithdrawType
+  withdrawType: WithdrawType,
+  onWithdraw: (info) => void,
 }
 
 export type DepositParam = {
   comet: Address,
   token: Token,
-  depositType: DepositType
+  depositType: DepositType,
+  onDeposit: (info) => void,
 }
 
 export enum PriceFeedKind {

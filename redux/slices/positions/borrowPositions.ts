@@ -32,12 +32,12 @@ export const borrowPositionsSlice = createSlice({
       state.data = undefined
       Object.assign(state, AsyncStatus.Idle)
     },
-    borrowPositionsIncrease: (state: BorrowPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
+    borrowPositionIncrease: (state: BorrowPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
       const { comet, amount } = action.payload
       const oldBalance = state.data[comet].borrowBalance
       state.data[comet].borrowBalance = oldBalance.plus(amount)
     },
-    borrowPositionsDecrease: (state: BorrowPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
+    borrowPositionDecrease: (state: BorrowPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
       const { comet, amount } = action.payload
       const oldBalance = state.data[comet].borrowBalance
       state.data[comet].borrowBalance = oldBalance.minus(amount)
@@ -90,6 +90,6 @@ export const borrowPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
     }
 )
 
-export const { borrowPositionsReset, borrowPositionsIncrease, borrowPositionsDecrease } = borrowPositionsSlice.actions
+export const { borrowPositionsReset, borrowPositionIncrease, borrowPositionDecrease } = borrowPositionsSlice.actions
 
 export default borrowPositionsSlice.reducer

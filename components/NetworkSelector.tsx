@@ -22,11 +22,11 @@ export default function NetworkSelector() {
     useEffect(() => {
         const comparator = (c1, c2) => {
             if (c1.isTestnet) {
-                return 1;
+                return 1
             } else if (c2.isTestnet) {
-                return -1;
+                return -1
             } else {
-                return 0;
+                return 0
             }
         }
         setChainList(CHAINS.map(enhanceChain).sort(comparator)) 

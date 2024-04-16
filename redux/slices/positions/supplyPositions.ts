@@ -42,6 +42,7 @@ export const supplyPositionsSlice = createSlice({
       state.data[comet].supplyBalance = oldBalance.minus(amount)
       console.log('supplyPositionDecrease', 
         'old balance', oldBalance.toFixed(), 
+        'amount', amount.toFixed(), 
         'new balance', oldBalance.minus(amount).toFixed())    
     },
   },

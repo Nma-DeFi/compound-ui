@@ -44,6 +44,7 @@ export const borrowPositionsSlice = createSlice({
       state.data[comet].borrowBalance = oldBalance.minus(amount)
       console.log('borrowPositionDecrease', 
         'old balance', oldBalance.toFixed(), 
+        'amount', amount.toFixed(), 
         'new balance', oldBalance.minus(amount).toFixed())
     }
   },

@@ -9,6 +9,7 @@ import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
 import { log } from '../../helpers/supply';
+import { bnf } from '../../../utils/bn';
 
 export type SupplyBalance = {
   baseToken: Token
@@ -39,6 +40,9 @@ export const supplyPositionsSlice = createSlice({
       const { comet, amount } = action.payload
       const oldBalance = state.data[comet].supplyBalance
       state.data[comet].supplyBalance = oldBalance.minus(amount)
+      console.log('supplyPositionDecrease', 
+        'old balance', oldBalance.toFixed(), 
+        'new balance', oldBalance.minus(amount).toFixed())    
     },
   },
   extraReducers(builder) {

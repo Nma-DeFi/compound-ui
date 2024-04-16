@@ -58,7 +58,7 @@ export default function BorrowPositions() {
     }
 
     return (
-        <div className="bg-body p-3 rounded border shadow pb-4">     
+        <div className="bg-body p-3 rounded border shadow pb-4" style={{ marginBottom: '2rem' }}>     
             <h4 style={{ marginBottom: '1.25rem' }}>Your { borrowPositions.length > 1 ? 'borrowings' : 'borrowing' }</h4>
             { isLoading &&
                 <div className="py-4">

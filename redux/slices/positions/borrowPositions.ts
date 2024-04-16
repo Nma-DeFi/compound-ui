@@ -9,6 +9,7 @@ import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
 import { log } from '../../helpers/borrow';
+import { bnf } from '../../../utils/bn';
 
 export type BorrowBalance = {
   borrowBalance: BigNumber
@@ -41,6 +42,9 @@ export const borrowPositionsSlice = createSlice({
       const { comet, amount } = action.payload
       const oldBalance = state.data[comet].borrowBalance
       state.data[comet].borrowBalance = oldBalance.minus(amount)
+      console.log('borrowPositionDecrease', 
+        'old balance', oldBalance.toFixed(), 
+        'new balance', oldBalance.minus(amount).toFixed())
     }
   },
   extraReducers(builder) {

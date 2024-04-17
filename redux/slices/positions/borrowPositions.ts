@@ -41,11 +41,13 @@ export const borrowPositionsSlice = createSlice({
     borrowPositionDecrease: (state: BorrowPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
       const { comet, amount } = action.payload
       const oldBalance = state.data[comet].borrowBalance
-      state.data[comet].borrowBalance = oldBalance.minus(amount)
+      const newBalance = oldBalance.minus(amount)
+      state.data[comet].borrowBalance =  BigNumber.max(0, newBalance)
       console.log('borrowPositionDecrease', 
         'old balance', oldBalance.toFixed(), 
         'amount', amount.toFixed(), 
-        'new balance', oldBalance.minus(amount).toFixed())
+        'new balance', newBalance.toFixed(),
+        'result', state.data[comet].borrowBalance.toFixed())
     }
   },
   extraReducers(builder) {

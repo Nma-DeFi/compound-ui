@@ -123,7 +123,7 @@ export default function WithdrawErc20Token({ comet, token, withdrawType, onWithd
     }
     
     function setInput(amount: BigNumber) {
-      const newInput = amount ? bnf(amount, AMOUNT_DP, AMOUNT_TRIM_ZERO, AMOUNT_RM) : ''
+      const newInput = amount ? amount.toFixed() : ''
       const id = css['withdraw-input']
       const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement

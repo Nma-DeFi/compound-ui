@@ -13,7 +13,7 @@ export const publicClientSlice = createSlice({
     name: 'publicClient',
     initialState,
     reducers: {
-        publicClientUpdated: (state, action: PayloadAction<any>) => {
+        publicClientUpdated: (state: PublicClientState, action: PayloadAction<PublicClient>) => {
             state.publicClient = action.payload
         },
     },

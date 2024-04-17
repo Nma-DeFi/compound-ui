@@ -16,7 +16,7 @@ export const currentChainSlice = createSlice({
     name: 'currentChain',
     initialState,
     reducers: {
-        chainIdUpdated: (state, action: PayloadAction<number>) => {
+        chainIdUpdated: (state: CurrentChainState, action: PayloadAction<number>) => {
             state.chainId = action.payload
         },
     },

@@ -144,7 +144,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     }
     
     function setInput(amount: BigNumber) {
-      const newInput = amount ? bnf(amount, AMOUNT_DP, AMOUNT_TRIM_ZERO, AMOUNT_RM) : ''
+      const newInput = amount ? amount.toFixed() : ''
       const id = css['repay-input']
       const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement

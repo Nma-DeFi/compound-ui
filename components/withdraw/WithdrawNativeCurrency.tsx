@@ -169,7 +169,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType, onW
     }
     
     function setInput(amount: BigNumber) {
-      const newInput = amount ? bnf(amount, AMOUNT_DP, AMOUNT_TRIM_ZERO, AMOUNT_RM) : ''
+      const newInput = amount ? amount.toFixed() : ''
       const id = css['withdraw-native-input']
       const elem = document.getElementById(id) 
       const input = elem as HTMLInputElement

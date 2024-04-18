@@ -266,7 +266,7 @@ export default function Borrow() {
             }
             { mode === Mode.FarmingBaseToken &&
               <BorrowPanel {...{ mode, borrowApr }}>
-                <span className="bg-warning-subtle text-warning-emphasis py-2 px-3 rounded-3">
+                <span className="small bg-warning-subtle text-warning-emphasis py-2 px-3 rounded-3">
                   Cannot supply and borrow {token?.symbol} at the same time
                 </span>
               </BorrowPanel>

@@ -55,6 +55,11 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
         if (isError) console.error(error) 
     }, [isError])
 
+    function tokenOrNativeCurrency() {
+        const value = (token?.address) ? getTokenOrNativeCurrency(chainId, token) : token
+        return value?.symbol
+    }
+
     return (
         <div className="toast-container position-fixed bottom-0 end-0 p-4">
             <div id={id || ACTION_RESULT_TOAST} className="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
@@ -65,7 +70,7 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
                             <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                         <div className="toast-body text-center px-0 py-4">
-                            <h5 className="mb-4">{ActionLabels[action].content} <span className="text-body-secondary"><Amount value={amount} /> { getTokenOrNativeCurrency(chainId, token)?.symbol }</span></h5>
+                            <h5 className="mb-4">{ActionLabels[action].content} <span className="text-body-secondary"><Amount value={amount} /> { tokenOrNativeCurrency() }</span></h5>
                             <div className="fs-6 text-body-secondary">Wait please <SmallSpinner /></div>
                         </div>
                     </>

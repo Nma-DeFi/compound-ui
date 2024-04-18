@@ -3,7 +3,7 @@ import { useWaitForTransaction } from "wagmi";
 import { useCurrentChain } from "../../hooks/useCurrentChain";
 import { useAppDispatch } from "../../redux/hooks";
 import { supplyPositionDecrease, supplyPositionIncrease } from "../../redux/slices/positions/supplyPositions";
-import { transactionUrl } from "../../utils/chains";
+import { getTokenOrNativeCurrency, transactionUrl } from "../../utils/chains";
 import { SmallSpinner } from "../Spinner";
 import { ActionInfo, ActionType } from "../../types";
 import { ActionLabels } from "./ActionsLabels";
@@ -65,7 +65,7 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
                             <button type="button" className="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                         <div className="toast-body text-center px-0 py-4">
-                            <h5 className="mb-4">{ActionLabels[action].content} <span className="text-body-secondary"><Amount value={amount} /> { token?.symbol }</span></h5>
+                            <h5 className="mb-4">{ActionLabels[action].content} <span className="text-body-secondary"><Amount value={amount} /> { getTokenOrNativeCurrency(chainId, token)?.symbol }</span></h5>
                             <div className="fs-6 text-body-secondary">Wait please <SmallSpinner /></div>
                         </div>
                     </>
@@ -74,7 +74,7 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
                     <div className="toast-body text-center px-0 py-4">
                         <h4 className="text-primary mb-3">Success !</h4>
                         <a href={ transactionUrl({ chainId, txHash: data.transactionHash }) } className="link-dark text-decoration-none" target="_blank" rel="noreferrer" >
-                            <p className="fs-5 mb-4">Transaction <i className="bi bi-box-arrow-up-right"></i></p>
+                            <p className="fs-6 mb-4">Transaction <i className="bi bi-box-arrow-up-right"></i></p>
                         </a>
                         <button type="button" className="btn btn-primary btn-sm text-white" data-bs-dismiss="toast">Close</button>
                     </div>
@@ -82,7 +82,7 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
                 {isError && (
                     <div className="toast-body text-center px-0 py-4">
                         <h4 className="text-danger mb-3">Failure</h4>
-                        <p className="mb-4">See browser console</p>
+                        <p className="fs-6 mb-4">See the browser console</p>
                         <button type="button" className="btn btn-primary btn-sm text-white" data-bs-dismiss="toast">Close</button>
                     </div>
                 )}

@@ -6,13 +6,13 @@ export function useErc20Service({ token, publicClient, walletClient, account }):
     const [ erc20Service, setErc20Service ] = useState<Erc20Service>()
 
     useEffect(() => {
-        if (token && publicClient) {
+        if (token?.address && publicClient) {
             const erc20service = new Erc20Service({ token, publicClient, walletClient, account })
             setErc20Service(erc20service)
         } else {
             setErc20Service(null)
         }
-    }, [token, publicClient, walletClient, account])
+    }, [token?.address, publicClient, walletClient, account])
 
 
     return erc20Service

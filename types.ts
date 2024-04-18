@@ -41,14 +41,14 @@ export type DepositType = ActionType.DepositBaseToken | ActionType.DepositCollat
 export type WithdrawParam = {
   comet: Address,
   token: Token,
-  withdrawType: WithdrawType,
+  withdrawType?: WithdrawType,
   onWithdraw: (info) => void,
 }
 
 export type DepositParam = {
   comet: Address,
   token: Token,
-  depositType: DepositType,
+  depositType?: DepositType,
   onDeposit: (info) => void,
 }
 

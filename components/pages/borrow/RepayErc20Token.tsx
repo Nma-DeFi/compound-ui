@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
-import { Zero, bn, bnf } from '../../../utils/bn'
+import { Zero, bn } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
 import AmountPercent from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
@@ -15,7 +15,7 @@ import { useErc20Service } from '../../../hooks/useErc20Service'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
 import AsyncAmount from '../../AmountAsync'
 import { Hash } from 'viem'
-import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../../Amount'
+import Amount from '../../Amount'
 import { useSupplyService } from '../../../hooks/useSupplyService'
 import { ActionType } from '../../../types'
 import { usePositionsService } from '../../../hooks/usePositionsService'
@@ -24,6 +24,7 @@ import { REPAY_RESULT_TOAST } from './BorrowPositions'
 const enum Mode {
   Init,
   ExceedMaximumRepayment,
+  InsufficientBalance,
   InsufficientAllowance,
   ConfirmationOfApproval,
   WaitingForApproval,
@@ -40,9 +41,11 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ approvalHash, setApprovalHash ] = useState<Hash>()
     const [ repayHash, setRepayHash ] = useState<Hash>()
+    const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
     const [ asyncAllowance, setAsyncAllowance ] = useState<AsyncBigNumber>(IdleData)
     const [ asyncBorrowBalance, setAsyncBorrowBalance ] = useState<AsyncBigNumber>(IdleData)
 
+    const { isSuccess: isBalance, data: balance } = asyncBalance
     const { isSuccess: isAllowance, data: allowance } = asyncAllowance
     const { isSuccess: isBorrowBalance, data: borrowBalance } = asyncBorrowBalance
     
@@ -65,15 +68,17 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     } = useWaitForTransaction({ hash: approvalHash })
 
     useEffect(() => {
-      if (!isBorrowBalance || !isAllowance) return
-      if (amount.isGreaterThan(borrowBalance)) {
-        setMode(Mode.ExceedMaximumRepayment)
+      if (!isBalance || !isAllowance || !isBorrowBalance) return
+      if (amount.isGreaterThan(balance)) {
+        setMode(Mode.InsufficientBalance)
       } else if (amount.isGreaterThan(allowance)) {
         setMode(Mode.InsufficientAllowance)
+      } else if (amount.isGreaterThan(borrowBalance)) {
+        setMode(Mode.ExceedMaximumRepayment)
       } else {
         setMode(Mode.RepaymentReady)
       }
-    }, [amount, borrowBalance, allowance])
+    }, [amount, balance, allowance, borrowBalance])
 
     useEffect(() => { 
       if (isWaitingApproval) {
@@ -83,7 +88,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
 
     useEffect(() => { 
       if (isSuccessApproval) {
-        loadAllowance()
+        loadTokenAllowance()
       } 
     }, [isSuccessApproval])
 
@@ -100,8 +105,9 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
 
     useEffect(() => {
       if (mode === Mode.Init && erc20service) {
-        loadBalance()
-        loadAllowance()
+        loadTokenBalance()
+        loadTokenAllowance()
+        loadBorrowBalance()
       }
     }, [mode, erc20service])
 
@@ -133,12 +139,17 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
       setRepayHash(null)
     }
 
-    function loadBalance() {
+    function loadBorrowBalance() {
       const promise = positionsService.borrowBalanceOf(account)
       loadAsyncData(promise, setAsyncBorrowBalance)
     }
+    
+    function loadTokenBalance() {
+      const promise = erc20service.balanceOf(account)
+      loadAsyncData(promise, setAsyncBalance)
+    }
 
-    function loadAllowance() {
+    function loadTokenAllowance() {
       const promise = erc20service.allowance(account, comet)
       loadAsyncData(promise, setAsyncAllowance)
     }
@@ -215,6 +226,9 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
                   }
                   { mode === Mode.ExceedMaximumRepayment &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Maximum repayment : <AsyncAmount {...asyncBorrowBalance} /></button>
+                  }
+                  { mode === Mode.InsufficientBalance &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {token?.symbol} Balance</button>
                   }
                   { mode === Mode.InsufficientAllowance &&
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleApproval}>Enable {token?.symbol}</button>

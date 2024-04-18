@@ -9,7 +9,6 @@ import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
 import { log } from '../../helpers/borrow';
-import { bnf } from '../../../utils/bn';
 
 export type BorrowBalance = {
   borrowBalance: BigNumber

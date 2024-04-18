@@ -6,14 +6,14 @@ import { Path } from '../../components/Layout';
 import Link from 'next/link';
 import TokenIcon from '../../components/TokenIcon';
 import { getTokenOrNativeCurrency, isWrappedNativeToken } from '../../utils/chains';
-import DepositErc20Token, { DEPOSIT_ERC20_TOKEN_MODAL } from '../../components/deposit/DepositErc20Token';
-import DepositNativeCurrency, { DEPOSIT_NATIVE_CURRENCY_MODAL } from '../../components/deposit/DepositNativeCurrency';
+import DepositCollateralErc20, { DEPOSIT_COLLATERAL_ERC20_MODAL } from '../../components/pages/collaterals/DepositCollateralErc20';
+import DepositCollateralNative, { DEPOSIT_COLLATERAL_NATIVE_MODAL } from '../../components/pages/collaterals/DepositCollateralNative';
 import { collateralTokens } from '../../selectors/market-selector';
 import { useBootstrap } from '../../hooks/useBootstrap';
 import { ActionInfo, ActionType, Market, PriceFeed, Token } from '../../types';
 import { percent } from '../../utils/number';
-import WithdrawErc20Token, { WITHDRAW_ERC20_TOKEN_MODAL } from '../../components/withdraw/WithdrawErc20Token';
-import WithdrawNativeCurrency, { WITHDRAW_NATIVE_CURRENCY_MODAL } from '../../components/withdraw/WithdrawNativeCurrency';
+import WithdrawCollateralErc20, { WITHDRAW_COLLATERAL_ERC20_MODAL } from '../../components/pages/collaterals/WithdrawCollateralErc20';
+import WithdrawCollateralNative, { WITHDRAW_COLLATERAL_NATIVE_MODAL } from '../../components/pages/collaterals/WithdrawCollateralNative';
 import { useCollateralPositions } from '../../hooks/useCollateralPositions';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import CollateralBalance from '../../components/CollateralBalance';
@@ -27,7 +27,7 @@ import ActionResult from '../../components/action-result/ActionResult';
 
 export default function Collateral() {
 
-    const { DepositCollateral, WithdrawCollateral } = ActionType
+    const { DepositCollateral } = ActionType
 
     const { isConnected } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
@@ -67,30 +67,22 @@ export default function Collateral() {
             ...collateral.token,
             priceFeed,
         } 
+        const onWithdraw = setCollatActionResult
         let modal: string
         if (action === DepositCollateral) {
-            setCollatActionInfo({ 
-                comet, token, 
-                depositType: DepositCollateral, 
-                onDeposit: setCollatActionResult 
-            })
             if (isWrappedNativeToken(chainId, token)) {
-                modal = DEPOSIT_NATIVE_CURRENCY_MODAL
+                modal = DEPOSIT_COLLATERAL_NATIVE_MODAL
             } else {
-                modal = DEPOSIT_ERC20_TOKEN_MODAL
+                modal = DEPOSIT_COLLATERAL_ERC20_MODAL
             }
         } else  {
-            setCollatActionInfo({ 
-                comet, token, 
-                withdrawType: WithdrawCollateral, 
-                onWithdraw: setCollatActionResult 
-            })
             if (isWrappedNativeToken(chainId, token)) {
-                modal = WITHDRAW_NATIVE_CURRENCY_MODAL
+                modal = WITHDRAW_COLLATERAL_NATIVE_MODAL
             } else {
-                modal = WITHDRAW_ERC20_TOKEN_MODAL
+                modal = WITHDRAW_COLLATERAL_ERC20_MODAL
             }        
         }
+        setCollatActionInfo({ comet, token, onWithdraw })
         setToken(token)
         openModal(modal)
     }
@@ -102,10 +94,10 @@ export default function Collateral() {
     }, [chainId, markets])
 
     useEffect(() => {
-        document.getElementById(DEPOSIT_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
-        document.getElementById(DEPOSIT_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
-        document.getElementById(WITHDRAW_ERC20_TOKEN_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
-        document.getElementById(WITHDRAW_NATIVE_CURRENCY_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
+        document.getElementById(DEPOSIT_COLLATERAL_ERC20_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
+        document.getElementById(DEPOSIT_COLLATERAL_NATIVE_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
+        document.getElementById(WITHDRAW_COLLATERAL_ERC20_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
+        document.getElementById(WITHDRAW_COLLATERAL_NATIVE_MODAL).addEventListener('hide.bs.modal', () => setToken(null))
     }, [])
 
     function marketCss(market: Market) {
@@ -120,10 +112,10 @@ export default function Collateral() {
     return (
         <div className="col-12 col-xl-8 col-xxl-7 px-0 px-xl-5">
 
-            <DepositNativeCurrency { ...collatActionInfo } />
-            <DepositErc20Token { ...collatActionInfo } />
-            <WithdrawNativeCurrency { ...collatActionInfo } />
-            <WithdrawErc20Token { ...collatActionInfo } />
+            <DepositCollateralNative { ...collatActionInfo } />
+            <DepositCollateralErc20 { ...collatActionInfo } />
+            <WithdrawCollateralNative { ...collatActionInfo } />
+            <WithdrawCollateralErc20 { ...collatActionInfo } />
             <ActionResult { ...collatActionResult } />
             
             <div className="row g-0 align-items-center bg-body shadow border rounded-4 p-4 mb-5">

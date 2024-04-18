@@ -2,26 +2,26 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import { Hash } from 'viem';
 import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi';
-import { CompoundConfig } from '../../compound-config';
-import { useAllowanceService } from '../../hooks/useAllowanceService';
-import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
-import { useCurrentAccount } from '../../hooks/useCurrentAccount';
-import { useCurrentChain } from '../../hooks/useCurrentChain';
-import { useWithdrawService } from '../../hooks/useWithdrawService';
-import css from '../../styles/components/farm/WithdrawNative.module.scss';
-import { AsyncBigNumber, AsyncData, IdleData, loadAsyncData } from '../../utils/async';
-import { Zero, bn, bnf } from '../../utils/bn';
-import * as ChainUtils from '../../utils/chains';
-import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../Amount';
-import AmountInput from '../AmountInput';
-import AmountPercent from '../AmountPercent';
-import { SmallSpinner } from '../Spinner';
-import { ACTION_RESULT_TOAST } from '../action-result/ActionResult';
-import { WithdrawParam, ActionType } from '../../types';
-import AsyncAmount from '../AmountAsync';
-import { usePositionsService } from '../../hooks/usePositionsService';
-import PriceFromFeed from '../PriceFromFeed';
-import TokenIcon from '../TokenIcon';
+import { CompoundConfig } from '../../../compound-config';
+import { useAllowanceService } from '../../../hooks/useAllowanceService';
+import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap';
+import { useCurrentAccount } from '../../../hooks/useCurrentAccount';
+import { useCurrentChain } from '../../../hooks/useCurrentChain';
+import { useWithdrawService } from '../../../hooks/useWithdrawService';
+import css from '../../../styles/components/collaterals/WithdrawCollateralNative.module.scss';
+import { AsyncBigNumber, AsyncData, IdleData, loadAsyncData } from '../../../utils/async';
+import { Zero, bn } from '../../../utils/bn';
+import * as ChainUtils from '../../../utils/chains';
+import Amount from '../../Amount';
+import AmountInput from '../../AmountInput';
+import AmountPercent from '../../AmountPercent';
+import { SmallSpinner } from '../../Spinner';
+import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult';
+import { WithdrawParam, ActionType } from '../../../types';
+import AsyncAmount from '../../AmountAsync';
+import { usePositionsService } from '../../../hooks/usePositionsService';
+import PriceFromFeed from '../../PriceFromFeed';
+import TokenIcon from '../../TokenIcon';
 
 const enum Mode {
   NotConnected, 
@@ -35,9 +35,9 @@ const enum Mode {
   WaitingForWithdrawal,
 }
 
-export const WITHDRAW_NATIVE_CURRENCY_MODAL = 'withdraw-native-modal'
+export const WITHDRAW_COLLATERAL_NATIVE_MODAL = 'withdraw-collateral-native-modal'
 
-export default function WithdrawNativeCurrency({ comet, token, withdrawType, onWithdraw } : WithdrawParam) {
+export default function WithdrawCollateralNative({ comet, token, onWithdraw } : WithdrawParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const { isConnected, address: account } = useCurrentAccount()
@@ -58,7 +58,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType, onW
     const nativeCurrency = ChainUtils.nativeCurrency(chainId)
 
     const { hideModal, openToast } = useBootstrap()
-    const modalEvent = useModalEvent(WITHDRAW_NATIVE_CURRENCY_MODAL)
+    const modalEvent = useModalEvent(WITHDRAW_COLLATERAL_NATIVE_MODAL)
 
     const positionsService = usePositionsService({ comet, publicClient })
     const allowanceService = useAllowanceService({ comet, publicClient, walletClient, account })
@@ -109,11 +109,11 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType, onW
     useEffect(() => {
       if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
         setMode(Mode.WaitingForWithdrawal)
-        const action = withdrawType
+        const action = ActionType.DepositCollateral
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(withdrawHash)
         onWithdraw({ comet, action, token, amount: amountCopy, hash: hashCopy })
-        hideModal(WITHDRAW_NATIVE_CURRENCY_MODAL)
+        hideModal(WITHDRAW_COLLATERAL_NATIVE_MODAL)
       }
     }, [mode, withdrawHash])
 
@@ -144,12 +144,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType, onW
     }
     
     function loadBalance() {
-      let promise
-      if (withdrawType === ActionType.WithdrawBaseToken) {
-        promise = positionsService.supplyBalanceOf(account)
-      } else {
-        promise = positionsService.collateralBalanceOf({ account, token })
-      }
+      const promise = positionsService.collateralBalanceOf({ account, token })
       loadAsyncData(promise, setAsyncBalance)
     }
 
@@ -198,7 +193,7 @@ export default function WithdrawNativeCurrency({ comet, token, withdrawType, onW
     }
 
     return (
-        <div id={WITHDRAW_NATIVE_CURRENCY_MODAL} className="modal" tabIndex={-1}>
+        <div id={WITHDRAW_COLLATERAL_NATIVE_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div id={css['withdraw-native-body']} className="modal-body">

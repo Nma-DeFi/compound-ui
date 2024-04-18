@@ -2,23 +2,22 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import { Hash } from 'viem';
 import { usePublicClient, useWalletClient } from 'wagmi';
-import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap';
-import { useCurrentAccount } from '../../hooks/useCurrentAccount';
-import { useCurrentChain } from '../../hooks/useCurrentChain';
-import { useWithdrawService } from '../../hooks/useWithdrawService';
-import css from '../../styles/components/farm/WithdrawErc20.module.scss';
-import { Zero, bn, bnf } from '../../utils/bn';
-import AmountInput from '../AmountInput';
-import AmountPercent from '../AmountPercent';
-import { SmallSpinner } from '../Spinner';
-import { ACTION_RESULT_TOAST } from '../action-result/ActionResult';
-import { WithdrawParam, ActionType } from '../../types';
-import AsyncAmount from '../AmountAsync';
-import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async';
-import { usePositionsService } from '../../hooks/usePositionsService';
-import PriceFromFeed from '../PriceFromFeed';
-import TokenIcon from '../TokenIcon';
-import { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../Amount';
+import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap';
+import { useCurrentAccount } from '../../../hooks/useCurrentAccount';
+import { useCurrentChain } from '../../../hooks/useCurrentChain';
+import { useWithdrawService } from '../../../hooks/useWithdrawService';
+import css from '../../../styles/components/collaterals/WithdrawCollateralErc20.module.scss';
+import { Zero, bn } from '../../../utils/bn';
+import AmountInput from '../../AmountInput';
+import AmountPercent from '../../AmountPercent';
+import { SmallSpinner } from '../../Spinner';
+import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult';
+import { WithdrawParam, ActionType } from '../../../types';
+import AsyncAmount from '../../AmountAsync';
+import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async';
+import { usePositionsService } from '../../../hooks/usePositionsService';
+import PriceFromFeed from '../../PriceFromFeed';
+import TokenIcon from '../../TokenIcon';
 
 const enum Mode {
   NotConnected,
@@ -29,9 +28,9 @@ const enum Mode {
   WaitingForWithdrawal,
 }
 
-export const WITHDRAW_ERC20_TOKEN_MODAL = 'withdraw-erc20-modal'
+export const WITHDRAW_COLLATERAL_ERC20_MODAL = 'withdraw-collateral-erc20-modal'
 
-export default function WithdrawErc20Token({ comet, token, withdrawType, onWithdraw } : WithdrawParam) {
+export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : WithdrawParam) {
 
     const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
@@ -50,7 +49,7 @@ export default function WithdrawErc20Token({ comet, token, withdrawType, onWithd
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
 
     const { hideModal, openToast } = useBootstrap()
-    const modalEvent = useModalEvent(WITHDRAW_ERC20_TOKEN_MODAL)
+    const modalEvent = useModalEvent(WITHDRAW_COLLATERAL_ERC20_MODAL)
 
     useEffect(() => {
       if (!isConnected || !isBalance || !withdrawService) return
@@ -70,11 +69,11 @@ export default function WithdrawErc20Token({ comet, token, withdrawType, onWithd
     useEffect(() => {
       if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
         setMode(Mode.WaitingForWithdrawal)
-        const action = withdrawType
+        const action = ActionType.WithdrawCollateral
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(withdrawHash)
         onWithdraw({ comet, action, token, amount: amountCopy, hash: hashCopy })
-        hideModal(WITHDRAW_ERC20_TOKEN_MODAL)
+        hideModal(WITHDRAW_COLLATERAL_ERC20_MODAL)
       }
     }, [mode, withdrawHash])
 
@@ -105,12 +104,7 @@ export default function WithdrawErc20Token({ comet, token, withdrawType, onWithd
     }
 
     function loadBalance() {
-      let promise
-      if (withdrawType === ActionType.WithdrawBaseToken) {
-        promise = positionsService.supplyBalanceOf(account)
-      } else {
-        promise = positionsService.collateralBalanceOf({ account, token })
-      }
+      const promise = positionsService.collateralBalanceOf({ account, token })
       loadAsyncData(promise, setAsyncBalance)
     }
 
@@ -150,7 +144,7 @@ export default function WithdrawErc20Token({ comet, token, withdrawType, onWithd
     }
 
     return (
-        <div id={WITHDRAW_ERC20_TOKEN_MODAL} className="modal" tabIndex={-1}>
+        <div id={WITHDRAW_COLLATERAL_ERC20_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div id={css['withdraw-body']} className="modal-body">

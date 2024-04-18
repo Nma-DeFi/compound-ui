@@ -1,0 +1,32 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+#deposit-native-body {
+    padding-top: 1.2rem !important;  
+    padding-bottom: 1.2rem !important;   
+    
+    #deposit-native-form {
+        padding-top: 2.2rem;   
+    }
+
+    #deposit-native-input {
+        font-size: $h1-font-size !important;
+        font-weight: $font-weight-medium !important;
+        line-height: 1.2 !important; 
+        margin-bottom: 0.2rem !important;
+        all: inherit;
+        width: 100%;
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+
+    #deposit-native-input::-webkit-outer-spin-button,
+    #deposit-native-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    #deposit-native-input::placeholder {
+        color: $dark;
+    }
+}

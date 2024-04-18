@@ -16,6 +16,7 @@ import * as MarketUtils from "../../../utils/markets"
 import ActionResult from "../../action-result/ActionResult"
 import RepayNativeCurrency, { REPAY_NATIVE_CURRENCY } from "./RepayNativeCurrency"
 import { Zero } from "../../../utils/bn"
+import { getTokenOrNativeCurrency } from "../../../utils/chains"
 
 export const REPAY_RESULT_TOAST = 'repay-result-toast'
 
@@ -73,7 +74,7 @@ export default function BorrowPositions() {
                             <tr>
                                 <td className="w-50" style={{ padding: '0.5rem 0 1rem 0' }}>
                                     <div className="d-flex justify-content-start">
-                                        <TokenIcon symbol={borrowPosition.baseToken.symbol} width={35} />
+                                        <TokenIcon symbol={getTokenOrNativeCurrency(chainId, borrowPosition.baseToken).symbol} width={35} />
                                         <div className="ps-2">
                                             <div><Amount value={borrowPosition.borrowBalance} /></div>
                                             <div className="small text-body-secondary">
@@ -83,7 +84,7 @@ export default function BorrowPositions() {
                                     </div>
                                 </td>
                                 <td className="text-center" style={{ padding: '0.5rem 0 1rem 0' }}>
-                                    <div className="small pb-2">Liquidation risk</div> 
+                                    <div className="small" style={{ paddingBottom: '0.35rem' }}>Liquidation risk</div> 
                                     <LiquidationRisk market={ borrowPosition.market } css="mx-4" minRiskLabel={100} />
                                 </td>
                             </tr>

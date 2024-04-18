@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
-import { Zero, bn, bnf } from '../../../utils/bn'
+import { Zero, bn, fromBigInt } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
 import AmountPercent from '../../AmountPercent'
 import TokenIcon from '../../TokenIcon'
@@ -13,7 +13,7 @@ import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
 import { usePublicClient, useWalletClient } from 'wagmi'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
 import AsyncAmount from '../../AmountAsync'
-import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../../Amount'
+import Amount from '../../Amount'
 import { SmallSpinner } from '../../Spinner'
 import { useSupplyService } from '../../../hooks/useSupplyService'
 import { Hash } from 'viem'
@@ -23,6 +23,7 @@ import { usePositionsService } from '../../../hooks/usePositionsService'
 
 const enum Mode {
   Init,
+  InsufficientBalance,
   ExceedMaximumRepayment,
   RepaymentReady,
   ConfirmationOfRepayment,
@@ -42,8 +43,11 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
 
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
-
+    
+    const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
     const [ asyncBorrowBalance, setAsyncBorrowBalance ] = useState<AsyncBigNumber>(IdleData)
+
+    const { isSuccess: isBalance, data: balance } = asyncBalance
     const { isSuccess: isBorrowBalance, data: borrowBalance } = asyncBorrowBalance
 
     const supplyService = useSupplyService({ publicClient, walletClient, comet, account: address })
@@ -55,13 +59,15 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     const nativeCurrency = ChainUtils.nativeCurrency(chainId)
 
     useEffect(() => {
-      if (!isBorrowBalance) return
-      if (amount.isGreaterThan(borrowBalance)) {
+      if (!isBalance || !isBorrowBalance) return
+      if (amount.isGreaterThan(balance)) {
+        setMode(Mode.InsufficientBalance)
+      } else if (amount.isGreaterThan(borrowBalance)) {
         setMode(Mode.ExceedMaximumRepayment)
       } else {
         setMode(Mode.RepaymentReady)
       }
-    }, [amount, borrowBalance])
+    }, [amount, balance, borrowBalance])
 
     useEffect(() => {
       if (mode === Mode.ConfirmationOfRepayment && repayHash) {
@@ -76,6 +82,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
 
     useEffect(() => {
       if (mode === Mode.Init && publicClient) {
+        loadTokenBalance()
         loadBorrowBalance()
       }
     }, [mode, publicClient])
@@ -112,7 +119,12 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
       const input = elem as HTMLInputElement
       input.value = newInput
     }
-    
+        
+    function loadTokenBalance() {
+      const promise = publicClient.getBalance({ address }).then(fromBigInt)
+      loadAsyncData(promise, setAsyncBalance)
+    }
+
     function loadBorrowBalance() {
       const promise = positionsService.borrowBalanceOf(address)
       loadAsyncData(promise, setAsyncBorrowBalance)
@@ -174,6 +186,9 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
                 <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
+                  }
+                  { mode === Mode.InsufficientBalance &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>
                   }
                   { mode === Mode.ExceedMaximumRepayment &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Maximum repayment : <AsyncAmount {...asyncBorrowBalance} /></button>

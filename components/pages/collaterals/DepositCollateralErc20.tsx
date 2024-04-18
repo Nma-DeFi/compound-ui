@@ -2,23 +2,23 @@ import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import { Hash } from 'viem'
 import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi'
-import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap'
-import { useCurrentAccount } from '../../hooks/useCurrentAccount'
-import { useCurrentChain } from '../../hooks/useCurrentChain'
-import { useErc20Service } from '../../hooks/useErc20Service'
-import { useSupplyService } from '../../hooks/useSupplyService'
-import { Zero, bn, bnf } from '../../utils/bn'
-import Amount, { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../Amount'
-import AmountInput from '../AmountInput'
-import AmountPercent from '../AmountPercent'
-import { SmallSpinner } from '../Spinner'
-import TokenIcon from '../TokenIcon'
-import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
-import css from '../../styles/components/farm/DepositErc20.module.scss'
-import AsyncAmount from '../AmountAsync'
-import { DepositParam } from '../../types'
-import PriceFromFeed from '../PriceFromFeed'
-import { ACTION_RESULT_TOAST } from '../action-result/ActionResult'
+import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
+import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
+import { useCurrentChain } from '../../../hooks/useCurrentChain'
+import { useErc20Service } from '../../../hooks/useErc20Service'
+import { useSupplyService } from '../../../hooks/useSupplyService'
+import { Zero, bn } from '../../../utils/bn'
+import Amount from '../../Amount'
+import AmountInput from '../../AmountInput'
+import AmountPercent from '../../AmountPercent'
+import { SmallSpinner } from '../../Spinner'
+import TokenIcon from '../../TokenIcon'
+import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
+import css from '../../../styles/components/collaterals/DepositCollateralErc20.module.scss'
+import AsyncAmount from '../../AmountAsync'
+import { ActionType, DepositParam } from '../../../types'
+import PriceFromFeed from '../../PriceFromFeed'
+import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult'
 
 const enum Mode {
   NotConnected,
@@ -32,9 +32,9 @@ const enum Mode {
   WaitingForDeposit,
 }
 
-export const DEPOSIT_ERC20_TOKEN_MODAL = 'deposit-erc20-modal'
+export const DEPOSIT_COLLATERAL_ERC20_MODAL = 'deposit-collat-erc20-modal'
 
-export default function DepositErc20Token({ comet, token, depositType, onDeposit } : DepositParam) {
+export default function DepositCollateralErc20({ comet, token, onDeposit } : DepositParam) {
     
     const [ mode, setMode ] = useState<Mode>()
 
@@ -64,7 +64,7 @@ export default function DepositErc20Token({ comet, token, depositType, onDeposit
     } = useWaitForTransaction({ hash: approvalHash })
 
     const { hideModal, openToast } = useBootstrap()
-    const modalEvent = useModalEvent(DEPOSIT_ERC20_TOKEN_MODAL)
+    const modalEvent = useModalEvent(DEPOSIT_COLLATERAL_ERC20_MODAL)
 
     useEffect(() => {
       if (!isConnected || !isBalance || !isAllowance) return
@@ -99,11 +99,11 @@ export default function DepositErc20Token({ comet, token, depositType, onDeposit
     useEffect(() => {
       if (mode === Mode.ConfirmationOfDeposit && supplyHash) {
         setMode(Mode.WaitingForDeposit)
-        const action = depositType
+        const action = ActionType.DepositCollateral
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(supplyHash)
         onDeposit({ comet, action, token, amount: amountCopy, hash: hashCopy })
-        hideModal(DEPOSIT_ERC20_TOKEN_MODAL)
+        hideModal(DEPOSIT_COLLATERAL_ERC20_MODAL)
       }
     }, [mode, supplyHash])
 
@@ -184,7 +184,7 @@ export default function DepositErc20Token({ comet, token, depositType, onDeposit
     }
 
     return (
-        <div id={DEPOSIT_ERC20_TOKEN_MODAL} className="modal" tabIndex={-1}>
+        <div id={DEPOSIT_COLLATERAL_ERC20_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div id={css['deposit-body']} className="modal-body">

@@ -2,23 +2,22 @@ import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import { Hash } from 'viem'
 import { usePublicClient, useWalletClient } from 'wagmi'
-import { useBootstrap, useModalEvent } from '../../hooks/useBootstrap'
-import { useCurrentAccount } from '../../hooks/useCurrentAccount'
-import { useCurrentChain } from '../../hooks/useCurrentChain'
-import { useSupplyService } from '../../hooks/useSupplyService'
-import css from '../../styles/components/farm/DepositNative.module.scss'
-import { Zero, bn, bnf, fromBigInt } from '../../utils/bn'
-import * as ChainUtils from '../../utils/chains'
-import { AMOUNT_DP, AMOUNT_RM, AMOUNT_TRIM_ZERO } from '../Amount'
-import AmountInput from '../AmountInput'
-import AmountPercent from '../AmountPercent'
-import { SmallSpinner } from '../Spinner'
-import TokenIcon from '../TokenIcon'
-import { AsyncBigNumber, IdleData, loadAsyncData } from '../../utils/async'
-import AsyncAmount from '../AmountAsync'
-import { DepositParam } from '../../types'
-import PriceFromFeed from '../PriceFromFeed'
-import { ACTION_RESULT_TOAST } from '../action-result/ActionResult'
+import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
+import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
+import { useCurrentChain } from '../../../hooks/useCurrentChain'
+import { useSupplyService } from '../../../hooks/useSupplyService'
+import css from '../../../styles/components/collaterals/DepositCollateralNative.module.scss'
+import { Zero, bn, fromBigInt } from '../../../utils/bn'
+import * as ChainUtils from '../../../utils/chains'
+import AmountInput from '../../AmountInput'
+import AmountPercent from '../../AmountPercent'
+import { SmallSpinner } from '../../Spinner'
+import TokenIcon from '../../TokenIcon'
+import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
+import AsyncAmount from '../../AmountAsync'
+import { ActionType, DepositParam } from '../../../types'
+import PriceFromFeed from '../../PriceFromFeed'
+import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult'
 
 const enum Mode {
   NotConnected,
@@ -29,9 +28,9 @@ const enum Mode {
   WaitingForDeposit,
 }
 
-export const DEPOSIT_NATIVE_CURRENCY_MODAL = 'deposit-native-modal'
+export const DEPOSIT_COLLATERAL_NATIVE_MODAL = 'deposit-collateral-native-modal'
 
-export default function DepositNativeCurrency({ comet, token, depositType, onDeposit }  : DepositParam) {
+export default function DepositCollateralNative({ comet, token, onDeposit }  : DepositParam) {
 
     const { currentChainId: chainId } = useCurrentChain()
     const publicClient = usePublicClient({ chainId })
@@ -47,7 +46,7 @@ export default function DepositNativeCurrency({ comet, token, depositType, onDep
     const { isConnected, address } = useCurrentAccount()
 
     const { hideModal, openToast } = useBootstrap()
-    const modalEvent = useModalEvent(DEPOSIT_NATIVE_CURRENCY_MODAL)
+    const modalEvent = useModalEvent(DEPOSIT_COLLATERAL_NATIVE_MODAL)
 
     const { data: walletClient } = useWalletClient()
 
@@ -67,11 +66,11 @@ export default function DepositNativeCurrency({ comet, token, depositType, onDep
     useEffect(() => {
       if (mode === Mode.ConfirmationOfDeposit && supplyHash) {
         setMode(Mode.WaitingForDeposit)
-        const action = depositType
+        const action = ActionType.DepositCollateral
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(supplyHash)
         onDeposit({ comet, action, token, amount: amountCopy, hash: hashCopy })
-        hideModal(DEPOSIT_NATIVE_CURRENCY_MODAL)
+        hideModal(DEPOSIT_COLLATERAL_NATIVE_MODAL)
       }
     }, [mode, supplyHash])
 
@@ -148,7 +147,7 @@ export default function DepositNativeCurrency({ comet, token, depositType, onDep
     }
 
     return (
-        <div id={DEPOSIT_NATIVE_CURRENCY_MODAL} className="modal" tabIndex={-1}>
+        <div id={DEPOSIT_COLLATERAL_NATIVE_MODAL} className="modal" tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div id={css['deposit-native-body']} className="modal-body">

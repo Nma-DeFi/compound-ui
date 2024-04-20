@@ -187,7 +187,7 @@ export default function DepositCollateralNative({ comet, token, onDeposit }  : D
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
                   }
                   { mode === Mode.NotConnected &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                   }
                   { mode === Mode.InsufficientBalance &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>

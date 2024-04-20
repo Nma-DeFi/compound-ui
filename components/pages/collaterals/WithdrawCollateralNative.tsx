@@ -22,11 +22,15 @@ import AsyncAmount from '../../AmountAsync';
 import { usePositionsService } from '../../../hooks/usePositionsService';
 import PriceFromFeed from '../../PriceFromFeed';
 import TokenIcon from '../../TokenIcon';
+import { useCurrentMarket } from '../../../hooks/useCurrentMarket';
+import { useLiquidationRiskByCollateralAmount } from '../../../hooks/useLiquidationRisk';
+import { LiquidationRiskAsync } from '../../LiquidationRisk';
 
 const enum Mode {
   NotConnected, 
   Init,
   InsufficientBalance,
+  LiquidationRiskTooHigh,
   BulkerNotApproved,
   ConfirmationOfBulkerApproval,
   WaitingForBulkerApproval,
@@ -60,6 +64,10 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
     const { hideModal, openToast } = useBootstrap()
     const modalEvent = useModalEvent(WITHDRAW_COLLATERAL_NATIVE_MODAL)
 
+    const market = useCurrentMarket()
+
+    const risk = useLiquidationRiskByCollateralAmount({ chainId, publicClient, market, collateral: token, amount }) 
+
     const positionsService = usePositionsService({ comet, publicClient })
     const allowanceService = useAllowanceService({ comet, publicClient, walletClient, account })
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
@@ -72,15 +80,17 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
     const { bulker } = CompoundConfig[chainId].contracts
 
     useEffect(() => {
-      if (!isConnected || !isBalance || !isBulkerChecked || !withdrawService) return
+      if (!isConnected || !isBalance || !isBulkerChecked || !risk.isSuccess || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
+      }  else if (risk.data > 100) {
+        setMode(Mode.LiquidationRiskTooHigh)
       } else if (amount.isGreaterThan(Zero) && !isBulkerApproved) {
         setMode(Mode.BulkerNotApproved)
       } else {
         setMode(Mode.WithdrawReady)
       }
-    }, [amount, balance, isBulkerApproved, withdrawService])
+    }, [amount, balance, isBulkerApproved, risk.data, withdrawService])
 
     useEffect(() => { 
       if (isWaitingBulkerApproval) {
@@ -199,6 +209,12 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
               <div id={css['withdraw-native-body']} className="modal-body">
                 <div className="d-flex align-items-center">
                   <h2 className="me-auto mb-0">Withdraw</h2>
+                  { isConnected &&
+                    <div className="pe-3">
+                      <span className="text-body-secondary">Liquidation risk :</span>
+                      <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={risk} /></span>
+                    </div>
+                  }
                   <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div id={css['withdraw-native-form']}>
@@ -231,22 +247,25 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                 </div>
                 <div className="d-grid">
                   { mode === Mode.Init &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Initialisation <SmallSpinner /></button>
                   }
                   { mode === Mode.NotConnected &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                   }
                   { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Insufficient {nativeCurrency.symbol} Balance</button>
+                  }
+                  { mode === Mode.LiquidationRiskTooHigh &&
+                    <button className="btn btn-lg btn-primary text-white" type="button">Liquidation risk too high</button>
                   }
                   { mode === Mode.BulkerNotApproved &&
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBulkerApproval}>Activate withdrawal</button>
                   }
                   { mode === Mode.WaitingForBulkerApproval &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Activating withdrawal ... Wait please <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Activating withdrawal ... Wait please <SmallSpinner /></button>
                   }
                   { [Mode.ConfirmationOfBulkerApproval, Mode.ConfirmationOfWithdrawal].includes(mode) &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Confirmation <SmallSpinner /></button>
                   }
                   { mode === Mode.WithdrawReady &&
                     <>

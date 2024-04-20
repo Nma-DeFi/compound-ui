@@ -10,7 +10,7 @@ import collateralPositions from './slices/positions/collateralPositions'
 
 const logger = createLogger({
   duration: true,
-  collapsed: (_, __, logLevel) => !logLevel.error
+  collapsed: (_getState, _action, logLevel) => !logLevel.error
 })
 
 export const store = configureStore({

@@ -4,13 +4,15 @@ import { useBorrowPositions } from "./useBorrowPositions"
 import { usePriceService } from "./usePriceService"
 import { useCurrentAccount } from "./useCurrentAccount"
 import { PublicClient } from "wagmi"
-import { Market } from "../types"
-import { getLiquidationRisk } from "../redux/helpers/liquidation-risk"
+import { Market, Token } from "../types"
+import { getLiquidationRisk, getLiquidationRiskByCollateralAmount } from "../redux/helpers/liquidation-risk"
+import { PRICE_STALE_TIME } from "../services/price-service"
+import BigNumber from "bignumber.js"
 
 export function useLiquidationRisk({ chainId, publicClient, market } : 
   { 
-    chainId: number; 
-    publicClient: PublicClient,
+    chainId: number
+    publicClient: PublicClient
     market: Market
   }) {
 
@@ -25,6 +27,30 @@ export function useLiquidationRisk({ chainId, publicClient, market } :
     queryKey: ['LiquidationRisk', chainId, market, borrowPositions, collateralPositions],
     queryFn: () => getLiquidationRisk({ chainId, market, borrowPositions, collateralPositions, priceService }),
     enabled: !!(isConnected && market && isCollateralPositions && isBorrowPositions && priceService),
-    staleTime: Infinity,
+    staleTime: PRICE_STALE_TIME,
+  })
+}
+
+export function useLiquidationRiskByCollateralAmount({ chainId, publicClient, market, collateral, amount } : 
+  { 
+    chainId: number 
+    publicClient: PublicClient
+    market: Market
+    collateral: Token
+    amount: BigNumber
+  }) {
+
+  const { isConnected } = useCurrentAccount()
+
+  const priceService = usePriceService({ chainId, publicClient})
+
+  const { isSuccess: isCollateralPositions, data: collateralPositions } = useCollateralPositions()
+  const { isSuccess: isBorrowPositions, data: borrowPositions } = useBorrowPositions()
+
+  return useQuery({
+    queryKey: ['LiquidationRiskByCollateralAmount', chainId, market, borrowPositions, collateralPositions, collateral, amount],
+    queryFn: () => getLiquidationRiskByCollateralAmount({ chainId, market, borrowPositions, collateralPositions, priceService, collateral, amount }),
+    enabled: !!(isConnected && market && isCollateralPositions && isBorrowPositions && priceService && collateral && amount),
+    staleTime: PRICE_STALE_TIME,
   })
 }

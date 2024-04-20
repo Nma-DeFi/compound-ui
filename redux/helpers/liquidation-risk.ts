@@ -1,10 +1,11 @@
-import { Zero, bnf } from '../../utils/bn'
+import { Zero, bn, bnf } from '../../utils/bn'
 import { BorrowPositionsData } from '../slices/positions/borrowPositions'
 import { CollateralPositionsData } from '../slices/positions/collateralPositions'
 import { PriceService } from '../../services/price-service'
 import BigNumber from 'bignumber.js'
-import { Market } from '../../types'
+import { Market, Token } from '../../types'
 import { getPriceFeed } from '../../utils/markets'
+import { cloneCollateralPositions } from './collateral'
 
 export async function getLiquidationRisk({ chainId, market, borrowPositions, collateralPositions, priceService } : {
     chainId: number
@@ -26,7 +27,6 @@ export async function getLiquidationRiskByBorrowAmount({ chainId, market, collat
   priceService: PriceService
   borrowAmount: BigNumber
 }) : Promise<number> {
-
   const marketId = market.cometProxy
   const collatPositions = Object.values(collateralPositions[marketId]).filter(p => p.balance.gt(Zero))
   const collatPriceFeeds = collatPositions.map(p => p.priceFeed)
@@ -53,5 +53,28 @@ export async function getLiquidationRiskByBorrowAmount({ chainId, market, collat
     'liquidationRisk', liquidationRisk)
 
   return liquidationRisk
+}
+
+export async function getLiquidationRiskByCollateralAmount({ chainId, market, borrowPositions, collateralPositions, priceService, collateral, amount } : {
+  chainId: number
+  market: Market
+  borrowPositions: BorrowPositionsData
+  collateralPositions: CollateralPositionsData
+  priceService: PriceService
+  collateral: Token
+  amount: BigNumber
+}): Promise<number> {
+  const modifiedCollateralPositions = cloneCollateralPositions(collateralPositions)
+
+  const oldBalance: BigNumber = modifiedCollateralPositions[market.cometProxy][collateral.address].balance
+  const newBalance: BigNumber = oldBalance.minus(amount)
+
+  modifiedCollateralPositions[market.cometProxy][collateral.address].balance = BigNumber.max(0, newBalance)
+
+  console.log('getLiquidationRiskByCollateralAmount', 'oldBalance', oldBalance.toString())
+  console.log('getLiquidationRiskByCollateralAmount', 'newBalance', newBalance.toString())
+  console.log('getLiquidationRiskByCollateralAmount', 'result', BigNumber.max(0, newBalance).toString())
+
+  return getLiquidationRisk({ chainId, market, priceService, borrowPositions, collateralPositions: modifiedCollateralPositions })
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useCurrentChain } from '../../hooks/useCurrentChain';
 import { useMarkets } from '../../hooks/useMarkets';
 import { getBaseTokenOrNativeCurrency, getPriceFeedKind } from '../../utils/markets';
-import { Path } from '../../components/Layout';
+import { NoData, Path } from '../../components/Layout';
 import Link from 'next/link';
 import TokenIcon from '../../components/TokenIcon';
 import { getTokenOrNativeCurrency, isWrappedNativeToken } from '../../utils/chains';
@@ -11,7 +11,7 @@ import DepositCollateralNative, { DEPOSIT_COLLATERAL_NATIVE_MODAL } from '../../
 import { collateralTokens } from '../../selectors/market-selector';
 import { useBootstrap } from '../../hooks/useBootstrap';
 import { ActionInfo, ActionType, Market, PriceFeed, Token } from '../../types';
-import { percent } from '../../utils/number';
+import { nf, percent } from '../../utils/number';
 import WithdrawCollateralErc20, { WITHDRAW_COLLATERAL_ERC20_MODAL } from '../../components/pages/collaterals/WithdrawCollateralErc20';
 import WithdrawCollateralNative, { WITHDRAW_COLLATERAL_NATIVE_MODAL } from '../../components/pages/collaterals/WithdrawCollateralNative';
 import { useCollateralPositions } from '../../hooks/useCollateralPositions';
@@ -24,6 +24,9 @@ import { useCurrentMarket } from '../../hooks/useCurrentMarket';
 import { marketChanged } from '../../redux/slices/currentMarket';
 import { useAppDispatch } from '../../redux/hooks';
 import ActionResult from '../../components/action-result/ActionResult';
+import { useLiquidationRisk } from '../../hooks/useLiquidationRisk';
+import { usePublicClient } from 'wagmi';
+import { LiquidationRiskAsync } from '../../components/LiquidationRisk';
 
 export default function Collateral() {
 
@@ -31,6 +34,9 @@ export default function Collateral() {
 
     const { isConnected } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
+
+    const publicClient = usePublicClient({ chainId })
+
     const currentMarket = useCurrentMarket()
 
     const [ _, setToken ] = useState<Token>()
@@ -43,6 +49,9 @@ export default function Collateral() {
     const dispatch = useAppDispatch()
 
     const asyncCollateralPositions = useCollateralPositions()
+
+    const asyncRisk = useLiquidationRisk({ chainId, publicClient, market: currentMarket }) 
+    const { isSuccess: isLiquidationRisk, data: liquidationRisk } = asyncRisk
 
     const asyncMarkets = useMarkets({ chainId })
 
@@ -105,6 +114,17 @@ export default function Collateral() {
         return `${linkCss} ${market.id === currentMarket?.id ? css['market-link-active'] : css['market-link']}`
     }
     
+    function liquidationRiskFormatted() {
+        let formattedRisk = <>{ NoData }</>
+        if (isLiquidationRisk) {
+            const risk = Number(liquidationRisk)
+            if (!isNaN(risk) && isFinite(risk)) {
+                formattedRisk = <>{ nf(liquidationRisk) }<small>%</small></>
+            }
+        }
+        return formattedRisk
+    }
+
     function setCurrentMarket(market: Market) {
         dispatch(marketChanged(market))
     }
@@ -120,21 +140,24 @@ export default function Collateral() {
             
             <div className="row g-0 align-items-center bg-body shadow border rounded-4 p-4 mb-5">
                 <div className="col-9 col-sm-4">
-                    <h2 className="mb-2">Collateral</h2>
-                    { isMarkets && 
-                        <>
-                            <span className="fs-5 text-body-secondary">{getBaseTokenOrNativeCurrency(currentMarket, chainId)?.symbol}</span>
-                            <span className="text-body-secondary ps-2">Market</span> 
-                            {isConnected && 
-                                <span className="text-body-tertiary ps-2">: <PriceAsync asyncPrice={{ 
+                    <h2>Collateral</h2>
+                    { isConnected && isMarkets && 
+                        <div className="small mt-2">
+                            <div>
+                                <span className="text-body-secondary">Total deposit :</span>
+                                <span className="text-body-tertiary ps-2"><PriceAsync asyncPrice={{ 
                                     isIdle: undefined,
                                     isLoading: isPendingUsdCollateral || isLoadingUsdCollateral, 
                                     isSuccess: isSuccessUsdCollateral, 
                                     isError: isErrorUsdCollateral, 
                                     data: usdCollateral, 
                                 }} placeHolderCfg={{ col: 2 }} /></span>
-                            }
-                        </>
+                            </div>
+                            <div>
+                                <span className="text-body-secondary">Liquidation risk :</span>
+                                <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncRisk} /></span>
+                            </div>
+                        </div>
                     }
                 </div>
                 <div className="col-12 col-sm-7 order-3 order-sm-2">

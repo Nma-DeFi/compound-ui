@@ -1,7 +1,7 @@
 import { CollateralPositionsData } from '../slices/positions/collateralPositions'
 import { Address } from 'viem'
 import { PriceService } from '../../services/price-service'
-import { Zero } from '../../utils/bn'
+import { Zero, bn } from '../../utils/bn'
 import BigNumber from 'bignumber.js'
 
 
@@ -35,5 +35,16 @@ export async function getTotalCollateralUsdBalance(
     const promises = params.map(param => getCollateralUsdBalanceByMarket(param))
     const collaterals = await Promise.all(promises)
     return collaterals.reduce((accumulator, currentValue) => accumulator.plus(currentValue), Zero)
+}
+
+export function cloneCollateralPositions(source: CollateralPositionsData): CollateralPositionsData {
+    const copy : CollateralPositionsData = structuredClone(source)
+
+    for (const [comet, collatPosByMarket] of Object.entries(copy)) {
+        for (const [collatToken, collatPosition] of Object.entries(collatPosByMarket)) {
+            collatPosition.balance = bn(source[comet][collatToken].balance)
+        }
+    }
+    return copy
 }
 

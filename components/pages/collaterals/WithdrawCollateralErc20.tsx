@@ -18,11 +18,15 @@ import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async';
 import { usePositionsService } from '../../../hooks/usePositionsService';
 import PriceFromFeed from '../../PriceFromFeed';
 import TokenIcon from '../../TokenIcon';
+import { useLiquidationRiskByCollateralAmount } from '../../../hooks/useLiquidationRisk';
+import { useCurrentMarket } from '../../../hooks/useCurrentMarket';
+import { LiquidationRiskAsync } from '../../LiquidationRisk';
 
 const enum Mode {
   NotConnected,
   Init,
   InsufficientBalance,
+  LiquidationRiskTooHigh,
   WithdrawReady,
   ConfirmationOfWithdrawal,
   WaitingForWithdrawal,
@@ -45,6 +49,10 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
 
+    const market = useCurrentMarket()
+
+    const risk = useLiquidationRiskByCollateralAmount({ chainId, publicClient, market, collateral: token, amount }) 
+
     const positionsService = usePositionsService({ comet, publicClient })
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
 
@@ -52,13 +60,15 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
     const modalEvent = useModalEvent(WITHDRAW_COLLATERAL_ERC20_MODAL)
 
     useEffect(() => {
-      if (!isConnected || !isBalance || !withdrawService) return
+      if (!isConnected || !isBalance || !risk.isSuccess || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
         setMode(Mode.InsufficientBalance)
+      } else if (risk.data > 100) {
+        setMode(Mode.LiquidationRiskTooHigh)
       } else {
         setMode(Mode.WithdrawReady)
       }
-    }, [amount, balance, withdrawService])
+    }, [amount, balance, risk.data, withdrawService])
 
     useEffect(() => {
       if (mode === Mode.Init && positionsService) {
@@ -150,6 +160,12 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
               <div id={css['withdraw-body']} className="modal-body">
                 <div className="d-flex align-items-center">
                   <h2 className="me-auto mb-0">Withdraw</h2>
+                  { isConnected &&
+                    <div className="pe-3">
+                      <span className="text-body-secondary">Liquidation risk :</span>
+                      <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={risk} /></span>
+                    </div>
+                  }
                   <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div id={css['withdraw-form']}>
@@ -181,19 +197,22 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                 </div>
                 <div className="d-grid">
                   { mode === Mode.Init &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Initialisation <SmallSpinner /></button>
                   }
                   { mode === Mode.NotConnected &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                   }
                   { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {token?.symbol} Balance</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Insufficient {token?.symbol} Balance</button>
+                  }
+                  { mode === Mode.LiquidationRiskTooHigh &&
+                    <button className="btn btn-lg btn-primary text-white" type="button">Liquidation risk too high</button>
                   }
                   { mode === Mode.WithdrawReady &&
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw {token?.symbol}</button>
                   }
                   { mode === Mode.ConfirmationOfWithdrawal &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button">Confirmation <SmallSpinner /></button>
                   }
                 </div>
               </div>

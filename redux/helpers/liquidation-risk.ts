@@ -55,7 +55,7 @@ export async function getLiquidationRiskByBorrowAmount({ chainId, market, collat
   return liquidationRisk
 }
 
-export async function getLiquidationRiskByCollateralAmount({ chainId, market, borrowPositions, collateralPositions, priceService, collateral, amount } : {
+export async function getLiquidationRiskByCollateralWithdrawal({ chainId, market, borrowPositions, collateralPositions, priceService, collateral, amount } : {
   chainId: number
   market: Market
   borrowPositions: BorrowPositionsData

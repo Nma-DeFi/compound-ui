@@ -25,7 +25,7 @@ import { SmallSpinner } from '../../Spinner'
 const enum Mode {
     NotConnected,
     Init,
-    InsufficientBalance,
+    ExceedBalance,
     WithdrawReady,
     ConfirmationOfWithdrawal,
     WaitingForWithdrawal,
@@ -69,7 +69,7 @@ export default function WithdrawBaseTokenErc20(market) {
     useEffect(() => {
       if (!isConnected || !isBalance || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
-        setMode(Mode.InsufficientBalance)
+        setMode(Mode.ExceedBalance)
       } else {
         setMode(Mode.WithdrawReady)
       }
@@ -199,10 +199,10 @@ export default function WithdrawBaseTokenErc20(market) {
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
                   }
                   { mode === Mode.NotConnected &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                   }
-                  { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {token?.symbol} Balance</button>
+                  { mode === Mode.ExceedBalance &&
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Exceed {token?.symbol} Balance</button>
                   }
                   { mode === Mode.WithdrawReady &&
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw {token?.symbol}</button>

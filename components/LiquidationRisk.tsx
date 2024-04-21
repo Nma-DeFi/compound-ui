@@ -15,7 +15,7 @@ export function LiquidationRiskAsync({ asyncRisk }) {
             return <>{NoData}</>
         }
         const risk = Math.min(100, value)
-        return <>{ risk.toFixed(0) }<small>%</small></>
+        return <>{ risk.toFixed() }<small>%</small></>
     }
     
     return (
@@ -32,9 +32,7 @@ export function LiquidationRiskAsync({ asyncRisk }) {
 export default function LiquidationRisk({ market, css, style = undefined, minRiskLabel = DEFAULT_MIN_RISK_LABEL }) {
 
     const { currentChainId: chainId } = useCurrentChain()
-
     const publicClient = usePublicClient({ chainId })
-
     const { isSuccess, data: risk } = useLiquidationRisk({ chainId, publicClient, market }) 
 
     return isSuccess && <LiquidationRiskProgress {...{ risk, css, style, minRiskLabel }} />

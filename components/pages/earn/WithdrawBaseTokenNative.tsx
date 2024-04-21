@@ -28,7 +28,7 @@ import css from '../../../styles/components/farm/WithdrawBaseTokenNative.module.
 const enum Mode {
   NotConnected, 
   Init,
-  InsufficientBalance,
+  ExceedBalance,
   BulkerNotApproved,
   ConfirmationOfBulkerApproval,
   WaitingForBulkerApproval,
@@ -88,7 +88,7 @@ export default function WithdrawBaseTokenNative(market) {
   useEffect(() => {
     if (!isConnected || !isBalance || !isBulkerChecked || !withdrawService) return
     if (amount.isGreaterThan(balance)) {
-      setMode(Mode.InsufficientBalance)
+      setMode(Mode.ExceedBalance)
     } else if (amount.isGreaterThan(Zero) && !isBulkerApproved) {
       setMode(Mode.BulkerNotApproved)
     } else {
@@ -248,10 +248,10 @@ export default function WithdrawBaseTokenNative(market) {
                   <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
                 }
                 { mode === Mode.NotConnected &&
-                  <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
+                  <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                 }
-                { mode === Mode.InsufficientBalance &&
-                  <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>
+                { mode === Mode.ExceedBalance &&
+                  <button className="btn btn-lg btn-primary text-white" type="button" disabled>Exceed {nativeCurrency.symbol} Balance</button>
                 }
                 { mode === Mode.BulkerNotApproved &&
                   <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBulkerApproval}>Activate withdrawal</button>

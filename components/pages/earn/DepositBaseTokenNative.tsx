@@ -216,7 +216,7 @@ export default function DepositBaseTokenNative(market) {
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
                   }
                   { mode === Mode.NotConnected &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect your wallet</button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                   }
                   { mode === Mode.BorrowingBaseToken &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Deposit {nativeCurrency.symbol}</button>

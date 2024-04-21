@@ -5,7 +5,7 @@ import { usePriceService } from "./usePriceService"
 import { useCurrentAccount } from "./useCurrentAccount"
 import { PublicClient } from "wagmi"
 import { Market, Token } from "../types"
-import { getLiquidationRisk, getLiquidationRiskByCollateralAmount } from "../redux/helpers/liquidation-risk"
+import { getLiquidationRisk, getLiquidationRiskByCollateralWithdrawal } from "../redux/helpers/liquidation-risk"
 import { PRICE_STALE_TIME } from "../services/price-service"
 import BigNumber from "bignumber.js"
 
@@ -31,7 +31,7 @@ export function useLiquidationRisk({ chainId, publicClient, market } :
   })
 }
 
-export function useLiquidationRiskByCollateralAmount({ chainId, publicClient, market, collateral, amount } : 
+export function useLiquidationRiskByCollateralWithdrawal({ chainId, publicClient, market, collateral, amount } : 
   { 
     chainId: number 
     publicClient: PublicClient
@@ -48,8 +48,8 @@ export function useLiquidationRiskByCollateralAmount({ chainId, publicClient, ma
   const { isSuccess: isBorrowPositions, data: borrowPositions } = useBorrowPositions()
 
   return useQuery({
-    queryKey: ['LiquidationRiskByCollateralAmount', chainId, market, borrowPositions, collateralPositions, collateral, amount],
-    queryFn: () => getLiquidationRiskByCollateralAmount({ chainId, market, borrowPositions, collateralPositions, priceService, collateral, amount }),
+    queryKey: ['LiquidationRiskByCollateralWithdrawal', chainId, market, borrowPositions, collateralPositions, collateral, amount],
+    queryFn: () => getLiquidationRiskByCollateralWithdrawal({ chainId, market, borrowPositions, collateralPositions, priceService, collateral, amount }),
     enabled: !!(isConnected && market && isCollateralPositions && isBorrowPositions && priceService && collateral && amount),
     staleTime: PRICE_STALE_TIME,
   })

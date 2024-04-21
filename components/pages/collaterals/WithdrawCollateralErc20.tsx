@@ -18,14 +18,14 @@ import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async';
 import { usePositionsService } from '../../../hooks/usePositionsService';
 import PriceFromFeed from '../../PriceFromFeed';
 import TokenIcon from '../../TokenIcon';
-import { useLiquidationRiskByCollateralAmount } from '../../../hooks/useLiquidationRisk';
+import { useLiquidationRiskByCollateralWithdrawal } from '../../../hooks/useLiquidationRisk';
 import { useCurrentMarket } from '../../../hooks/useCurrentMarket';
 import { LiquidationRiskAsync } from '../../LiquidationRisk';
 
 const enum Mode {
   NotConnected,
   Init,
-  InsufficientBalance,
+  ExceedCollateralBalance,
   LiquidationRiskTooHigh,
   WithdrawReady,
   ConfirmationOfWithdrawal,
@@ -51,7 +51,8 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
 
     const market = useCurrentMarket()
 
-    const risk = useLiquidationRiskByCollateralAmount({ chainId, publicClient, market, collateral: token, amount }) 
+    const asyncLiquidationRisk = useLiquidationRiskByCollateralWithdrawal({ chainId, publicClient, market, collateral: token, amount }) 
+    const { isSuccess: isLiquidationRisk, data: liquidationRisk } = asyncLiquidationRisk
 
     const positionsService = usePositionsService({ comet, publicClient })
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
@@ -60,15 +61,15 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
     const modalEvent = useModalEvent(WITHDRAW_COLLATERAL_ERC20_MODAL)
 
     useEffect(() => {
-      if (!isConnected || !isBalance || !risk.isSuccess || !withdrawService) return
+      if (!isConnected || !isBalance || !isLiquidationRisk || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
-        setMode(Mode.InsufficientBalance)
-      } else if (risk.data > 100) {
+        setMode(Mode.ExceedCollateralBalance)
+      } else if (liquidationRisk > 100) {
         setMode(Mode.LiquidationRiskTooHigh)
       } else {
         setMode(Mode.WithdrawReady)
       }
-    }, [amount, balance, risk.data, withdrawService])
+    }, [amount, balance, liquidationRisk, withdrawService])
 
     useEffect(() => {
       if (mode === Mode.Init && positionsService) {
@@ -160,10 +161,10 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
               <div id={css['withdraw-body']} className="modal-body">
                 <div className="d-flex align-items-center">
                   <h2 className="me-auto mb-0">Withdraw</h2>
-                  { isConnected &&
+                  { isConnected && (mode > Mode.ExceedCollateralBalance) &&
                     <div className="pe-3">
                       <span className="text-body-secondary">Liquidation risk :</span>
-                      <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={risk} /></span>
+                      <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>
                     </div>
                   }
                   <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -202,8 +203,8 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                   { mode === Mode.NotConnected &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                   }
-                  { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button">Insufficient {token?.symbol} Balance</button>
+                  { mode === Mode.ExceedCollateralBalance &&
+                    <button className="btn btn-lg btn-primary text-white" type="button">Exceed {token?.symbol} Balance</button>
                   }
                   { mode === Mode.LiquidationRiskTooHigh &&
                     <button className="btn btn-lg btn-primary text-white" type="button">Liquidation risk too high</button>

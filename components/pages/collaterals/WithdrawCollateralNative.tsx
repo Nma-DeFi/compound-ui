@@ -23,13 +23,13 @@ import { usePositionsService } from '../../../hooks/usePositionsService';
 import PriceFromFeed from '../../PriceFromFeed';
 import TokenIcon from '../../TokenIcon';
 import { useCurrentMarket } from '../../../hooks/useCurrentMarket';
-import { useLiquidationRiskByCollateralAmount } from '../../../hooks/useLiquidationRisk';
+import { useLiquidationRiskByCollateralWithdrawal } from '../../../hooks/useLiquidationRisk';
 import { LiquidationRiskAsync } from '../../LiquidationRisk';
 
 const enum Mode {
   NotConnected, 
   Init,
-  InsufficientBalance,
+  ExceedCollateralBalance,
   LiquidationRiskTooHigh,
   BulkerNotApproved,
   ConfirmationOfBulkerApproval,
@@ -66,7 +66,8 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
 
     const market = useCurrentMarket()
 
-    const risk = useLiquidationRiskByCollateralAmount({ chainId, publicClient, market, collateral: token, amount }) 
+    const asyncLiquidationRisk = useLiquidationRiskByCollateralWithdrawal({ chainId, publicClient, market, collateral: token, amount }) 
+    const { isSuccess: isLiquidationRisk, data: liquidationRisk} = asyncLiquidationRisk
 
     const positionsService = usePositionsService({ comet, publicClient })
     const allowanceService = useAllowanceService({ comet, publicClient, walletClient, account })
@@ -80,17 +81,17 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
     const { bulker } = CompoundConfig[chainId].contracts
 
     useEffect(() => {
-      if (!isConnected || !isBalance || !isBulkerChecked || !risk.isSuccess || !withdrawService) return
+      if (!isConnected || !isBalance || !isBulkerChecked || !isLiquidationRisk || !withdrawService) return
       if (amount.isGreaterThan(balance)) {
-        setMode(Mode.InsufficientBalance)
-      }  else if (risk.data > 100) {
+        setMode(Mode.ExceedCollateralBalance)
+      }  else if (liquidationRisk > 100) {
         setMode(Mode.LiquidationRiskTooHigh)
       } else if (amount.isGreaterThan(Zero) && !isBulkerApproved) {
         setMode(Mode.BulkerNotApproved)
       } else {
         setMode(Mode.WithdrawReady)
       }
-    }, [amount, balance, isBulkerApproved, risk.data, withdrawService])
+    }, [amount, balance, isBulkerApproved, liquidationRisk, withdrawService])
 
     useEffect(() => { 
       if (isWaitingBulkerApproval) {
@@ -209,10 +210,10 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
               <div id={css['withdraw-native-body']} className="modal-body">
                 <div className="d-flex align-items-center">
                   <h2 className="me-auto mb-0">Withdraw</h2>
-                  { isConnected &&
+                  { isConnected && (mode > Mode.ExceedCollateralBalance) &&
                     <div className="pe-3">
                       <span className="text-body-secondary">Liquidation risk :</span>
-                      <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={risk} /></span>
+                      <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>
                     </div>
                   }
                   <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -252,8 +253,8 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                   { mode === Mode.NotConnected &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                   }
-                  { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button">Insufficient {nativeCurrency.symbol} Balance</button>
+                  { mode === Mode.ExceedCollateralBalance &&
+                    <button className="btn btn-lg btn-primary text-white" type="button">Exceed {nativeCurrency.symbol} Balance</button>
                   }
                   { mode === Mode.LiquidationRiskTooHigh &&
                     <button className="btn btn-lg btn-primary text-white" type="button">Liquidation risk too high</button>

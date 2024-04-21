@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useCurrentChain } from '../../hooks/useCurrentChain';
 import { useMarkets } from '../../hooks/useMarkets';
 import { getBaseTokenOrNativeCurrency, getPriceFeedKind } from '../../utils/markets';
-import { NoData, Path } from '../../components/Layout';
+import { Path } from '../../components/Layout';
 import Link from 'next/link';
 import TokenIcon from '../../components/TokenIcon';
 import { getTokenOrNativeCurrency, isWrappedNativeToken } from '../../utils/chains';
@@ -11,7 +11,7 @@ import DepositCollateralNative, { DEPOSIT_COLLATERAL_NATIVE_MODAL } from '../../
 import { collateralTokens } from '../../selectors/market-selector';
 import { useBootstrap } from '../../hooks/useBootstrap';
 import { ActionInfo, ActionType, Market, PriceFeed, Token } from '../../types';
-import { nf, percent } from '../../utils/number';
+import { percent } from '../../utils/number';
 import WithdrawCollateralErc20, { WITHDRAW_COLLATERAL_ERC20_MODAL } from '../../components/pages/collaterals/WithdrawCollateralErc20';
 import WithdrawCollateralNative, { WITHDRAW_COLLATERAL_NATIVE_MODAL } from '../../components/pages/collaterals/WithdrawCollateralNative';
 import { useCollateralPositions } from '../../hooks/useCollateralPositions';
@@ -51,7 +51,6 @@ export default function Collateral() {
     const asyncCollateralPositions = useCollateralPositions()
 
     const asyncRisk = useLiquidationRisk({ chainId, publicClient, market: currentMarket }) 
-    const { isSuccess: isLiquidationRisk, data: liquidationRisk } = asyncRisk
 
     const asyncMarkets = useMarkets({ chainId })
 
@@ -76,22 +75,22 @@ export default function Collateral() {
             ...collateral.token,
             priceFeed,
         } 
-        const onWithdraw = setCollatActionResult
         let modal: string
         if (action === DepositCollateral) {
+            setCollatActionInfo({ comet, token, onDeposit: setCollatActionResult })
             if (isWrappedNativeToken(chainId, token)) {
                 modal = DEPOSIT_COLLATERAL_NATIVE_MODAL
             } else {
                 modal = DEPOSIT_COLLATERAL_ERC20_MODAL
             }
         } else  {
+            setCollatActionInfo({ comet, token, onWithdraw: setCollatActionResult })
             if (isWrappedNativeToken(chainId, token)) {
                 modal = WITHDRAW_COLLATERAL_NATIVE_MODAL
             } else {
                 modal = WITHDRAW_COLLATERAL_ERC20_MODAL
             }        
         }
-        setCollatActionInfo({ comet, token, onWithdraw })
         setToken(token)
         openModal(modal)
     }
@@ -112,17 +111,6 @@ export default function Collateral() {
     function marketCss(market: Market) {
         const linkCss = 'text-body d-flex align-items-center border-bottom border-3 border-primary py-2'
         return `${linkCss} ${market.id === currentMarket?.id ? css['market-link-active'] : css['market-link']}`
-    }
-    
-    function liquidationRiskFormatted() {
-        let formattedRisk = <>{ NoData }</>
-        if (isLiquidationRisk) {
-            const risk = Number(liquidationRisk)
-            if (!isNaN(risk) && isFinite(risk)) {
-                formattedRisk = <>{ nf(liquidationRisk) }<small>%</small></>
-            }
-        }
-        return formattedRisk
     }
 
     function setCurrentMarket(market: Market) {

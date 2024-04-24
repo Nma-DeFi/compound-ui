@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { useEffect, useState } from "react";
 import { bnf } from "../utils/bn";
-import { NoData } from "./Layout";
+import { NoData } from "../utils/page";
 
 const PRICE_DP = 2
 

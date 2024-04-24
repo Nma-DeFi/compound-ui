@@ -21,10 +21,11 @@ export type Token = Asset & {
 
 export enum ActionType {
   DepositBaseToken,
-  DepositCollateral,
   WithdrawBaseToken,
+  WithdrawMaxBaseToken,
+  DepositCollateral,
   WithdrawCollateral,
-  Borrow, Repay
+  Borrow, Repay, RepayMax
 }
 
 export type ActionInfo = {

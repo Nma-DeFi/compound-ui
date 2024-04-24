@@ -84,7 +84,7 @@ export default function WithdrawBaseTokenErc20(market) {
     useEffect(() => {
       if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
         setMode(Mode.WaitingForWithdrawal)
-        const action = ActionType.WithdrawBaseToken
+        const action = amount.isEqualTo(balance) ? ActionType.WithdrawMaxBaseToken : ActionType.WithdrawBaseToken
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(withdrawHash)
         onWithdraw({ comet, action, token, amount: amountCopy, hash: hashCopy })
@@ -147,7 +147,8 @@ export default function WithdrawBaseTokenErc20(market) {
     function handleWithdraw() {
       if (amount.isGreaterThan(Zero)) {
         setMode(Mode.ConfirmationOfWithdrawal)
-        withdrawService.withdrawErc20Token({ token, amount }).then(setWithdrawHash)
+        const maxed = amount.isEqualTo(balance)
+        withdrawService.withdrawErc20Token({ token, amount, maxed }).then(setWithdrawHash)
       }
     }
 

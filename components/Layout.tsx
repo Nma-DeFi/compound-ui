@@ -12,8 +12,6 @@ export const Path = {
     Claim: '/claim',
 } 
 
-export const NoData = '—'
-
 export default function Layout({ children }) {
 
     useNetworkEvents()

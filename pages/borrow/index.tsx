@@ -37,6 +37,10 @@ import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/bor
 import BorrowPositions from "../../components/pages/borrow/BorrowPositions"
 import Apr from "../../components/Apr"
 import { useWeb3Modal } from "@web3modal/wagmi/react"
+import { AsyncBigNumber, IdleData, loadAsyncData } from "../../utils/async"
+import { getTotalCollateralUsdBalance } from "../../redux/helpers/collateral"
+import Price from "../../components/Price"
+import NoData from "../../components/NoData"
 
 const enum Mode {
   Loading,
@@ -227,7 +231,7 @@ export default function Borrow() {
                   { mode === Mode.Loading ? (
                       <div className="d-flex align-items-center">
                         <div className="me-1 me-sm-2 mb-1" style={{ width: '6rem'}}>
-                          <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} />
+                          <PlaceHolder size={PlaceHolderSize.NORMAL} col={12} />
                         </div>
                         <i className="bi bi-chevron-down"></i>
                         </div>
@@ -246,7 +250,7 @@ export default function Borrow() {
             { mode === Mode.Loading  &&    
               <BorrowPanel {...{ mode, borrowApr, css: 'pb-1' }}>
                 <div style={{ width: '20rem'}}>
-                  <PlaceHolder size={PlaceHolderSize.DEFAULT} col={12} />
+                  <PlaceHolder size={PlaceHolderSize.NORMAL} col={12} />
                 </div>
               </BorrowPanel>
             }
@@ -320,8 +324,11 @@ export default function Borrow() {
           </div>
         </div>
         <div className="col-12 col-xl-3 col-xxl-2 px-0 pt-4 pt-xl-0">
-          { isShowPositions() &&
-            <BorrowPositions />
+          { isConnected &&
+            <>
+              <BorrowPositions /> 
+              <TotalCollaterals /> 
+            </>
           }
         </div>
         <SelectTokenToBorrow onSelect={setCurrentMarket} />
@@ -337,25 +344,58 @@ function BorrowPanel({ children, mode, borrowApr, css = ''} : { children: ReactN
     <div className={`d-flex flex-wrap justify-content-between align-items-center mb-4 pt-1 ${css}`}>
       <div>{ children }</div>
       <div className="my-2 my-sm-0">
-        <BorrowApr {...{ mode, borrowApr }} />
+        <div className="px-2 py-1 me-1 shadow-sm rounded small">
+          { mode === Mode.Loading ? 
+            (
+              <div style={{ width: '6rem'}}>
+                <PlaceHolder size={PlaceHolderSize.SMALL} col={12} />
+              </div>
+            ) : (
+              <>Borrow APR : <span className="text-body-tertiary"><Apr value={borrowApr} /></span></>
+            )
+          }
+        </div>
       </div>
     </div>
   )
 }
 
-function BorrowApr({ mode, borrowApr} : { mode: Mode; borrowApr: number }) {
-  return (
-    <div className="px-2 py-1 me-1 shadow-sm rounded small">
-      { mode === Mode.Loading ? 
-        (
-          <div style={{ width: '6rem'}}>
-            <PlaceHolder size={PlaceHolderSize.SMALL} col={12} />
-          </div>
-        ) : (
-          <>Borrow APR : <span className="text-body-tertiary"><Apr value={borrowApr} /></span></>
-        )
-      }
-    </div>
+function TotalCollaterals() {
+  const [ collateral, setCollateral ] = useState<AsyncBigNumber>(IdleData)
+
+  const { currentChainId: chainId } = useCurrentChain()
+
+  const publicClient = usePublicClient({ chainId })
+  const priceService = usePriceService({ chainId, publicClient})
+
+  const { isSuccess: isCollateralPositions, data: collateralPositions } = useCollateralPositions()
+
+  useEffect(() => {
+    if (isCollateralPositions && priceService) {
+        const promise = getTotalCollateralUsdBalance({ collateralPositions, priceService })
+        loadAsyncData(promise, setCollateral)
+    } else {
+        setCollateral(IdleData)
+    }
+  }, [collateralPositions, priceService])
+
+  function isShown() {
+    return collateral.isSuccess && collateral.data.gt(Zero)
+  }
+  
+  return isShown() && (
+    <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">
+      <p className="text-body text-center mb-4" style={{ fontSize: '1.1rem', fontWeight: '500' }}>
+        <span className="pe-3">Your collaterals :</span>
+        {(collateral.isIdle || collateral.isLoading) ? (
+            <PlaceHolder size={PlaceHolderSize.NORMAL} col={2} />
+          ) : collateral.isSuccess ? (
+            <span className="text-body-secondary"><Price value={collateral.data} /> <i className="ms-2 bi bi-box-arrow-up-right"></i></span>
+          ) : (
+            <span className="text-body-secondary"><NoData /></span>
+        )}
+      </p>
+    </Link>
   )
 }
   

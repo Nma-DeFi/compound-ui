@@ -18,3 +18,17 @@
 .collateral-name {
     padding-left: 0.7rem;
 }
+
+#market-combo-button {
+    .icon { width: 1.6rem; }
+    .market-name { padding: 0 1rem }
+}
+
+#market-combo-button::after {
+    display: none;
+}
+
+#market-combo-dropdown {
+    .icon { width: 1.4rem; }
+    .market-name { padding: 0 1rem }
+}

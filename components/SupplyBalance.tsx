@@ -3,7 +3,7 @@ import { useCurrentAccount } from "../hooks/useCurrentAccount"
 import { RootState } from "../redux/types"
 import { baseTokePriceFeed, cometProxy } from "../selectors/market-selector"
 import Amount from "./Amount"
-import { NoData } from "./Layout"
+import { NoData } from "../utils/page"
 import PriceFromFeed from "./PriceFromFeed"
 import { PriceFeed } from "../types"
 import { useCurrentChain } from "../hooks/useCurrentChain"
@@ -39,7 +39,7 @@ export function SupplyBalanceAmount({ market, isLoading, isSuccess, supplyBalanc
         <>
             { isLoading ? (
                 <>
-                    <div className="mb-1"><PlaceHolder size={PlaceHolderSize.DEFAULT} col={5} /></div>
+                    <div className="mb-1"><PlaceHolder size={PlaceHolderSize.NORMAL} col={5} /></div>
                     <PlaceHolder col={4} />
                 </>
             ) : isSuccess ? (

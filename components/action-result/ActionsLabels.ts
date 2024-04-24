@@ -13,6 +13,10 @@ export const ActionLabels = {
         header : 'Withdrawal',
         content : 'Withdrawal of',
     },
+    [ActionType.WithdrawMaxBaseToken] : {
+        header : 'Max withdrawal',
+        content : 'Withdrawal of',
+    },
     [ActionType.WithdrawCollateral] : {
         header : 'Withdraw collateral',
         content : 'Withdrawal of',
@@ -23,6 +27,10 @@ export const ActionLabels = {
     },
     [ActionType.Repay] : {
         header : 'Repay',
+        content : 'Repaying',
+    },
+    [ActionType.RepayMax] : {
+        header : 'Repay max',
         content : 'Repaying',
     },
 }

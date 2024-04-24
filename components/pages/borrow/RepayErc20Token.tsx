@@ -44,6 +44,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
     const [ asyncAllowance, setAsyncAllowance ] = useState<AsyncBigNumber>(IdleData)
     const [ asyncBorrowBalance, setAsyncBorrowBalance ] = useState<AsyncBigNumber>(IdleData)
+    const [ maxed, setMaxed ] = useState<boolean>()
 
     const { isSuccess: isBalance, data: balance } = asyncBalance
     const { isSuccess: isAllowance, data: allowance } = asyncAllowance
@@ -93,6 +94,18 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     }, [isSuccessApproval])
 
     useEffect(() => {
+      if (isBalance) {
+        setMaxed(amount.isEqualTo(borrowBalance))
+      } else {
+        setMaxed(false)
+      }
+    }, [amount, borrowBalance])
+
+    useEffect(() => {
+      console.log('maxed !!!', maxed)
+    }, [maxed])
+
+    useEffect(() => {
       switch (modalEvent) {
         case 'show':
           onOpen()
@@ -114,7 +127,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     useEffect(() => {
       if (mode === Mode.ConfirmationOfRepayment && repayHash) {
         setMode(Mode.WaitingForRepayment)
-        const action = ActionType.Repay
+        const action = maxed ? ActionType.RepayMax : ActionType.Repay
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(repayHash)
         onRepay({ comet, action, token, amount: amountCopy, hash: hashCopy })
@@ -137,6 +150,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
       setAsyncAllowance(IdleData)
       setApprovalHash(null)
       setRepayHash(null)
+      setMaxed(null)
     }
 
     function loadBorrowBalance() {
@@ -169,7 +183,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
 
     function handleRepay() {
       setMode(Mode.ConfirmationOfRepayment)
-      supplyService.supplyErc20Token({ token, amount }).then(setRepayHash)
+      supplyService.supplyErc20Token({ token, amount, maxed }).then(setRepayHash)
     }
 
     function handleApproval() {

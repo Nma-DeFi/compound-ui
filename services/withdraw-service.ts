@@ -1,8 +1,8 @@
-import { encodeAbiParameters } from "viem";
+import { encodeAbiParameters, maxUint256 } from "viem";
 import { bulkerAbi } from "../abi/bulkerAbi";
 import { cometAbi } from "../abi/cometAbi";
 import { CompoundConfig } from "../compound-config";
-import { toBigInt } from "../utils/bn";
+import { bnf, toBigInt } from "../utils/bn";
 import { nativeCurrency } from "../utils/chains";
 
 export class WithdrawService {
@@ -21,36 +21,45 @@ export class WithdrawService {
             abi: cometAbi
         }
     }
-
-    async withdrawErc20Token({ token, amount }) {
+    
+    async withdrawErc20Token({ token, amount, maxed = false }) {
         const { address: asset, decimals } = token
-        const withdrawAmount = toBigInt(amount, decimals)
+        const withdrawAmount = maxed ? maxUint256 : toBigInt(amount, decimals)
+
         console.log(
-            'WithdrawService.withdraw',
+            Date.now(),
+            'WithdrawService.withdrawErc20Token',
             'token', asset,
-            'amount', withdrawAmount,
+            'amount', bnf(amount),
+            'withdrawAmount', withdrawAmount,
+            'maxed', maxed,   
             'account', this.account
         )
+
         const { request } = await this.publicClient.simulateContract({
             ...this.cometContract,
             functionName: 'withdraw',
             args: [asset, withdrawAmount],
             account: this.account
         })
+
         return await this.walletClient.writeContract(request)
     }
 
-    async withdrawNativeCurrency({ amount }) {
+    async withdrawNativeCurrency({ amount, maxed = false }) {
         const chainId = await this.publicClient.getChainId()
         const { symbol, decimals } = nativeCurrency(chainId)
         const { bulker: bulkerAddress } = CompoundConfig[chainId].contracts
         const bulkerContract = { address: bulkerAddress, abi: bulkerAbi }
-        const withdrawAmount = toBigInt(amount, decimals)
+        const withdrawAmount = maxed ? maxUint256 : toBigInt(amount, decimals)
 
         console.log(
+            Date.now(),
             'WithdrawService.withdrawNativeCurrency',
             'account', this.account,
-            'amount', withdrawAmount,
+            'amount', bnf(amount),
+            'withdrawAmount', withdrawAmount,
+            'max', maxed,   
             'currency', symbol,
             'contract', bulkerContract
         )
@@ -76,7 +85,6 @@ export class WithdrawService {
         const { request } = await this.publicClient.simulateContract({
             ...bulkerContract,
             account: this.account,
-            value: withdrawAmount,
             functionName: 'invoke',
             args: [[ withdrawAction ], [ withdrawParameters ]]
         })

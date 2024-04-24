@@ -1,5 +1,5 @@
 export const enum PlaceHolderSize {
-    DEFAULT = '',
+    NORMAL = '',
     SMALL = 'placeholder-sm',
     LARGE = 'placeholder-lg',
 }

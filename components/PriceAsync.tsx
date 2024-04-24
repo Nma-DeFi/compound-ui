@@ -1,4 +1,4 @@
-import { NoData } from "./Layout"
+import { NoData } from "../utils/page"
 import { AsyncBigNumber } from "../utils/async"
 import PlaceHolder, { PlaceHolderParam } from "./PlaceHolder"
 import Price from "./Price"

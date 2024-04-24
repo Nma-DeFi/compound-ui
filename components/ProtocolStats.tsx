@@ -3,7 +3,7 @@ import { useCurrentChain } from "../hooks/useCurrentChain"
 import { useProtocolStats } from "../hooks/useProtocolStats"
 import { collateralBalanceUsd, totalBorrowUsd, totalSupplyUsd } from "../selectors/protocol-selector"
 import { bnf } from "../utils/bn"
-import { NoData } from "./Layout"
+import { NoData } from "../utils/page"
 
 export default function ProtocolStats() {
 

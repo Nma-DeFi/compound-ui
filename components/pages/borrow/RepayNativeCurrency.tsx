@@ -40,6 +40,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ repayHash, setRepayHash ] = useState<Hash>()
+    const [ maxed, setMaxed ] = useState<boolean>()
 
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
@@ -72,7 +73,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     useEffect(() => {
       if (mode === Mode.ConfirmationOfRepayment && repayHash) {
         setMode(Mode.WaitingForRepayment)
-        const action = ActionType.Repay
+        const action = maxed ? ActionType.RepayMax : ActionType.Repay
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(repayHash)
         onRepay({ comet, action, token, amount: amountCopy, hash: hashCopy })
@@ -86,6 +87,18 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
         loadBorrowBalance()
       }
     }, [mode, publicClient])
+
+    useEffect(() => {
+      if (isBalance) {
+        setMaxed(amount.isEqualTo(borrowBalance))
+      } else {
+        setMaxed(false)
+      }
+    }, [amount, borrowBalance])
+
+    useEffect(() => {
+      console.log('maxed !!!', maxed)
+    }, [maxed])
 
     useEffect(() => {
       switch (modalEvent) {
@@ -110,6 +123,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
       setAmount(Zero)
       setInput(null)
       setRepayHash(null)
+      setMaxed(null)
     }
 
     function setInput(amount: BigNumber) {
@@ -137,7 +151,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
 
     function handleRepay() {
       setMode(Mode.ConfirmationOfRepayment)
-      supplyService.supplyNativeCurrency({ amount }).then(setRepayHash)
+      supplyService.supplyNativeCurrency({ amount, maxed }).then(setRepayHash)
     }
 
     function handleWalletBalancePercent(factor: number) {

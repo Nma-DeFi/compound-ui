@@ -1,8 +1,8 @@
-import { encodeAbiParameters } from "viem";
+import { encodeAbiParameters, maxUint256 } from "viem";
 import { bulkerAbi } from "../abi/bulkerAbi";
 import { cometAbi } from "../abi/cometAbi";
 import { CompoundConfig } from "../compound-config";
-import { toBigInt } from "../utils/bn";
+import { bnf, toBigInt } from "../utils/bn";
 import { nativeCurrency } from "../utils/chains";
 
 export class SupplyService {
@@ -22,25 +22,30 @@ export class SupplyService {
         }
     }
 
-    async supplyErc20Token({ token, amount }) {
+    async supplyErc20Token({ token, amount, maxed = false }) {
         const { address: asset, decimals } = token
-        const supplyAmount = toBigInt(amount, decimals)
+        const supplyAmount = maxed ? maxUint256 : toBigInt(amount, decimals)
+
         console.log(
+            Date.now(),
             'SupplyService.supplyErc20Token',
             'token', asset,
-            'amount', supplyAmount,
+            'amount', bnf(amount),
+            'maxed', maxed,
             'account', this.account
         )
+
         const { request } = await this.publicClient.simulateContract({
             ...this.cometContract,
             functionName: 'supply',
             args: [asset, supplyAmount],
             account: this.account
         })
+        
         return await this.walletClient.writeContract(request)
     }
 
-    async supplyNativeCurrency({ amount }) {
+    async supplyNativeCurrency({ amount, maxed = false }) {
         const chainId = await this.publicClient.getChainId()
         const { symbol, decimals } = nativeCurrency(chainId)
         const { bulker: bulkerAddress } = CompoundConfig[chainId].contracts
@@ -48,9 +53,11 @@ export class SupplyService {
         const supplyAmount = toBigInt(amount, decimals)
 
         console.log(
+            Date.now(),
             'SupplyService.supplyNativeCurrency',
             'account', this.account,
-            'amount', supplyAmount,
+            'amount', bnf(amount),
+            'maxed', maxed,
             'currency', symbol,
             'contract', bulkerContract
         )
@@ -69,7 +76,7 @@ export class SupplyService {
             [ 
                 this.cometContract.address, 
                 this.account,
-                supplyAmount,
+                (maxed ? maxUint256 : supplyAmount),
             ]
         )
 

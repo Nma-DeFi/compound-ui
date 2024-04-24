@@ -1,0 +1,2 @@
+
+export const NoData = '—';

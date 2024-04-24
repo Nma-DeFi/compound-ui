@@ -9,7 +9,6 @@ import { usePublicClient } from 'wagmi';
 import { useCurrentChain } from '../hooks/useCurrentChain';
 import { usePriceService } from '../hooks/usePriceService';
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../utils/async';
-import { NoData } from './Layout';
 import { CollateralPositionsState } from '../redux/slices/positions/collateralPositions';
 import { getTotalCollateralUsdBalance } from '../redux/helpers/collateral';
 import { BorrowPositionsState } from '../redux/slices/positions/borrowPositions';
@@ -18,6 +17,7 @@ import { useBorrowPositions } from '../hooks/useBorrowPositions';
 import { useSupplyPositions } from '../hooks/useSupplyPositions';
 import { getTotalBorrowingsUsdBalance } from '../redux/helpers/borrow';
 import { getTotalEarningsUsdBalance } from '../redux/helpers/supply';
+import NoData from './NoData';
 
 type PositionsState = { 
     supplyPositions: SupplyPositionsState, 
@@ -84,7 +84,7 @@ export function UserAccount(positionsState : PositionsState) {
                     ) : collateral.isSuccess ? (
                         <div className="text-body-secondary"><Price value={collateral.data} /></div>
                     ) : (
-                        <div className="text-body-secondary">{NoData}</div>
+                        <div className="text-body-secondary"><NoData /></div>
                     )}
                 </div>
                 <div>
@@ -94,7 +94,7 @@ export function UserAccount(positionsState : PositionsState) {
                     ) : borrowing.isSuccess ? (
                         <div className="text-body-secondary"><Price value={borrowing.data} /></div>
                     ) : (
-                        <div className="text-body-secondary">{NoData}</div>
+                        <div className="text-body-secondary"><NoData /></div>
                     )}
                 </div>
             </div>
@@ -106,12 +106,12 @@ export function UserAccount(positionsState : PositionsState) {
                     ) : earning.isSuccess ? (
                         <div className="text-body-secondary"><Price value={earning.data} /></div>
                     ) : (
-                        <div className="text-body-secondary">{NoData}</div>
+                        <div className="text-body-secondary"><NoData /></div>
                     )}
                 </div>
                 <div>
                     <div className="fw-semibold text-primary mb-1">Rewards</div> 
-                    <div>{NoData}</div>
+                    <div className="text-body-secondary"><NoData /></div>
                 </div>
             </div>
         </div>

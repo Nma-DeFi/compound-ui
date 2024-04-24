@@ -1,7 +1,7 @@
 import { usePublicClient } from "wagmi"
 import { useCurrentChain } from "../hooks/useCurrentChain"
 import { useLiquidationRisk } from "../hooks/useLiquidationRisk"
-import { NoData } from "./Layout"
+import { NoData } from "../utils/page"
 
 const DEFAULT_MIN_RISK_LABEL = 25
 

@@ -47,6 +47,11 @@ export const supplyPositionsSlice = createSlice({
         'new balance', newBalance.toFixed(),
         'result', state.data[comet].supplyBalance.toFixed())    
     },
+    supplyPositionSet: (state: SupplyPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
+      const { comet, amount } = action.payload
+      state.data[comet].supplyBalance = amount
+      Object.assign(state, AsyncStatus.Success)
+    },
   },
   extraReducers(builder) {
       builder
@@ -94,6 +99,6 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
     }
 )
 
-export const { supplyPositionsReset, supplyPositionIncrease, supplyPositionDecrease } = supplyPositionsSlice.actions
+export const { supplyPositionsReset, supplyPositionIncrease, supplyPositionDecrease, supplyPositionSet  } = supplyPositionsSlice.actions
 
 export default supplyPositionsSlice.reducer

@@ -6,7 +6,7 @@ import { ActionType, PriceFeed, Token } from '../../../types'
 import * as MarketUtils from '../../../utils/markets'
 import { useEffect, useState } from 'react'
 import { Zero, bn } from '../../../utils/bn'
-import * as ChainUtils from '../../../utils/chains';
+import * as ChainUtils from '../../../utils/chains'
 import { Hash } from 'viem'
 import { AsyncBigNumber, AsyncBoolean, IdleData, loadAsyncData } from '../../../utils/async'
 import BigNumber from 'bignumber.js'
@@ -123,7 +123,7 @@ export default function WithdrawBaseTokenNative(market) {
   useEffect(() => {
     if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
       setMode(Mode.WaitingForWithdrawal)
-      const action = ActionType.WithdrawBaseToken
+      const action = amount.isEqualTo(balance) ? ActionType.WithdrawMaxBaseToken : ActionType.WithdrawBaseToken
       const amountCopy = bn(amount)
       const hashCopy = structuredClone(withdrawHash)
       onWithdraw({ comet, action, token, amount: amountCopy, hash: hashCopy })
@@ -203,7 +203,8 @@ export default function WithdrawBaseTokenNative(market) {
 
   function handleWithdraw() {
     setMode(Mode.ConfirmationOfWithdrawal)
-    withdrawService.withdrawNativeCurrency({ amount }).then(setWithdrawHash)
+    const maxed = amount.isEqualTo(balance)
+    withdrawService.withdrawNativeCurrency({ amount, maxed }).then(setWithdrawHash)
   }
 
   return (

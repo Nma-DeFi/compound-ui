@@ -3,7 +3,7 @@ import { useCurrentAccount } from "../hooks/useCurrentAccount"
 import { RootState } from "../redux/types"
 import { cometProxy } from "../selectors/market-selector"
 import Amount from "./Amount"
-import { NoData } from "./Layout"
+import { NoData } from "../utils/page"
 import css from '../styles/components/CollateralBalance.module.scss';
 import PriceFromFeed from "./PriceFromFeed"
 import { useEffect, useState } from "react"
@@ -41,7 +41,7 @@ function CollateralAmount({ market, collateral, isLoading, isSuccess, amount }) 
         <>
             { isLoading ? (
                 <CollateralBalanceLayout>
-                    <PlaceHolder size={PlaceHolderSize.DEFAULT} col={5} />
+                    <PlaceHolder size={PlaceHolderSize.NORMAL} col={5} />
                     <div className={css['collateral-balance']}><PlaceHolder col={4} /></div>
                 </CollateralBalanceLayout>
             ) : isSuccess ? (

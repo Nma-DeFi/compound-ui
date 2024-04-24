@@ -149,14 +149,27 @@ export default function Collateral() {
                     }
                 </div>
                 <div className="col-12 col-sm-7 order-3 order-sm-2">
-                    <div className="d-flex justify-content-center justify-content-sm-end pt-5 pt-sm-0">
-                        { isMarkets && markets.map((market) =>
-                            <div key={market.id} className={marketCss(market)} onClick={() => setCurrentMarket(market)}>
-                                <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} width={25} css={`me-2 ${css['market-icon']}`} />
-                                {getBaseTokenOrNativeCurrency(market, chainId)?.symbol} <span className="text-body-tertiary ps-1">Market</span>
-                            </div>
-                        )}
-                    </div>
+                { isMarkets && currentMarket &&
+                    <>
+                        <div className="d-flex d-sm-none justify-content-center pt-5">
+                            <SelectMarket {...{ markets, currentMarket, chainId, setCurrentMarket }} />
+                        </div>
+                        <div className="d-none d-sm-flex justify-content-end pt-0">
+                            {(markets.length < 3) ? (
+                                <>
+                                    {markets.map((market) =>
+                                        <div key={market.id} className={marketCss(market)} onClick={() => setCurrentMarket(market)}>
+                                            <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} width={25} css={`me-2 ${css['market-icon']}`} />
+                                            { getBaseTokenOrNativeCurrency(market, chainId)?.symbol } <span className="text-body-tertiary ps-1">Market</span>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <SelectMarket {...{ markets, currentMarket, chainId, setCurrentMarket }} />
+                            )}
+                        </div>
+                    </>
+                }
                 </div>
                 <div className="col-3 col-sm-1 order-2 order-sm-3 text-end">
                     <Link href={Path.Borrow}>
@@ -196,4 +209,33 @@ export default function Collateral() {
             )}
         </div>
     )
+}
+
+export function SelectMarket({ markets, currentMarket, chainId, setCurrentMarket }) {
+    return (
+        <div className="btn-group">
+            <button id={css['market-combo-button']} type="button" className="btn btn-light border shadow-sm rounded-5 dropdown-toggle px-3" data-bs-toggle="dropdown" aria-expanded="false">
+                <div className="d-flex align-items-center">
+                    <TokenIcon symbol={getBaseTokenOrNativeCurrency(currentMarket, chainId)?.symbol} css={css['icon']} />
+                    <div className={css['market-name']}>
+                    { getBaseTokenOrNativeCurrency(currentMarket, chainId)?.symbol } <span className="text-body-secondary">Market</span>
+                    </div>
+                    <i className="bi bi-chevron-down"></i>
+                </div>
+            </button>
+            <ul id={css['market-combo-dropdown']} className="dropdown-menu">
+                {markets.map((market) =>
+                    <li key={market.id}>
+                        <button className="dropdown-item d-flex align-items-center py-2" type="button" onClick={() => setCurrentMarket(market)}>
+                            <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} css={css['icon']} />
+                            <div className="ps-2">
+                            { getBaseTokenOrNativeCurrency(market, chainId)?.symbol } <span className="text-body-secondary">Market</span>
+                            </div>
+                        </button>
+                    </li>
+                )}
+            </ul>
+        </div>
+    )
+
 }

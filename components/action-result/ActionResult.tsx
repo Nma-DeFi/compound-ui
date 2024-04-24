@@ -2,14 +2,15 @@ import { useEffect } from "react";
 import { useWaitForTransaction } from "wagmi";
 import { useCurrentChain } from "../../hooks/useCurrentChain";
 import { useAppDispatch } from "../../redux/hooks";
-import { supplyPositionDecrease, supplyPositionIncrease } from "../../redux/slices/positions/supplyPositions";
+import { supplyPositionDecrease, supplyPositionIncrease, supplyPositionSet } from "../../redux/slices/positions/supplyPositions";
 import { getTokenOrNativeCurrency, transactionUrl } from "../../utils/chains";
 import { SmallSpinner } from "../Spinner";
 import { ActionInfo, ActionType } from "../../types";
 import { ActionLabels } from "./ActionsLabels";
 import { collateralPositionDecrease, collateralPositionIncrease } from "../../redux/slices/positions/collateralPositions";
 import Amount from "../Amount";
-import { borrowPositionDecrease, borrowPositionIncrease } from "../../redux/slices/positions/borrowPositions";
+import { borrowPositionDecrease, borrowPositionIncrease, borrowPositionSet } from "../../redux/slices/positions/borrowPositions";
+import { Zero } from "../../utils/bn";
 
 export const ACTION_RESULT_TOAST = 'action-result-toast'
 
@@ -34,6 +35,9 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
                 case ActionType.WithdrawBaseToken:
                     dispatch(supplyPositionDecrease({ comet, amount }))
                     break
+                case ActionType.WithdrawMaxBaseToken:
+                    dispatch(supplyPositionSet({ comet, amount: Zero }))
+                    break
                 case ActionType.DepositCollateral:
                     dispatch(collateralPositionIncrease({ comet, token, amount }))
                     break                    
@@ -46,13 +50,18 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
                 case ActionType.Repay:
                     dispatch(borrowPositionDecrease({ comet, amount }))
                     break
+                case ActionType.RepayMax:
+                    dispatch(borrowPositionSet({ comet, amount: Zero }))
+                    break
             }
             onSuccess?.()
         }
     }, [isSuccess])
 
     useEffect(() => { 
-        if (isError) console.error(error) 
+        if (isError) {
+            console.error(error) 
+        }
     }, [isError])
 
     function tokenOrNativeCurrency() {

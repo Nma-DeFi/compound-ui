@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import { Hash } from 'viem';
 import { usePublicClient, useWalletClient } from 'wagmi';
-import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap';
+import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap';
 import { useCurrentAccount } from '../../../hooks/useCurrentAccount';
 import { useCurrentChain } from '../../../hooks/useCurrentChain';
 import { useWithdrawService } from '../../../hooks/useWithdrawService';
@@ -90,10 +90,10 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
 
     useEffect(() => {
       switch (modalEvent) {
-        case 'show':
+        case ModalEvent.Show:
           onOpen()
           break
-        case 'hidden':
+        case ModalEvent.Hidden:
           onHide()
           break
       } 
@@ -188,7 +188,7 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                               </div>
                           </button>
                           <div className="text-center text-body-secondary small">
-                            Balance : <span className="text-body-tertiary"><AsyncAmount {...asyncBalance} /></span>
+                            Balance : <span className="text-body-tertiary"><AsyncAmount { ...{ ...asyncBalance, idleData: '0'} } /></span>
                           </div>
                       </div>
                   </div>

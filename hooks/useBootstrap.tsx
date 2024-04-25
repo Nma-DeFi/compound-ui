@@ -12,24 +12,49 @@ export function useBootstrap() {
     });
 
     useEffect(() => {
-        import('../utils/bootstrap').then(bs => setBootstrap(bs));
-    }, []);
+        import('../utils/bootstrap').then(bs => setBootstrap(bs))
+    }, [])
 
-    return bootstrap;
+    return bootstrap
 }
 
-export type ModalEvent = 'show' | 'hide' | 'hidden'
+export enum ModalEvent { 
+    Show = 'show', 
+    Hide = 'hide', 
+    Hidden = 'hidden', 
+}
 
 export function useModalEvent(modalId: string) {
-
     const [ modalEvent, setModalEvent ] = useState<ModalEvent>()
 
     useEffect(() => {
+        const { Show, Hide, Hidden  } = ModalEvent
         const modal = document.getElementById(modalId)
-        modal.addEventListener('show.bs.modal', () => setModalEvent('show'))
-        modal.addEventListener('hide.bs.modal', () => setModalEvent('hide'))
-        modal.addEventListener('hidden.bs.modal', () => setModalEvent('hidden'))
+        modal.addEventListener('show.bs.modal', () => setModalEvent(Show))
+        modal.addEventListener('hide.bs.modal', () => setModalEvent(Hide))
+        modal.addEventListener('hidden.bs.modal', () => setModalEvent(Hidden))
       }, [modalId])
 
     return modalEvent
+}
+
+export enum ToastEvent { 
+    Show = 'show', 
+    Hide = 'hide', 
+    Hidden = 'hidden', 
+}
+
+export function useToastEvent(toastId: string) {
+    const [ toastEvent, setToastEvent ] = useState<ToastEvent>()
+
+    useEffect(() => {
+        if (!toastId) return
+        const { Show, Hide, Hidden  } = ToastEvent
+        const toast = document.getElementById(toastId)
+        toast.addEventListener('show.bs.toast', () => setToastEvent(Show))
+        toast.addEventListener('hide.bs.toast', () => setToastEvent(Hide))
+        toast.addEventListener('hidden.bs.toast', () => setToastEvent(Hidden))
+      }, [toastId])
+
+    return toastEvent
 }

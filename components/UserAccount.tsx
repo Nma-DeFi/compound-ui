@@ -10,7 +10,6 @@ import { useCurrentChain } from '../hooks/useCurrentChain';
 import { usePriceService } from '../hooks/usePriceService';
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../utils/async';
 import { CollateralPositionsState } from '../redux/slices/positions/collateralPositions';
-import { getTotalCollateralUsdBalance } from '../redux/helpers/collateral';
 import { BorrowPositionsState } from '../redux/slices/positions/borrowPositions';
 import { useCollateralPositions } from '../hooks/useCollateralPositions';
 import { useBorrowPositions } from '../hooks/useBorrowPositions';
@@ -18,6 +17,7 @@ import { useSupplyPositions } from '../hooks/useSupplyPositions';
 import { getTotalBorrowingsUsdBalance } from '../redux/helpers/borrow';
 import { getTotalEarningsUsdBalance } from '../redux/helpers/supply';
 import NoData from './NoData';
+import { useTotalCollateralUsd } from '../hooks/useTotalCollateralUsd';
 
 type PositionsState = { 
     supplyPositions: SupplyPositionsState, 
@@ -33,11 +33,11 @@ export function UserAccount(positionsState : PositionsState) {
 
     const { isSuccess: isSupplyPositions, data: supplyPositions } = positionsState.supplyPositions
     const { isSuccess: isBorrowPositions, data: borrowPositions } = positionsState.borrowPositions
-    const { isSuccess: isCollateralPositions, data: collateralPositions } = positionsState.collateralPositions
+
+    const totalCollateral = useTotalCollateralUsd({ asyncCollateralPositions: positionsState.collateralPositions })
     
     const [ earning, setEarning ] = useState<AsyncBigNumber>(IdleData)
     const [ borrowing, setBorrowing ] = useState<AsyncBigNumber>(IdleData)
-    const [ collateral, setCollateral ] = useState<AsyncBigNumber>(IdleData)
 
     const { isConnected } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
@@ -63,15 +63,6 @@ export function UserAccount(positionsState : PositionsState) {
         }
     }, [borrowPositions, priceService])
 
-    useEffect(() => {
-        if (isCollateralPositions && priceService) {
-            const promise = getTotalCollateralUsdBalance({ collateralPositions, priceService })
-            loadAsyncData(promise, setCollateral)
-        } else {
-            setCollateral(IdleData)
-        }
-    }, [collateralPositions, priceService])
-
 
     return isConnected && (
         <div id={css['user-account']} className="bg-body py-4 border rounded shadow text-center rounded-4">
@@ -79,10 +70,10 @@ export function UserAccount(positionsState : PositionsState) {
             <div className="d-flex justify-content-around justify-content-xl-between mb-3 small">
                 <div>
                     <div className="fw-semibold mb-1">Collateral</div> 
-                    { (collateral.isIdle || collateral.isLoading) ? (
+                    { (totalCollateral.isPending || totalCollateral.isLoading) ? (
                         <div className="placeholder bg-secondary-subtle col-10"></div>
-                    ) : collateral.isSuccess ? (
-                        <div className="text-body-secondary"><Price value={collateral.data} /></div>
+                    ) : totalCollateral.isSuccess ? (
+                        <div className="text-body-secondary"><Price value={totalCollateral.data} /></div>
                     ) : (
                         <div className="text-body-secondary"><NoData /></div>
                     )}

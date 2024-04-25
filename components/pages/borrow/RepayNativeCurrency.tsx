@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
-import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
+import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { Zero, bn, fromBigInt } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
 import AmountPercent from '../../AmountPercent'
@@ -33,6 +33,7 @@ const enum Mode {
 export const REPAY_NATIVE_CURRENCY = 'repay-native-currency'
 
 export default function RepayNativeCurrency({ comet, token, onRepay }) {
+    const ACCRUED_ESTIMATION = 1.001
 
     const { currentChainId: chainId } = useCurrentChain()
     const { address } = useCurrentAccount()
@@ -40,7 +41,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ repayHash, setRepayHash ] = useState<Hash>()
-    const [ maxed, setMaxed ] = useState<boolean>()
+    const [ action, setAction ] = useState<ActionType>()
 
     const publicClient = usePublicClient({ chainId })
     const { data: walletClient } = useWalletClient()
@@ -73,7 +74,6 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     useEffect(() => {
       if (mode === Mode.ConfirmationOfRepayment && repayHash) {
         setMode(Mode.WaitingForRepayment)
-        const action = maxed ? ActionType.RepayMax : ActionType.Repay
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(repayHash)
         onRepay({ comet, action, token, amount: amountCopy, hash: hashCopy })
@@ -89,24 +89,12 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     }, [mode, publicClient])
 
     useEffect(() => {
-      if (isBalance) {
-        setMaxed(amount.isEqualTo(borrowBalance))
-      } else {
-        setMaxed(false)
-      }
-    }, [amount, borrowBalance])
-
-    useEffect(() => {
-      console.log('maxed !!!', maxed)
-    }, [maxed])
-
-    useEffect(() => {
       switch (modalEvent) {
-        case 'show':
+        case ModalEvent.Show:
           onOpen()
           break
-        case 'hidden':
-          onHide()
+        case ModalEvent.Hidden:
+            onHide()
           break
       } 
     }, [modalEvent])
@@ -119,11 +107,15 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
       if (mode === Mode.WaitingForRepayment) {
         openToast(REPAY_RESULT_TOAST)
       }
+      resetState()
+    }
+
+    function resetState() {
       setMode(null)
       setAmount(Zero)
       setInput(null)
       setRepayHash(null)
-      setMaxed(null)
+      setAction(null)
     }
 
     function setInput(amount: BigNumber) {
@@ -149,9 +141,31 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
       setAmount(amount)
     }
 
-    function handleRepay() {
+    async function handleRepay() {
       setMode(Mode.ConfirmationOfRepayment)
-      supplyService.supplyNativeCurrency({ amount, maxed }).then(setRepayHash)
+      const estimedAccruedBorrowBalance = borrowBalance.times(ACCRUED_ESTIMATION).dp(token.decimals)
+      const isMaxed = amount.isEqualTo(borrowBalance)
+      const isEnoughBalance = estimedAccruedBorrowBalance.isLessThan(balance)
+      console.log('isMaxed', isMaxed, amount.toFixed(), borrowBalance.toFixed())
+      console.log('isEnoughBalance', isEnoughBalance, estimedAccruedBorrowBalance.toFixed(), balance.toFixed())
+      let maxRepayRequest = null
+      if (isMaxed && isEnoughBalance) {
+        const [ isSuccess, data ] = await supplyService.simulateSupplyNativeCurrency({ amount: estimedAccruedBorrowBalance, maxed: true })
+        if (isSuccess) {
+          maxRepayRequest = data
+        } else {
+          console.warn(data)
+        }
+      }      
+      let supplyPromise 
+      if (maxRepayRequest) {
+        setAction(ActionType.RepayMax)
+        supplyPromise = supplyService.writeContract(maxRepayRequest)
+      } else {
+        setAction(ActionType.Repay)
+        supplyPromise = supplyService.supplyNativeCurrency({ amount })
+      }
+      supplyPromise.then(setRepayHash)
     }
 
     function handleWalletBalancePercent(factor: number) {

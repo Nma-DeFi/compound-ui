@@ -29,18 +29,16 @@ import { useAppDispatch } from "../../redux/hooks"
 import { marketChanged } from "../../redux/slices/currentMarket"
 import { useCurrentMarket } from "../../hooks/useCurrentMarket"
 import { getTokenOrNativeCurrency } from "../../utils/chains"
-import { getLiquidationRiskByBorrowAmount } from "../../redux/helpers/liquidation-risk"
-import { useBorrowPositions } from "../../hooks/useBorrowPositions"
 import { useCollateralPositions } from "../../hooks/useCollateralPositions"
 import { usePriceService } from "../../hooks/usePriceService"
 import BorrowErc20Token, { BORROW_ERC20_MODAL } from "../../components/pages/borrow/BorrowErc20Token"
 import BorrowPositions from "../../components/pages/borrow/BorrowPositions"
 import Apr from "../../components/Apr"
 import { useWeb3Modal } from "@web3modal/wagmi/react"
-import { AsyncBigNumber, IdleData, loadAsyncData } from "../../utils/async"
-import { getTotalCollateralUsdBalance } from "../../redux/helpers/collateral"
 import Price from "../../components/Price"
 import NoData from "../../components/NoData"
+import { useLiquidationRiskByBorrowAmount } from "../../hooks/useLiquidationRisk"
+import { useTotalCollateralUsd } from "../../hooks/useTotalCollateralUsd"
 
 const enum Mode {
   Loading,
@@ -57,16 +55,13 @@ export default function Borrow() {
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
-    const [ liquidationRisk, setLiquidationRisk ] = useState<number>()
 
     const { open: openWeb3Modal } = useWeb3Modal()
 
-    const currentMarket = useCurrentMarket()
-
-    const comet = cometProxy(currentMarket)
+    const market = useCurrentMarket()
+    const comet = cometProxy(market)
 
     const { isConnected } = useCurrentAccount()
-
     const { currentChainId: chainId } = useCurrentChain()
 
     const publicClient = usePublicClient({ chainId })
@@ -76,26 +71,24 @@ export default function Borrow() {
     const dispatch = useAppDispatch()
 
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
-
     const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
-    const { isSuccess: isBorrowPositions, data: borrowPositions } = useBorrowPositions()
-    const { isSuccess: isCollateralPositions, data: collateralPositions } = useCollateralPositions()
 
-    const asyncBorrowCapacity  =  useBorrowCapacity({ chainId, publicClient, marketId: comet })
+    const asyncBorrowCapacity = useBorrowCapacity({ chainId, publicClient, marketId: comet })
 
     const priceService = usePriceService({ chainId, publicClient })
 
-    const priceFeed = getPriceFeed(currentMarket, chainId)
-    
+    const priceFeed = getPriceFeed(market, chainId)
     const asyncAmountUsd = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
 
-    const token = getBaseTokenOrNativeCurrency(currentMarket, chainId)
-    const borrowApr = netBorrowAprScaled(currentMarket)
-    const minBorrowAmount = baseBorrowMinScaled(currentMarket)
-    const collaterals = collateralTokens(currentMarket)
+    const token = getBaseTokenOrNativeCurrency(market, chainId)
+    const borrowApr = netBorrowAprScaled(market)
+    const minBorrowAmount = baseBorrowMinScaled(market)
+    const collaterals = collateralTokens(market)
 
     const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
     const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountUsd
+
+    const liquidationRisk = useLiquidationRiskByBorrowAmount({ chainId, publicClient, market, amount, enabled: (mode === Mode.ReadyToBorrow)})
 
     useEffect(() => { 
       if (isLoading()) {
@@ -110,52 +103,32 @@ export default function Borrow() {
         setMode(Mode.InsufficientBorrowAmount)
       } else {
         setMode(Mode.ReadyToBorrow)
-        const { borrowBalance } = borrowPositions[comet]
-        const borrowAmount = borrowBalance.plus(amount)
-        getLiquidationRiskByBorrowAmount({ 
-          chainId, 
-          collateralPositions, 
-          priceService, 
-          borrowAmount,
-          market: currentMarket
-        }).then(setLiquidationRisk)
       }
     })
     
     useEffect(() => {
-      if (isMarkets && !currentMarket) {
+      if (isMarkets && !market) {
         setCurrentMarket(markets[0])
       }
     }, [chainId, markets])
 
     useEffect(() => {
-      if (currentMarket) {
+      if (market) {
         resetAmount()
       }
-    }, [chainId, currentMarket])
+    }, [chainId, market])
 
     function isLoading() {
-      if (!isMarkets || !currentMarket) return true
+      if (!isMarkets || !market) return true
       console.log(
-        'isLoading', 
         'isConnected', isConnected, 
         'isSupplyPositions', isSupplyPositions,
-        'isBorrowPositions', isBorrowPositions,
-        'isCollateralPositions', isCollateralPositions,
-        'priceService', !!priceService,
         'isBorrowCapacity', isBorrowCapacity,
-        'isAmountUsd', isAmountUsd)
-      if (isConnected &&  
-        (!isSupplyPositions || !isBorrowPositions || !isCollateralPositions 
-        || !priceService || !isBorrowCapacity || !isAmountUsd)) return true
+        'isAmountUsd', isAmountUsd,
+        'priceService', !!priceService,
+      )
+      if (isConnected &&  (!isSupplyPositions || !isBorrowCapacity || !isAmountUsd || !priceService)) return true
       return false
-    }
-
-    function isShowPositions() {
-      if (!isConnected) return false
-      if (!isBorrowPositions) return false
-      const activePositions = Object.values(borrowPositions).filter(p => p.borrowBalance.gt(Zero))
-      return activePositions.length > 0
     }
 
     function isFarmingBaseToken() {
@@ -180,11 +153,11 @@ export default function Borrow() {
       const borrowInfo = { 
         comet, token, amount, 
         priceFeed, borrowApr, 
-        liquidationRisk, 
+        liquidationRisk: liquidationRisk.data, 
         onBorrow: setBorrowResult
       }
       setBorrowInfo(borrowInfo)
-      if (isNativeCurrencyMarket(currentMarket, chainId)) {
+      if (isNativeCurrencyMarket(market, chainId)) {
         openModal(BORROW_NATIVE_MODAL)
       } else {
         openModal(BORROW_ERC20_MODAL)
@@ -361,36 +334,17 @@ function BorrowPanel({ children, mode, borrowApr, css = ''} : { children: ReactN
 }
 
 function TotalCollaterals() {
-  const [ collateral, setCollateral ] = useState<AsyncBigNumber>(IdleData)
-
-  const { currentChainId: chainId } = useCurrentChain()
-
-  const publicClient = usePublicClient({ chainId })
-  const priceService = usePriceService({ chainId, publicClient})
-
-  const { isSuccess: isCollateralPositions, data: collateralPositions } = useCollateralPositions()
-
-  useEffect(() => {
-    if (isCollateralPositions && priceService) {
-        const promise = getTotalCollateralUsdBalance({ collateralPositions, priceService })
-        loadAsyncData(promise, setCollateral)
-    } else {
-        setCollateral(IdleData)
-    }
-  }, [collateralPositions, priceService])
-
-  function isShown() {
-    return collateral.isSuccess && collateral.data.gt(Zero)
-  }
+  const asyncCollateralPositions = useCollateralPositions()
+  const { isPending, isLoading, isSuccess, data: totalCollateral} = useTotalCollateralUsd({ asyncCollateralPositions })
   
-  return isShown() && (
+  return isSuccess && totalCollateral.gt(Zero) && (
     <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">
       <p className="text-body text-center mb-4" style={{ fontSize: '1.1rem', fontWeight: '500' }}>
         <span className="pe-3">Your collaterals :</span>
-        {(collateral.isIdle || collateral.isLoading) ? (
+        {(isPending || isLoading) ? (
             <PlaceHolder size={PlaceHolderSize.NORMAL} col={2} />
-          ) : collateral.isSuccess ? (
-            <span className="text-body-secondary"><Price value={collateral.data} /> <i className="ms-2 bi bi-box-arrow-up-right"></i></span>
+          ) : isSuccess ? (
+            <span className="text-body-secondary"><Price value={totalCollateral} /> <i className="ms-2 bi bi-box-arrow-up-right"></i></span>
           ) : (
             <span className="text-body-secondary"><NoData /></span>
         )}

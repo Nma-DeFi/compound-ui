@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
 import { Hash } from 'viem'
 import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi'
-import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
+import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
 import { useCurrentChain } from '../../../hooks/useCurrentChain'
 import { useErc20Service } from '../../../hooks/useErc20Service'
@@ -109,10 +109,10 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
 
     useEffect(() => {
       switch (modalEvent) {
-        case 'show':
+        case ModalEvent.Show:
           onOpen()
           break
-        case 'hidden':
+        case ModalEvent.Hidden:
           onHide()
           break
       } 
@@ -211,7 +211,7 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
                             </div>
                         </button>
                         <div className="text-center text-body-secondary small">
-                          Wallet : <span className="text-body-tertiary"><AsyncAmount { ...asyncBalance } /></span>
+                          Wallet : <span className="text-body-tertiary"><AsyncAmount { ...{ ...asyncBalance, idleData: '0'} } /></span>
                         </div>
                       </div>
                   </div>

@@ -235,7 +235,7 @@ export default function DepositBaseTokenErc20(market) {
                             </div>
                         </button>
                         <div className="text-center text-body-secondary small">
-                          Wallet : <span className="text-body-tertiary"><AsyncAmount { ...asyncBalance } /></span>
+                          Wallet : <span className="text-body-tertiary"><AsyncAmount { ...{ ...asyncBalance, idleData: '0'} } /></span>
                         </div>
                       </div>
                   </div>

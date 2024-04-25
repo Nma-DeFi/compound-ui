@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
 import { useEffect, useState } from 'react'
-import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
+import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { Zero, bn } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
 import AmountPercent from '../../AmountPercent'
@@ -36,7 +36,8 @@ const enum Mode {
 export const REPAY_ERC20_TOKEN_MODAL = 'repay-erc20-modal'
 
 export default function RepayErc20Token({ comet, token, onRepay }) {
-    
+    const ACCRUED_ESTIMATION = 1.001
+
     const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ approvalHash, setApprovalHash ] = useState<Hash>()
@@ -44,7 +45,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     const [ asyncBalance, setAsyncBalance ] = useState<AsyncBigNumber>(IdleData)
     const [ asyncAllowance, setAsyncAllowance ] = useState<AsyncBigNumber>(IdleData)
     const [ asyncBorrowBalance, setAsyncBorrowBalance ] = useState<AsyncBigNumber>(IdleData)
-    const [ maxed, setMaxed ] = useState<boolean>()
+    const [ action, setAction ] = useState<ActionType>()
 
     const { isSuccess: isBalance, data: balance } = asyncBalance
     const { isSuccess: isAllowance, data: allowance } = asyncAllowance
@@ -94,23 +95,11 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     }, [isSuccessApproval])
 
     useEffect(() => {
-      if (isBalance) {
-        setMaxed(amount.isEqualTo(borrowBalance))
-      } else {
-        setMaxed(false)
-      }
-    }, [amount, borrowBalance])
-
-    useEffect(() => {
-      console.log('maxed !!!', maxed)
-    }, [maxed])
-
-    useEffect(() => {
       switch (modalEvent) {
-        case 'show':
+        case ModalEvent.Show:
           onOpen()
           break
-        case 'hidden':
+        case ModalEvent.Hidden:
           onHide()
           break
       } 
@@ -127,7 +116,6 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     useEffect(() => {
       if (mode === Mode.ConfirmationOfRepayment && repayHash) {
         setMode(Mode.WaitingForRepayment)
-        const action = maxed ? ActionType.RepayMax : ActionType.Repay
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(repayHash)
         onRepay({ comet, action, token, amount: amountCopy, hash: hashCopy })
@@ -143,6 +131,10 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
       if (mode === Mode.WaitingForRepayment) {
         openToast(REPAY_RESULT_TOAST)
       }
+      resetState()
+    }
+
+    function resetState() {
       setMode(null)
       setAmount(Zero)
       setInput(null)
@@ -150,7 +142,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
       setAsyncAllowance(IdleData)
       setApprovalHash(null)
       setRepayHash(null)
-      setMaxed(null)
+      setAction(null)
     }
 
     function loadBorrowBalance() {
@@ -181,14 +173,39 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
       setAmount(amount)
     }
 
-    function handleRepay() {
+    async function handleRepay() {
       setMode(Mode.ConfirmationOfRepayment)
-      supplyService.supplyErc20Token({ token, amount, maxed }).then(setRepayHash)
+      const estimedAccruedBorrowBalance = borrowBalance.times(ACCRUED_ESTIMATION).dp(token.decimals)
+      const isMaxed = amount.isEqualTo(borrowBalance)
+      const isEnoughAllowance = estimedAccruedBorrowBalance.isLessThanOrEqualTo(allowance)
+      const isEnoughBalance = estimedAccruedBorrowBalance.isLessThanOrEqualTo(balance)
+      console.log('isMaxed', isMaxed, amount.toFixed(), borrowBalance.toFixed())
+      console.log('isEnoughAllowance', isEnoughAllowance, estimedAccruedBorrowBalance.toFixed(), allowance.toFixed())
+      console.log('isEnoughBalance', isEnoughBalance, estimedAccruedBorrowBalance.toFixed(), balance.toFixed())
+      let maxRepayRequest = null
+      if (isMaxed && isEnoughAllowance && isEnoughBalance) {
+        const [ isSuccess, data ] = await supplyService.simulateSupplyErc20Token({ token, amount, maxed: true })
+        if (isSuccess) {
+          maxRepayRequest = data
+        } else {
+          console.warn(data)
+        }
+      }   
+      let supplyPromise 
+      if (maxRepayRequest) {
+        setAction(ActionType.RepayMax)
+        supplyPromise = supplyService.writeContract(maxRepayRequest)
+      } else {
+        setAction(ActionType.Repay)
+        supplyPromise = supplyService.supplyErc20Token({ token, amount })
+      }
+      supplyPromise.then(setRepayHash)
     }
 
     function handleApproval() {
       setMode(Mode.ConfirmationOfApproval)
-      erc20service.approve(comet, borrowBalance).then(setApprovalHash)
+      const allowance = amount.isEqualTo(borrowBalance) ? borrowBalance.times(ACCRUED_ESTIMATION) : amount
+      erc20service.approve(comet, allowance).then(setApprovalHash)
     }
 
     function handleWalletBalancePercent(factor: number) {

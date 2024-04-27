@@ -19,7 +19,7 @@ import { useCurrentAccount } from '../../hooks/useCurrentAccount';
 import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
 import PriceAsync from '../../components/PriceAsync';
-import { useTotalMarketCollateralUsd } from '../../hooks/useTotalMarketCollateralUsd';
+import { useTotalCollateralUsdByMarket } from '../../hooks/useTotalCollateralUsdByMarket';
 import { useCurrentMarket } from '../../hooks/useCurrentMarket';
 import { marketChanged } from '../../redux/slices/currentMarket';
 import { useAppDispatch } from '../../redux/hooks';
@@ -27,6 +27,8 @@ import ActionResult from '../../components/action-result/ActionResult';
 import { useLiquidationRisk } from '../../hooks/useLiquidationRisk';
 import { usePublicClient } from 'wagmi';
 import { LiquidationRiskAsync } from '../../components/LiquidationRisk';
+import { isBorrowPosition } from '../../redux/helpers/borrow';
+import { useBorrowPositions } from '../../hooks/useBorrowPositions';
 
 export default function Collateral() {
 
@@ -49,6 +51,7 @@ export default function Collateral() {
     const dispatch = useAppDispatch()
 
     const asyncCollateralPositions = useCollateralPositions()
+    const asyncBorrowPositions = useBorrowPositions()
 
     const asyncRisk = useLiquidationRisk({ chainId, publicClient, market: currentMarket }) 
 
@@ -64,7 +67,7 @@ export default function Collateral() {
         isSuccess: isSuccessUsdCollateral, 
         isError: isErrorUsdCollateral, 
         data: usdCollateral, 
-    } = useTotalMarketCollateralUsd({ asyncCollateralPositions, currentMarket })
+    } = useTotalCollateralUsdByMarket({ asyncCollateralPositions, currentMarket })
 
     function showModal(action: ActionType, market, collateral) {
         const priceFeed : PriceFeed = {
@@ -141,10 +144,12 @@ export default function Collateral() {
                                     data: usdCollateral, 
                                 }} placeHolderCfg={{ col: 2 }} /></span>
                             </div>
+                            { isBorrowPosition(comet, asyncBorrowPositions.data) &&
                             <div>
                                 <span className="text-body-secondary">Liquidation risk :</span>
                                 <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncRisk} /></span>
                             </div>
+                            }
                         </div>
                     }
                 </div>

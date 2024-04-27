@@ -50,6 +50,10 @@ export async function getTotalBorrowingsUsdBalance(
   return totalBorrowingsUsd
 }
 
+export function isBorrowPosition(comet: Address, positions: BorrowPositionsData) {
+  return Boolean(positions && positions[comet].borrowBalance.isGreaterThan(Zero))
+}
+
 export function log(chainId: number, positions: BorrowPositionsData) {
   const formatter = ({ baseToken, borrowBalance }) => `${baseToken.name} : ${bnf(borrowBalance)}`
   console.log(Date.now(), 'borrowPositions', chainId, Object.values(positions).map(formatter))

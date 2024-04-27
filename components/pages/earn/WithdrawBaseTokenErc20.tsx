@@ -11,7 +11,7 @@ import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
 import { usePublicClient, useWalletClient } from 'wagmi'
 import { usePositionsService } from '../../../hooks/usePositionsService'
 import { useWithdrawService } from '../../../hooks/useWithdrawService'
-import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
+import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult'
 import css from '../../../styles/components/farm/WithdrawBaseTokenErc20.module.scss'
 import AmountInput from '../../AmountInput'
@@ -94,10 +94,10 @@ export default function WithdrawBaseTokenErc20(market) {
 
     useEffect(() => {
       switch (modalEvent) {
-        case 'show':
+        case ModalEvent.Show:
           onOpen()
           break
-        case 'hidden':
+        case ModalEvent.Hidden:
           onHide()
           break
       } 

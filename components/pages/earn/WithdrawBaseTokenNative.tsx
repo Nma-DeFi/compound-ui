@@ -10,7 +10,7 @@ import * as ChainUtils from '../../../utils/chains'
 import { Hash } from 'viem'
 import { AsyncBigNumber, AsyncBoolean, IdleData, loadAsyncData } from '../../../utils/async'
 import BigNumber from 'bignumber.js'
-import { useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
+import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { usePositionsService } from '../../../hooks/usePositionsService'
 import { useAllowanceService } from '../../../hooks/useAllowanceService'
 import { useWithdrawService } from '../../../hooks/useWithdrawService'
@@ -133,10 +133,10 @@ export default function WithdrawBaseTokenNative(market) {
 
   useEffect(() => {
     switch (modalEvent) {
-      case 'show':
+      case ModalEvent.Show:
         onOpen()
         break
-      case 'hidden':
+      case ModalEvent.Hidden:
         onHide()
         break
     } 

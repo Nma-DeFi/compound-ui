@@ -21,6 +21,8 @@ import TokenIcon from '../../TokenIcon';
 import { useLiquidationRiskByCollateralWithdrawal } from '../../../hooks/useLiquidationRisk';
 import { useCurrentMarket } from '../../../hooks/useCurrentMarket';
 import { LiquidationRiskAsync } from '../../LiquidationRisk';
+import { useBorrowPositions } from '../../../hooks/useBorrowPositions';
+import { isBorrowPosition } from '../../../redux/helpers/borrow';
 
 const enum Mode {
   NotConnected,
@@ -56,6 +58,8 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
 
     const positionsService = usePositionsService({ comet, publicClient })
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
+
+    const asyncBorrowPositions = useBorrowPositions()
 
     const { hideModal, openToast } = useBootstrap()
     const modalEvent = useModalEvent(WITHDRAW_COLLATERAL_ERC20_MODAL)
@@ -161,7 +165,7 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
               <div id={css['withdraw-body']} className="modal-body">
                 <div className="d-flex align-items-center">
                   <h2 className="me-auto mb-0">Withdraw</h2>
-                  { isConnected && (mode > Mode.ExceedCollateralBalance) &&
+                  { isConnected && (mode > Mode.ExceedCollateralBalance) && isBorrowPosition(comet, asyncBorrowPositions.data) &&
                     <div className="pe-3">
                       <span className="text-body-secondary">Liquidation risk :</span>
                       <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>

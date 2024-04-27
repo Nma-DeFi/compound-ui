@@ -25,6 +25,8 @@ import TokenIcon from '../../TokenIcon';
 import { useCurrentMarket } from '../../../hooks/useCurrentMarket';
 import { useLiquidationRiskByCollateralWithdrawal } from '../../../hooks/useLiquidationRisk';
 import { LiquidationRiskAsync } from '../../LiquidationRisk';
+import { useBorrowPositions } from '../../../hooks/useBorrowPositions';
+import { isBorrowPosition } from '../../../redux/helpers/borrow';
 
 const enum Mode {
   NotConnected, 
@@ -72,6 +74,8 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
     const positionsService = usePositionsService({ comet, publicClient })
     const allowanceService = useAllowanceService({ comet, publicClient, walletClient, account })
     const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
+    
+    const asyncBorrowPositions = useBorrowPositions()
 
     const { 
       isLoading: isWaitingBulkerApproval, 
@@ -210,9 +214,9 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
               <div id={css['withdraw-native-body']} className="modal-body">
                 <div className="d-flex align-items-center">
                   <h2 className="me-auto mb-0">Withdraw</h2>
-                  { isConnected && (mode > Mode.ExceedCollateralBalance) &&
+                  { isConnected && (mode > Mode.ExceedCollateralBalance) && isBorrowPosition(comet, asyncBorrowPositions.data) &&
                     <div className="pe-3">
-                      <span className="text-body-secondary">Liquidation risk :</span>
+                      <span className="text-body-secondary">Liquidation risk :</span>                
                       <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>
                     </div>
                   }

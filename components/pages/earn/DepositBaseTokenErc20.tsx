@@ -11,7 +11,7 @@ import { useCurrentAccount } from "../../../hooks/useCurrentAccount"
 import { usePublicClient, useWaitForTransaction, useWalletClient } from "wagmi"
 import { useErc20Service } from "../../../hooks/useErc20Service"
 import { useSupplyService } from "../../../hooks/useSupplyService"
-import { useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
+import { ModalEvent, useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
 import { ACTION_RESULT_TOAST } from "../../action-result/ActionResult"
 import css from '../../../styles/components/farm/DepositBaseTokenErc20.module.scss'
 import AmountInput from "../../AmountInput"
@@ -22,6 +22,7 @@ import AmountPercent from "../../AmountPercent"
 import { SmallSpinner } from "../../Spinner"
 import Amount from "../../Amount"
 import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
+import { isBorrowPosition } from "../../../redux/helpers/borrow"
 
 const enum Mode {
     NotConnected,
@@ -129,10 +130,10 @@ export default function DepositBaseTokenErc20(market) {
 
     useEffect(() => {
       switch (modalEvent) {
-        case 'show':
+        case ModalEvent.Show:
           onOpen()
           break
-        case 'hidden':
+        case ModalEvent.Hidden:
           onHide()
           break
       } 
@@ -164,7 +165,7 @@ export default function DepositBaseTokenErc20(market) {
     }
 
     function isBorrowingBaseToken() {
-        return borrowPositions[comet].borrowBalance.isGreaterThan(Zero)
+      return isBorrowPosition(comet, borrowPositions)
     }
 
     function setInput(amount: BigNumber) {

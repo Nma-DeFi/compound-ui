@@ -10,7 +10,7 @@ import { Hash } from "viem"
 import { Zero, bn, fromBigInt } from "../../../utils/bn"
 import BigNumber from "bignumber.js"
 import { useCurrentAccount } from "../../../hooks/useCurrentAccount"
-import { useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
+import { ModalEvent, useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
 import { useSupplyService } from "../../../hooks/useSupplyService"
 import { ACTION_RESULT_TOAST } from "../../action-result/ActionResult"
 import css from '../../../styles/components/farm/DepositBaseTokenNative.module.scss'
@@ -21,6 +21,7 @@ import AsyncAmount from "../../AmountAsync"
 import AmountPercent from "../../AmountPercent"
 import { SmallSpinner } from "../../Spinner"
 import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
+import { isBorrowPosition } from "../../../redux/helpers/borrow"
 
 const enum Mode {
     NotConnected,
@@ -102,10 +103,10 @@ export default function DepositBaseTokenNative(market) {
 
     useEffect(() => {
       switch (modalEvent) {
-        case 'show':
+        case ModalEvent.Show:
           onOpen()
           break
-        case 'hidden':
+        case ModalEvent.Hidden:
           onHide()
           break
       } 
@@ -135,7 +136,7 @@ export default function DepositBaseTokenNative(market) {
     }
 
     function isBorrowingBaseToken() {
-        return borrowPositions[comet].borrowBalance.isGreaterThan(Zero)
+      return isBorrowPosition(comet, borrowPositions)
     }
     
     function loadBalance() {

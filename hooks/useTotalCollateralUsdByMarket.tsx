@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getCollateralUsdBalanceByMarket } from "../redux/helpers/collateral"
 import { PRICE_STALE_TIME } from "../services/price-service"
 
-export function useTotalMarketCollateralUsd({ asyncCollateralPositions, currentMarket }) {
+export function useTotalCollateralUsdByMarket({ asyncCollateralPositions, currentMarket }) {
 
     const { isSuccess: isCollateralPositions, data: collateralPositions } = asyncCollateralPositions
     

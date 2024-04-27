@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getTotalCollateralUsdBalance } from "../redux/helpers/collateral"
 import { PRICE_STALE_TIME } from "../services/price-service"
 
-export function useTotalCollateralUsd({ asyncCollateralPositions }) {
+export function useTotalCollateralUsdByChain({ asyncCollateralPositions }) {
 
     const { isSuccess: isCollateralPositions, data: collateralPositions } = asyncCollateralPositions
     
@@ -18,7 +18,7 @@ export function useTotalCollateralUsd({ asyncCollateralPositions }) {
     const priceService = usePriceService({ chainId, publicClient})
 
     return useQuery({
-        queryKey: ['TotalCollateralForMarket', chainId, collateralPositions],
+        queryKey: ['TotalCollateralUsd', chainId, collateralPositions],
         queryFn: () => getTotalCollateralUsdBalance({ collateralPositions, priceService }),
         enabled: !!(isConnected && isCollateralPositions && priceService),
         staleTime: PRICE_STALE_TIME,

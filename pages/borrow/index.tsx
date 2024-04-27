@@ -38,7 +38,7 @@ import { useWeb3Modal } from "@web3modal/wagmi/react"
 import Price from "../../components/Price"
 import NoData from "../../components/NoData"
 import { useLiquidationRiskByBorrowAmount } from "../../hooks/useLiquidationRisk"
-import { useTotalCollateralUsd } from "../../hooks/useTotalCollateralUsd"
+import { useTotalCollateralUsdByChain } from "../../hooks/useTotalCollateralUsdByChain"
 
 const enum Mode {
   Loading,
@@ -335,7 +335,7 @@ function BorrowPanel({ children, mode, borrowApr, css = ''} : { children: ReactN
 
 function TotalCollaterals() {
   const asyncCollateralPositions = useCollateralPositions()
-  const { isPending, isLoading, isSuccess, data: totalCollateral} = useTotalCollateralUsd({ asyncCollateralPositions })
+  const { isPending, isLoading, isSuccess, data: totalCollateral} = useTotalCollateralUsdByChain({ asyncCollateralPositions })
   
   return isSuccess && totalCollateral.gt(Zero) && (
     <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">

@@ -17,7 +17,7 @@ import { useSupplyPositions } from '../hooks/useSupplyPositions';
 import { getTotalBorrowingsUsdBalance } from '../redux/helpers/borrow';
 import { getTotalEarningsUsdBalance } from '../redux/helpers/supply';
 import NoData from './NoData';
-import { useTotalCollateralUsd } from '../hooks/useTotalCollateralUsd';
+import { useTotalCollateralUsdByChain } from '../hooks/useTotalCollateralUsdByChain';
 
 type PositionsState = { 
     supplyPositions: SupplyPositionsState, 
@@ -34,7 +34,7 @@ export function UserAccount(positionsState : PositionsState) {
     const { isSuccess: isSupplyPositions, data: supplyPositions } = positionsState.supplyPositions
     const { isSuccess: isBorrowPositions, data: borrowPositions } = positionsState.borrowPositions
 
-    const totalCollateral = useTotalCollateralUsd({ asyncCollateralPositions: positionsState.collateralPositions })
+    const totalCollateral = useTotalCollateralUsdByChain({ asyncCollateralPositions: positionsState.collateralPositions })
     
     const [ earning, setEarning ] = useState<AsyncBigNumber>(IdleData)
     const [ borrowing, setBorrowing ] = useState<AsyncBigNumber>(IdleData)

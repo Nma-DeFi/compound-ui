@@ -9,7 +9,7 @@ import { useWithdrawService } from '../../../hooks/useWithdrawService';
 import css from '../../../styles/components/collaterals/WithdrawCollateralErc20.module.scss';
 import { Zero, bn } from '../../../utils/bn';
 import AmountInput from '../../AmountInput';
-import AmountPercent from '../../AmountPercent';
+import AmountPercent, { fillInput } from '../../AmountPercent';
 import { SmallSpinner } from '../../Spinner';
 import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult';
 import { WithdrawParam, ActionType } from '../../../types';
@@ -132,11 +132,7 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
     }
     
     function setInput(amount: BigNumber) {
-      const newInput = amount ? amount.toFixed() : ''
-      const id = css['withdraw-input']
-      const elem = document.getElementById(id) 
-      const input = elem as HTMLInputElement
-      input.value = newInput
+      fillInput({ amount, token, id: css['withdraw-input'] })
     }
 
     function handleAmountChange(event) {
@@ -153,7 +149,7 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
 
     function handleBalancePercent(factor: number) {
       if (!isConnected) return
-      const newAmount = balance.times(factor)
+      const newAmount = balance.times(factor).dp(token.decimals)
       setAmount(newAmount)
       setInput(newAmount)
     }

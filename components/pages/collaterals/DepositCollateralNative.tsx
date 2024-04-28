@@ -10,7 +10,7 @@ import css from '../../../styles/components/collaterals/DepositCollateralNative.
 import { Zero, bn, fromBigInt } from '../../../utils/bn'
 import * as ChainUtils from '../../../utils/chains'
 import AmountInput from '../../AmountInput'
-import AmountPercent from '../../AmountPercent'
+import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
 import TokenIcon from '../../TokenIcon'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
@@ -120,11 +120,7 @@ export default function DepositCollateralNative({ comet, token, onDeposit }  : D
     }
 
     function setInput(amount: BigNumber) {
-      const newInput = amount ? amount.toFixed() : ''
-      const id = css['deposit-native-input']
-      const elem = document.getElementById(id) 
-      const input = elem as HTMLInputElement
-      input.value = newInput
+      fillInput({ amount, token, id: css['deposit-native-input'] })
     }
 
     function handleAmountChange(event) {
@@ -141,7 +137,7 @@ export default function DepositCollateralNative({ comet, token, onDeposit }  : D
 
     function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
-      const newAmount = balance.times(factor)
+      const newAmount = balance.times(factor).dp(token.decimals)
       setAmount(newAmount)
       setInput(newAmount)
     }

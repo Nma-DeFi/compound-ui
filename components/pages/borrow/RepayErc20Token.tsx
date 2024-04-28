@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { Zero, bn } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
-import AmountPercent from '../../AmountPercent'
+import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
 import TokenIcon from '../../TokenIcon'
 import css from '../../../styles/components/borrow/RepayErc20.module.scss'
@@ -161,11 +161,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     }
     
     function setInput(amount: BigNumber) {
-      const newInput = amount ? amount.toFixed() : ''
-      const id = css['repay-input']
-      const elem = document.getElementById(id) 
-      const input = elem as HTMLInputElement
-      input.value = newInput
+      fillInput({ amount, token, id: css['repay-input'] })
     }
 
     function handleAmountChange(event) {
@@ -209,7 +205,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     }
 
     function handleWalletBalancePercent(factor: number) {
-      const newAmount = borrowBalance.times(factor)
+      const newAmount = borrowBalance.times(factor).dp(token.decimals)
       setAmount(newAmount)
       setInput(newAmount)
     }

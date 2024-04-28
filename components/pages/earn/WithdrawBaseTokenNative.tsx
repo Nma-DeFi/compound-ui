@@ -20,7 +20,7 @@ import AmountInput from '../../AmountInput'
 import PriceFromFeed from '../../PriceFromFeed'
 import TokenIcon from '../../TokenIcon'
 import AsyncAmount from '../../AmountAsync'
-import AmountPercent from '../../AmountPercent'
+import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
 import Amount from '../../Amount'
 import css from '../../../styles/components/farm/WithdrawBaseTokenNative.module.scss'
@@ -178,11 +178,7 @@ export default function WithdrawBaseTokenNative(market) {
   }
   
   function setInput(amount: BigNumber) {
-    const newInput = amount ? amount.toFixed() : ''
-    const id = css['withdraw-native-input']
-    const elem = document.getElementById(id) 
-    const input = elem as HTMLInputElement
-    input.value = newInput
+    fillInput({ amount, token, id: css['withdraw-native-input'] })
   }
 
   function handleAmountChange(event) {
@@ -192,7 +188,7 @@ export default function WithdrawBaseTokenNative(market) {
 
   function handleBalancePercent(factor: number) {
     if (!isConnected) return
-    const newAmount = balance.times(factor)
+    const newAmount = balance.times(factor).dp(token.decimals)
     setAmount(newAmount)
     setInput(newAmount)
   }

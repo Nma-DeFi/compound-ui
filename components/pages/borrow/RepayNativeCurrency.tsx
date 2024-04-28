@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { Zero, bn, fromBigInt } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
-import AmountPercent from '../../AmountPercent'
+import AmountPercent, { fillInput } from '../../AmountPercent'
 import TokenIcon from '../../TokenIcon'
 import PriceFromFeed from '../../PriceFromFeed'
 import css from '../../../styles/components/borrow/RepayNativeCurrency.module.scss'
@@ -119,11 +119,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     }
 
     function setInput(amount: BigNumber) {
-      const newInput = amount ? amount.toFixed() : ''
-      const id = css['repay-input']
-      const elem = document.getElementById(id) 
-      const input = elem as HTMLInputElement
-      input.value = newInput
+      fillInput({ amount, token, id: css['repay-input'] })
     }
         
     function loadTokenBalance() {
@@ -169,7 +165,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     }
 
     function handleWalletBalancePercent(factor: number) {
-      const newAmount = borrowBalance.times(factor)
+      const newAmount = borrowBalance.times(factor).dp(token.decimals)
       setAmount(newAmount)
       setInput(newAmount)
     }

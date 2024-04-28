@@ -10,7 +10,7 @@ import { useSupplyService } from '../../../hooks/useSupplyService'
 import { Zero, bn } from '../../../utils/bn'
 import Amount from '../../Amount'
 import AmountInput from '../../AmountInput'
-import AmountPercent from '../../AmountPercent'
+import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
 import TokenIcon from '../../TokenIcon'
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
@@ -144,11 +144,7 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
     }
 
     function setInput(amount: BigNumber) {
-      const newInput = amount ? amount.toFixed() : ''
-      const id = css['deposit-input']
-      const elem = document.getElementById(id) 
-      const input = elem as HTMLInputElement
-      input.value = newInput
+      fillInput({ amount, token, id: css['deposit-input'] })
     }
 
     function loadBalance() {
@@ -178,7 +174,7 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
 
     function handleWalletBalancePercent(factor: number) {
       if (!isConnected) return
-      const newAmount = balance.times(factor)
+      const newAmount = balance.times(factor).dp(token.decimals)
       setAmount(newAmount)
       setInput(newAmount)
     }

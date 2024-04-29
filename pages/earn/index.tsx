@@ -10,7 +10,7 @@ import { useBootstrap } from "../../hooks/useBootstrap"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
 import { useMarkets } from "../../hooks/useMarkets"
 import { baseTokenAddress, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../../selectors/market-selector"
-import { bnf } from "../../utils/bn"
+import { bn, bnf } from "../../utils/bn"
 import { isNativeCurrencyMarket, getBaseTokenOrNativeCurrency } from "../../utils/markets"
 import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
@@ -20,6 +20,8 @@ import DepositBaseTokenErc20, { DEPOSIT_BASE_TOKEN_ERC20_MODAL } from "../../com
 import DepositBaseTokenNative, { DEPOSIT_BASE_TOKEN_NATIVE_MODAL } from "../../components/pages/earn/DepositBaseTokenNative"
 import { ActionInfo, ActionType } from "../../types"
 import ActionResult from "../../components/action-result/ActionResult"
+import Amount from "../../components/Amount"
+import Price from "../../components/Price"
 
 export default function Earn() {
 
@@ -121,8 +123,8 @@ export default function Earn() {
                       </div>
                   </div>
                   <div className="col text-center d-none d-md-block">
-                      <div className="mb-1">{bnf(totalBaseSupplyScaled(market))}</div>
-                      <small className="text-body-secondary">${bnf(totalBaseSupplyUsd(market))}</small>
+                      <div className="mb-1"><Amount value={bn(totalBaseSupplyScaled(market))} /></div>
+                      <small className="text-body-secondary"><Price value={bn(totalBaseSupplyUsd(market))} /></small>
                   </div>
                   { isConnected &&
                     <div className="col text-center">

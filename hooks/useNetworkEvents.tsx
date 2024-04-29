@@ -4,14 +4,12 @@ import { Address, useAccount, useNetwork } from "wagmi"
 import { useAppDispatch } from "../redux/hooks"
 import { accountConnected, accountDisconnected } from "../redux/slices/currentAccount"
 import { chainSwitched } from "../redux/slices/currentChain"
-import { supplyPositionsReset } from "../redux/slices/positions/supplyPositions"
+import { accruedPositionsReset } from "../redux/slices/positions/supplyPositions"
 import { collateralPositionsReset } from "../redux/slices/positions/collateralPositions"
-import { borrowPositionsReset } from "../redux/slices/positions/borrowPositions"
 
 
 export const resetPositions = (dispatch) => {
-    dispatch(supplyPositionsReset())
-    dispatch(borrowPositionsReset())
+    dispatch(accruedPositionsReset())
     dispatch(collateralPositionsReset())
 }
 

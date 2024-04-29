@@ -6,7 +6,7 @@ import PriceAsync from "../../PriceAsync"
 import { nf } from "../../../utils/number"
 import * as ChainUtils from '../../../utils/chains'
 import { useEffect, useState } from "react"
-import { useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
+import { ModalEvent, useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
 import { SmallSpinner } from "../../Spinner"
 import { Hash } from "viem"
 import { useWithdrawService } from "../../../hooks/useWithdrawService"
@@ -118,10 +118,10 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
   
   useEffect(() => {
     switch (modalEvent) {
-      case 'show':
+      case ModalEvent.Show:
         onOpen()
         break
-      case 'hidden':
+      case ModalEvent.Hidden:
         onHide()
         break
     } 
@@ -209,7 +209,7 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
               }
               { mode === Mode.BorrowReady &&
-                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {nativeCurrency.symbol}</button>
+                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow <Amount value={amount} /> {nativeCurrency.symbol}</button>
               }
             </div>
           </div>        

@@ -22,6 +22,9 @@ import AmountPercent, { fillInput } from "../../AmountPercent"
 import { SmallSpinner } from "../../Spinner"
 import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
 import { isBorrowPosition } from "../../../redux/helpers/borrow"
+import Amount from "../../Amount"
+import WarningAlert from "../../WarningAlert"
+import Spacer from "../../Spacer"
 
 const enum Mode {
     NotConnected,
@@ -154,10 +157,8 @@ export default function DepositBaseTokenNative(market) {
     }
 
     function handleDeposit() {
-      if (amount.isGreaterThan(Zero)) {
-        setMode(Mode.ConfirmationOfDeposit)
-        supplyService.supplyNativeCurrency({ amount }).then(setSupplyHash)
-      }
+      setMode(Mode.ConfirmationOfDeposit)
+      supplyService.supplyNativeCurrency({ amount }).then(setSupplyHash)
     }
 
     function handleWalletBalancePercent(factor: number) {
@@ -203,12 +204,19 @@ export default function DepositBaseTokenNative(market) {
                       <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
-                { mode === Mode.BorrowingBaseToken &&
-                    <div className="alert alert-warning" role="alert" style={{ marginTop: '2rem' }}>
-                        Cannot supply and borrow {nativeCurrency.symbol} at the same time
-                    </div>
+                { mode === Mode.BorrowingBaseToken ? (
+                    <WarningAlert>
+                      Cannot supply and borrow {nativeCurrency.symbol} at the same time
+                    </WarningAlert>
+                  ) : mode === Mode.InsufficientBalance ? (
+                    <WarningAlert>
+                      Insufficient {nativeCurrency.symbol} Balance
+                    </WarningAlert>
+                  ) : (
+                    <Spacer />
+                  )
                 }
-                <div className="d-grid" style={{ marginTop: '2rem' }}>
+                <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
                   }
@@ -221,11 +229,18 @@ export default function DepositBaseTokenNative(market) {
                   { mode === Mode.InsufficientBalance &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>
                   }
-                  { mode === Mode.DepositReady &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit {nativeCurrency.symbol}</button>
-                  }
                   { mode === Mode.ConfirmationOfDeposit &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
+                  }
+                  { mode === Mode.DepositReady &&
+                    <>
+                    { amount.isGreaterThan(Zero) ? (
+                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit <Amount value={amount} /> {nativeCurrency.symbol}</button>
+                      ) : (
+                        <button className="btn btn-lg btn-primary text-white" type="button">Deposit {token?.symbol}</button>
+                      )
+                    }
+                    </>
                   }
                 </div>
               </div>

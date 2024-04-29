@@ -243,9 +243,7 @@ export default function Borrow() {
             }
             { mode === Mode.FarmingBaseToken &&
               <BorrowPanel {...{ mode, borrowApr }}>
-                <span className="small bg-warning-subtle text-warning-emphasis py-2 px-3 rounded-3">
-                  Cannot supply and borrow {token?.symbol} at the same time
-                </span>
+                <WarningLabel>Cannot supply and borrow {token?.symbol} at the same time</WarningLabel>
               </BorrowPanel>
             }
             { mode === Mode.InsufficientBorrowCapacity &&
@@ -264,7 +262,7 @@ export default function Borrow() {
             }
             { mode === Mode.InsufficientBorrowAmount &&
               <BorrowPanel {...{ mode, borrowApr }}>
-                <div className="text-warning">Minimum borrow amount : <Amount value={minBorrowAmount} /> { token?.symbol }</div>
+                <WarningLabel>Minimum borrow amount : <Amount value={minBorrowAmount} /> { token?.symbol }</WarningLabel>
               </BorrowPanel>
             }
             { mode === Mode.ReadyToBorrow &&
@@ -350,6 +348,14 @@ function TotalCollaterals() {
         )}
       </p>
     </Link>
+  )
+}
+
+function WarningLabel({ children }) {
+  return (
+    <div className="bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-3" style={{ fontSize: '95%' }}>
+    { children }
+    </div>
   )
 }
   

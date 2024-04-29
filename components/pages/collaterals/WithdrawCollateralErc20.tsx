@@ -23,6 +23,9 @@ import { useCurrentMarket } from '../../../hooks/useCurrentMarket';
 import { LiquidationRiskAsync } from '../../LiquidationRisk';
 import { useBorrowPositions } from '../../../hooks/useBorrowPositions';
 import { isBorrowPosition } from '../../../redux/helpers/borrow';
+import Amount from '../../Amount';
+import WarningAlert from '../../WarningAlert';
+import Spacer from '../../Spacer';
 
 const enum Mode {
   NotConnected,
@@ -141,10 +144,8 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
     }
 
     function handleWithdraw() {
-      if (amount.isGreaterThan(Zero)) {
-        setMode(Mode.ConfirmationOfWithdrawal)
-        withdrawService.withdrawErc20Token({ token, amount }).then(setWithdrawHash)
-      }
+      setMode(Mode.ConfirmationOfWithdrawal)
+      withdrawService.withdrawErc20Token({ token, amount }).then(setWithdrawHash)
     }
 
     function handleBalancePercent(factor: number) {
@@ -162,9 +163,9 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                 <div className="d-flex align-items-center">
                   <h2 className="me-auto mb-0">Withdraw</h2>
                   { isConnected && (mode > Mode.ExceedCollateralBalance) && isBorrowPosition(comet, asyncBorrowPositions.data) &&
-                    <div className="pe-3">
-                      <span className="text-body-secondary">Liquidation risk :</span>
-                      <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>
+                    <div className="d-flex pe-3">
+                      <span className="text-body-secondary pe-2">Liquidation risk :</span>
+                      <span className="text-body-tertiary"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>
                     </div>
                   }
                   <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -196,6 +197,18 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                     <AmountPercent handler={handleBalancePercent} />
                   </div>
                 </div>
+                { mode === Mode.ExceedCollateralBalance ? (
+                    <WarningAlert>
+                      Exceed {token?.symbol} Balance
+                    </WarningAlert>
+                  ) : mode === Mode.LiquidationRiskTooHigh ? (
+                    <WarningAlert>
+                      Liquidation risk too high
+                    </WarningAlert>
+                  ) :  (
+                    <Spacer />
+                  )
+                }
                 <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button">Initialisation <SmallSpinner /></button>
@@ -209,11 +222,18 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                   { mode === Mode.LiquidationRiskTooHigh &&
                     <button className="btn btn-lg btn-primary text-white" type="button">Liquidation risk too high</button>
                   }
-                  { mode === Mode.WithdrawReady &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw {token?.symbol}</button>
-                  }
                   { mode === Mode.ConfirmationOfWithdrawal &&
                     <button className="btn btn-lg btn-primary text-white" type="button">Confirmation <SmallSpinner /></button>
+                  }
+                  { mode === Mode.WithdrawReady &&
+                    <>
+                      { amount.isGreaterThan(Zero) ? (
+                          <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {token?.symbol}</button>
+                        ) : (
+                          <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {token?.symbol}</button>
+                        )
+                      }
+                    </>
                   }
                 </div>
               </div>

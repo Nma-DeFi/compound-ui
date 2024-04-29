@@ -1,7 +1,8 @@
 import { SupplyPositionsData } from '../slices/positions/supplyPositions';
-import { Zero, bnf } from '../../utils/bn';
+import { Zero } from '../../utils/bn';
 import { PriceService } from '../../services/price-service';
 import BigNumber from 'bignumber.js';
+import { bna } from '../../components/Amount';
 
 export async function getTotalEarningsUsdBalance(
   { supplyPositions, priceService } : {
@@ -24,6 +25,6 @@ export async function getTotalEarningsUsdBalance(
 }
 
 export function log(chainId: number, positions: SupplyPositionsData) {
-  const formatter = ({ baseToken, supplyBalance }) => `${baseToken.name} : ${bnf(supplyBalance)}`;
+  const formatter = ({ baseToken, supplyBalance }) => `${baseToken.name} : ${bna(supplyBalance)}`;
   console.log(Date.now(), 'supplyPositions', chainId, Object.values(positions).map(formatter));
 }

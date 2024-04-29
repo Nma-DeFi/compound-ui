@@ -24,6 +24,8 @@ import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
 import Amount from '../../Amount'
 import css from '../../../styles/components/farm/WithdrawBaseTokenNative.module.scss'
+import WarningAlert from '../../WarningAlert'
+import Spacer from '../../Spacer'
 
 const enum Mode {
   NotConnected, 
@@ -240,6 +242,14 @@ export default function WithdrawBaseTokenNative(market) {
                   <AmountPercent handler={handleBalancePercent} />
                 </div>
               </div>
+              { mode === Mode.ExceedBalance ? (
+                    <WarningAlert>
+                      Exceed {nativeCurrency.symbol} Balance
+                    </WarningAlert>
+                  ) : (
+                    <Spacer />
+                  )
+                }
               <div className="d-grid">
                 { mode === Mode.Init &&
                   <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>

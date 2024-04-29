@@ -5,7 +5,7 @@ import { useCurrentChain } from "../../../hooks/useCurrentChain"
 import PriceAsync from "../../PriceAsync"
 import { nf } from "../../../utils/number"
 import { useEffect, useState } from "react"
-import { useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
+import { ModalEvent, useBootstrap, useModalEvent } from "../../../hooks/useBootstrap"
 import { SmallSpinner } from "../../Spinner"
 import { Hash } from "viem"
 import { useWithdrawService } from "../../../hooks/useWithdrawService"
@@ -66,10 +66,10 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
   
   useEffect(() => {
     switch (modalEvent) {
-      case 'show':
+      case ModalEvent.Show:
         onOpen()
         break
-      case 'hidden':
+      case ModalEvent.Hidden:
         onHide()
         break
     } 
@@ -131,7 +131,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
               }
               { mode === Mode.BorrowReady &&
-                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow {token?.symbol}</button>
+                <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBorrow}>Borrow <Amount value={amount} /> {token?.symbol}</button>
               }
               { mode === Mode.ConfirmTransaction &&
                 <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>

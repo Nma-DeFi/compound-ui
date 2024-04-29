@@ -20,6 +20,8 @@ import { Hash } from 'viem'
 import { ActionType } from '../../../types'
 import { REPAY_RESULT_TOAST } from './BorrowPositions'
 import { usePositionsService } from '../../../hooks/usePositionsService'
+import WarningAlert from '../../WarningAlert'
+import Spacer from '../../Spacer'
 
 const enum Mode {
   Init,
@@ -207,6 +209,18 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
                     <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
+                { mode === Mode.ExceedMaximumRepayment ? (
+                    <WarningAlert>
+                      Maximum repayment : <AsyncAmount {...asyncBorrowBalance} />
+                    </WarningAlert>
+                  ) : mode === Mode.InsufficientBalance ? (
+                    <WarningAlert>
+                      Insufficient {nativeCurrency.symbol} Balance
+                    </WarningAlert>
+                  ) : (
+                    <Spacer />
+                  )
+                }
                 <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>

@@ -19,6 +19,8 @@ import AsyncAmount from '../../AmountAsync'
 import { ActionType, DepositParam } from '../../../types'
 import PriceFromFeed from '../../PriceFromFeed'
 import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult'
+import Spacer from '../../Spacer'
+import WarningAlert from '../../WarningAlert'
 
 const enum Mode {
   NotConnected,
@@ -159,7 +161,7 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
     
     function handleApproval() {
       setMode(Mode.ConfirmationOfApproval)
-      erc20service.approve(comet, balance).then(setApprovalHash)
+      erc20service.approve(comet, amount).then(setApprovalHash)
     }
 
     function handleDeposit() {
@@ -215,6 +217,14 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
                     <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
+                { mode === Mode.InsufficientBalance ? (
+                    <WarningAlert>
+                      Insufficient {token?.symbol} Balance
+                    </WarningAlert>
+                  ) : (
+                    <Spacer />
+                  )
+                }
                 <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>

@@ -20,6 +20,8 @@ import { useSupplyService } from '../../../hooks/useSupplyService'
 import { ActionType } from '../../../types'
 import { usePositionsService } from '../../../hooks/usePositionsService'
 import { REPAY_RESULT_TOAST } from './BorrowPositions'
+import Spacer from '../../Spacer'
+import WarningAlert from '../../WarningAlert'
 
 const enum Mode {
   Init,
@@ -247,6 +249,18 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
                     <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
+                { mode === Mode.ExceedMaximumRepayment ? (
+                    <WarningAlert>
+                      Maximum repayment : <AsyncAmount {...asyncBorrowBalance} />
+                    </WarningAlert>
+                  ) : mode === Mode.InsufficientBalance ? (
+                    <WarningAlert>
+                      Insufficient {token?.symbol} Balance
+                    </WarningAlert>
+                  ) : (
+                    <Spacer />
+                  )
+                }
                 <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>

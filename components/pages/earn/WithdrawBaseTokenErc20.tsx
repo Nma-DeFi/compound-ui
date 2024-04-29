@@ -20,6 +20,9 @@ import TokenIcon from '../../TokenIcon'
 import AsyncAmount from '../../AmountAsync'
 import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
+import Amount from '../../Amount'
+import WarningAlert from '../../WarningAlert'
+import Spacer from '../../Spacer'
 
 
 const enum Mode {
@@ -141,11 +144,9 @@ export default function WithdrawBaseTokenErc20(market) {
     }
 
     function handleWithdraw() {
-      if (amount.isGreaterThan(Zero)) {
-        setMode(Mode.ConfirmationOfWithdrawal)
-        const maxed = amount.isEqualTo(balance)
-        withdrawService.withdrawErc20Token({ token, amount, maxed }).then(setWithdrawHash)
-      }
+      setMode(Mode.ConfirmationOfWithdrawal)
+      const maxed = amount.isEqualTo(balance)
+      withdrawService.withdrawErc20Token({ token, amount, maxed }).then(setWithdrawHash)
     }
 
     function handleBalancePercent(factor: number) {
@@ -191,6 +192,14 @@ export default function WithdrawBaseTokenErc20(market) {
                     <AmountPercent handler={handleBalancePercent} />
                   </div>
                 </div>
+                { mode === Mode.ExceedBalance ? (
+                    <WarningAlert>
+                      Exceed {token?.symbol} Balance
+                    </WarningAlert>
+                  ) : (
+                    <Spacer />
+                  )
+                }
                 <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
@@ -201,11 +210,18 @@ export default function WithdrawBaseTokenErc20(market) {
                   { mode === Mode.ExceedBalance &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Exceed {token?.symbol} Balance</button>
                   }
-                  { mode === Mode.WithdrawReady &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw {token?.symbol}</button>
-                  }
                   { mode === Mode.ConfirmationOfWithdrawal &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
+                  }
+                  { mode === Mode.WithdrawReady &&
+                    <>
+                    { amount.isGreaterThan(Zero) ? (
+                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {token?.symbol}</button>
+                      ) : (
+                        <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {token?.symbol}</button>
+                      )
+                    }
+                    </>
                   }
                 </div>
               </div>

@@ -1,29 +1,30 @@
 import { usePublicClient } from "wagmi"
 import { useCurrentChain } from "../hooks/useCurrentChain"
 import { useLiquidationRisk } from "../hooks/useLiquidationRisk"
-import { NoData } from "../utils/page"
+import NoData from "./NoData"
+import PlaceHolder, { PlaceHolderSize } from "./PlaceHolder"
 
 const DEFAULT_MIN_RISK_LABEL = 25
 
 export function LiquidationRiskAsync({ asyncRisk }) {
 
-    const { isSuccess, data } = asyncRisk
+    const { isLoading, isSuccess, data } = asyncRisk
 
     function formattedRisk() {
         const value = Number(data)
-        if (isNaN(value)) {
-            return <>{NoData}</>
-        }
+        if (isNaN(value)) return <NoData />
         const risk = Math.min(100, value)
         return <>{ risk.toFixed() }<small>%</small></>
     }
     
     return (
         <>
-            { isSuccess ? (
-              <>{ formattedRisk() }</>
+            { /*isLoading ? (
+                <PlaceHolder size={PlaceHolderSize.NORMAL} col={2} />
+            ) :*/ isSuccess ? (
+                <>{ formattedRisk() }</>
             ) : (
-              <>{NoData}</>
+                <NoData />
             )}
         </>    
     )

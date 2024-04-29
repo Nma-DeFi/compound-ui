@@ -23,6 +23,9 @@ import { SmallSpinner } from "../../Spinner"
 import Amount from "../../Amount"
 import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
 import { isBorrowPosition } from "../../../redux/helpers/borrow"
+import WarningAlert from "../../WarningAlert"
+import WarningMessage from "../../WarningMessage"
+import Spacer from "../../Spacer"
 
 const enum Mode {
     NotConnected,
@@ -184,7 +187,7 @@ export default function DepositBaseTokenErc20(market) {
     
     function handleApproval() {
       setMode(Mode.ConfirmationOfApproval)
-      erc20service.approve(comet, balance).then(setApprovalHash)
+      erc20service.approve(comet, amount).then(setApprovalHash)
     }
 
     function handleDeposit() {
@@ -240,12 +243,19 @@ export default function DepositBaseTokenErc20(market) {
                     <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
-                { mode === Mode.BorrowingBaseToken &&
-                    <div className="alert alert-warning" role="alert" style={{ marginTop: '2rem' }}>
-                        Cannot supply and borrow {token?.symbol} at the same time
-                    </div>
+                { mode === Mode.BorrowingBaseToken ? (
+                    <WarningAlert>
+                      Cannot supply and borrow {token?.symbol} at the same time
+                    </WarningAlert>
+                  ) : mode === Mode.InsufficientBalance ? (
+                    <WarningMessage>
+                      Insufficient {token?.symbol} Balance
+                    </WarningMessage>
+                  ) : (
+                    <Spacer />
+                  )
                 }
-                <div className="d-grid" style={{ marginTop: '2rem' }}>
+                <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
                   }

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react"
 import { useCurrentChain } from "../hooks/useCurrentChain"
 import { useProtocolStats } from "../hooks/useProtocolStats"
 import { collateralBalanceUsd, totalBorrowUsd, totalSupplyUsd } from "../selectors/protocol-selector"
-import { bnf } from "../utils/bn"
 import { NoData } from "../utils/page"
+import { bnp } from "./Price"
 
 export default function ProtocolStats() {
 
@@ -19,9 +19,9 @@ export default function ProtocolStats() {
             const totalEarning = totalSupplyUsd(data)
             const totalBorrowing = totalBorrowUsd(data)
             const totalCollateral = collateralBalanceUsd(data)
-            setTotalEarning(bnf(totalEarning))
-            setTotalBorrowing(bnf(totalBorrowing))
-            setTotalCollateral(bnf(totalCollateral))
+            setTotalEarning(bnp(totalEarning))
+            setTotalBorrowing(bnp(totalBorrowing))
+            setTotalCollateral(bnp(totalCollateral))
         }
     }, [chainId, isSuccess])
 

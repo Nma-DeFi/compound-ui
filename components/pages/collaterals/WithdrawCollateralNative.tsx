@@ -27,6 +27,8 @@ import { useLiquidationRiskByCollateralWithdrawal } from '../../../hooks/useLiqu
 import { LiquidationRiskAsync } from '../../LiquidationRisk';
 import { useBorrowPositions } from '../../../hooks/useBorrowPositions';
 import { isBorrowPosition } from '../../../redux/helpers/borrow';
+import WarningAlert from '../../WarningAlert';
+import Spacer from '../../Spacer';
 
 const enum Mode {
   NotConnected, 
@@ -211,7 +213,7 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                 <div className="d-flex align-items-center">
                   <h2 className="me-auto mb-0">Withdraw</h2>
                   { isConnected && (mode > Mode.ExceedCollateralBalance) && isBorrowPosition(comet, asyncBorrowPositions.data) &&
-                    <div className="pe-3">
+                    <div className="d-flex pe-3">
                       <span className="text-body-secondary">Liquidation risk :</span>                
                       <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>
                     </div>
@@ -246,6 +248,18 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                     <AmountPercent handler={handleBalancePercent} />
                   </div>
                 </div>
+                { mode === Mode.ExceedCollateralBalance ? (
+                    <WarningAlert>
+                      Exceed {nativeCurrency.symbol} Balance
+                    </WarningAlert>
+                  ) : mode === Mode.LiquidationRiskTooHigh ? (
+                    <WarningAlert>
+                      Liquidation risk too high
+                    </WarningAlert>
+                  ) :  (
+                    <Spacer />
+                  )
+                }
                 <div className="d-grid">
                   { mode === Mode.Init &&
                     <button className="btn btn-lg btn-primary text-white" type="button">Initialisation <SmallSpinner /></button>

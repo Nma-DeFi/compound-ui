@@ -2,8 +2,9 @@ import { encodeAbiParameters, maxUint256 } from "viem";
 import { bulkerAbi } from "../abi/bulkerAbi";
 import { cometAbi } from "../abi/cometAbi";
 import { CompoundConfig } from "../compound-config";
-import { bnf, toBigInt } from "../utils/bn";
+import { toBigInt } from "../utils/bn";
 import { nativeCurrency } from "../utils/chains";
+import { bna } from "../components/Amount";
 
 export class WithdrawService {
 
@@ -30,7 +31,7 @@ export class WithdrawService {
             Date.now(),
             'WithdrawService.withdrawErc20Token',
             'token', asset,
-            'amount', bnf(amount),
+            'amount', bna(amount),
             'withdrawAmount', withdrawAmount,
             'maxed', maxed,   
             'account', this.account
@@ -57,7 +58,7 @@ export class WithdrawService {
             Date.now(),
             'WithdrawService.withdrawNativeCurrency',
             'account', this.account,
-            'amount', bnf(amount),
+            'amount', bna(amount),
             'withdrawAmount', withdrawAmount,
             'max', maxed,   
             'currency', symbol,

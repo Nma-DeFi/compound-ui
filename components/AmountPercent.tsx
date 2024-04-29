@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js"
 import { Token } from "../types"
+import { bna } from "./Amount"
 
 export default function AmountPercent({ handler }) {
 
@@ -14,7 +15,7 @@ export default function AmountPercent({ handler }) {
 }
 
 export function fillInput({ amount, token, id } : { amount: BigNumber, token: Token, id: string}) {
-    const newInput = amount ? amount.toFixed(token.decimals) : ''
+    const newInput = amount ? bna(amount) : ''
     const elem = document.getElementById(id) 
     const input = elem as HTMLInputElement
     input.value = newInput

@@ -9,7 +9,7 @@ import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
 import { log } from '../../helpers/supply';
-import { bnf } from '../../../utils/bn';
+import { borrowPositionsReset } from './borrowPositions';
 
 export type SupplyBalance = {
   baseToken: Token
@@ -98,6 +98,11 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
       return positions
     }
 )
+
+export const accruedPositionsReset = () => (dispatch) => {
+  dispatch(supplyPositionsReset()) 
+  dispatch(borrowPositionsReset())
+}
 
 export const { supplyPositionsReset, supplyPositionIncrease, supplyPositionDecrease, supplyPositionSet  } = supplyPositionsSlice.actions
 

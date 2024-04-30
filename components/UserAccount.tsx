@@ -67,7 +67,7 @@ export function UserAccount(positionsState : PositionsState) {
     return isConnected && (
         <div id={css['user-account']} className="bg-body py-4 border rounded shadow text-center rounded-4">
             <h4 className={css['title']}>Your account</h4>
-            <div className="d-flex justify-content-around justify-content-xl-between mb-3 small">
+            <div className="d-flex justify-content-around justify-content-xl-between small" style={{ marginBottom: '1.4rem' }}>
                 <div>
                     <div className="fw-semibold mb-1">Collateral</div> 
                     { (totalCollateral.isPending || totalCollateral.isLoading) ? (

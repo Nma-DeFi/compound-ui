@@ -21,7 +21,7 @@ import { ActionType } from '../../../types'
 import { usePositionsService } from '../../../hooks/usePositionsService'
 import { REPAY_RESULT_TOAST } from './BorrowPositions'
 import Spacer from '../../Spacer'
-import WarningAlert from '../../WarningAlert'
+import WarningMessage from '../../WarningMessage'
 
 const enum Mode {
   Init,
@@ -250,13 +250,13 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
                   </div>
                 </div>
                 { mode === Mode.ExceedMaximumRepayment ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Maximum repayment : <AsyncAmount {...asyncBorrowBalance} />
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
-                    <WarningAlert>
-                      Insufficient {token?.symbol} Balance
-                    </WarningAlert>
+                    <WarningMessage>
+                      Not enough {token?.symbol} in your wallet
+                    </WarningMessage>
                   ) : (
                     <Spacer />
                   )

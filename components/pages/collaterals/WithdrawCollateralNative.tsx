@@ -27,8 +27,9 @@ import { useLiquidationRiskByCollateralWithdrawal } from '../../../hooks/useLiqu
 import { LiquidationRiskAsync } from '../../LiquidationRisk';
 import { useBorrowPositions } from '../../../hooks/useBorrowPositions';
 import { isBorrowPosition } from '../../../redux/helpers/borrow';
-import WarningAlert from '../../WarningAlert';
+import WarningMessage from '../../WarningMessage';
 import Spacer from '../../Spacer';
+import PlaceHolder, { PlaceHolderSize } from '../../PlaceHolder';
 
 const enum Mode {
   NotConnected, 
@@ -214,8 +215,12 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                   <h2 className="me-auto mb-0">Withdraw</h2>
                   { isConnected && (mode > Mode.ExceedCollateralBalance) && isBorrowPosition(comet, asyncBorrowPositions.data) &&
                     <div className="d-flex pe-3">
-                      <span className="text-body-secondary">Liquidation risk :</span>                
-                      <span className="text-body-tertiary ps-2"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>
+                      <span className="text-body-secondary pe-2">Liquidation risk :</span>                
+                      { asyncLiquidationRisk.isSuccess ? ( 
+                        <span className="text-body-tertiary"><LiquidationRiskAsync asyncRisk={asyncLiquidationRisk} /></span>
+                      ) : (
+                        <div style={{ width: '2rem' }}><PlaceHolder size={PlaceHolderSize.NORMAL} col={12} /></div>
+                      )}
                     </div>
                   }
                   <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -249,13 +254,13 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                   </div>
                 </div>
                 { mode === Mode.ExceedCollateralBalance ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Exceed {nativeCurrency.symbol} Balance
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : mode === Mode.LiquidationRiskTooHigh ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Liquidation risk too high
-                    </WarningAlert>
+                    </WarningMessage>
                   ) :  (
                     <Spacer />
                   )

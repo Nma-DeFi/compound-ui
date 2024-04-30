@@ -19,9 +19,9 @@ export function LiquidationRiskAsync({ asyncRisk }) {
     
     return (
         <>
-            { /*isLoading ? (
+            { isLoading ? (
                 <PlaceHolder size={PlaceHolderSize.NORMAL} col={2} />
-            ) :*/ isSuccess ? (
+            ) : isSuccess ? (
                 <>{ formattedRisk() }</>
             ) : (
                 <NoData />

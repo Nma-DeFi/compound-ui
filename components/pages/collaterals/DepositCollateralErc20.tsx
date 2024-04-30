@@ -20,7 +20,7 @@ import { ActionType, DepositParam } from '../../../types'
 import PriceFromFeed from '../../PriceFromFeed'
 import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult'
 import Spacer from '../../Spacer'
-import WarningAlert from '../../WarningAlert'
+import WarningMessage from '../../WarningMessage'
 
 const enum Mode {
   NotConnected,
@@ -218,9 +218,9 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
                   </div>
                 </div>
                 { mode === Mode.InsufficientBalance ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Insufficient {token?.symbol} Balance
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : (
                     <Spacer />
                   )

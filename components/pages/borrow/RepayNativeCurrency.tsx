@@ -20,7 +20,7 @@ import { Hash } from 'viem'
 import { ActionType } from '../../../types'
 import { REPAY_RESULT_TOAST } from './BorrowPositions'
 import { usePositionsService } from '../../../hooks/usePositionsService'
-import WarningAlert from '../../WarningAlert'
+import WarningMessage from '../../WarningMessage'
 import Spacer from '../../Spacer'
 
 const enum Mode {
@@ -210,13 +210,13 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
                   </div>
                 </div>
                 { mode === Mode.ExceedMaximumRepayment ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Maximum repayment : <AsyncAmount {...asyncBorrowBalance} />
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
-                    <WarningAlert>
-                      Insufficient {nativeCurrency.symbol} Balance
-                    </WarningAlert>
+                    <WarningMessage>
+                      Not enough {nativeCurrency.symbol} in your wallet
+                    </WarningMessage>
                   ) : (
                     <Spacer />
                   )

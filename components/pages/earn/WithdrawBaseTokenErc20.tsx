@@ -21,7 +21,7 @@ import AsyncAmount from '../../AmountAsync'
 import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
 import Amount from '../../Amount'
-import WarningAlert from '../../WarningAlert'
+import WarningMessage from '../../WarningMessage'
 import Spacer from '../../Spacer'
 
 
@@ -193,9 +193,9 @@ export default function WithdrawBaseTokenErc20(market) {
                   </div>
                 </div>
                 { mode === Mode.ExceedBalance ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Exceed {token?.symbol} Balance
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : (
                     <Spacer />
                   )

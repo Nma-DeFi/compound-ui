@@ -19,7 +19,7 @@ import { ActionType, DepositParam } from '../../../types'
 import PriceFromFeed from '../../PriceFromFeed'
 import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult'
 import Amount from '../../Amount'
-import WarningAlert from '../../WarningAlert'
+import WarningMessage from '../../WarningMessage'
 import Spacer from '../../Spacer'
 
 const enum Mode {
@@ -180,9 +180,9 @@ export default function DepositCollateralNative({ comet, token, onDeposit }  : D
                   </div>
                 </div>
                 { mode === Mode.InsufficientBalance ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Insufficient {nativeCurrency.symbol} Balance
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : (
                     <Spacer />
                   )

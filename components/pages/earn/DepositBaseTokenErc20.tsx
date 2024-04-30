@@ -23,7 +23,6 @@ import { SmallSpinner } from "../../Spinner"
 import Amount from "../../Amount"
 import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
 import { isBorrowPosition } from "../../../redux/helpers/borrow"
-import WarningAlert from "../../WarningAlert"
 import WarningMessage from "../../WarningMessage"
 import Spacer from "../../Spacer"
 
@@ -244,9 +243,9 @@ export default function DepositBaseTokenErc20(market) {
                   </div>
                 </div>
                 { mode === Mode.BorrowingBaseToken ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Cannot supply and borrow {token?.symbol} at the same time
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
                     <WarningMessage>
                       Insufficient {token?.symbol} Balance

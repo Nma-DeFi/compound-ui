@@ -29,6 +29,7 @@ import { usePublicClient } from 'wagmi';
 import { LiquidationRiskAsync } from '../../components/LiquidationRisk';
 import { isBorrowPosition } from '../../redux/helpers/borrow';
 import { useBorrowPositions } from '../../hooks/useBorrowPositions';
+import PlaceHolder, { PlaceHolderSize } from '../../components/PlaceHolder';
 
 export default function Collateral() {
 

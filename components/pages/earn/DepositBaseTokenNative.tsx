@@ -23,7 +23,7 @@ import { SmallSpinner } from "../../Spinner"
 import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
 import { isBorrowPosition } from "../../../redux/helpers/borrow"
 import Amount from "../../Amount"
-import WarningAlert from "../../WarningAlert"
+import WarningMessage from "../../WarningMessage"
 import Spacer from "../../Spacer"
 
 const enum Mode {
@@ -205,13 +205,13 @@ export default function DepositBaseTokenNative(market) {
                   </div>
                 </div>
                 { mode === Mode.BorrowingBaseToken ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Cannot supply and borrow {nativeCurrency.symbol} at the same time
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
-                    <WarningAlert>
+                    <WarningMessage>
                       Insufficient {nativeCurrency.symbol} Balance
-                    </WarningAlert>
+                    </WarningMessage>
                   ) : (
                     <Spacer />
                   )

@@ -38,13 +38,10 @@ export function bna(value: BigNumber.Value) {
     if (result.lt(1)) {
         dp = 6
         rm = BigNumber.ROUND_UP
-    } else if (result.lt(1e6)) {
-        dp = 4
-        rm = BigNumber.ROUND_HALF_UP
     } else {
-        dp = 3
+        dp = result.lt(1e6) ? 4 : 3
         rm = BigNumber.ROUND_HALF_UP
-    }
+    } 
 
     result = result.toFixed(dp, rm)
 
@@ -52,6 +49,31 @@ export function bna(value: BigNumber.Value) {
         result = result.replace(/0+$/, '')
         result = result.replace(/\.$/, '')
     }
+
+    return result
+}
+
+export function bna2(value: BigNumber.Value) {
+
+    let result: string | BigNumber = bn(value ?? 0)
+
+    if (result.lt(1)) {
+        result = result.toFixed(6, BigNumber.ROUND_UP)
+        if (result.includes('.')) {
+            result = result.replace(/0+$/, '')
+            result = result.replace(/\.$/, '')
+        }
+    } else {
+        if (result.gte(1e9)) {
+            result = `${result.div(1e9).toFixed(2)}B`
+        } else if (result.gte(1e6)) {
+            result = `${result.div(1e6).toFixed(2)}M`
+        } else if (result.gte(1e4)) {
+            result = `${result.div(1e3).toFixed(2)}K`
+        } else {
+            result = result.toFixed(3)
+        }
+    } 
 
     return result
 }

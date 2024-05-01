@@ -229,16 +229,18 @@ export default function Borrow() {
             }
             { mode === Mode.NotConnected &&
               <BorrowPanel {...{ mode, borrowApr, css: 'pb-2' }}>
-                <div className="d-flex align-items-center">
-                  <span className="pe-2" style={{ fontSize: '110%' }}>
-                  { collaterals.length > 1 ? 'Collaterals' : 'Collateral' }
-                  </span>
-                  { collaterals.map((collateral) =>
-                    <span key={collateral.token.address} className="text-body-tertiary ps-2">
-                      <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
+                <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none text-body">
+                  <div className="d-flex align-items-center">
+                    <span className="pe-2" style={{ fontSize: '110%' }}>
+                    { collaterals.length > 1 ? 'Collaterals' : 'Collateral' }
                     </span>
-                  )}
-                </div>
+                    { collaterals.map((collateral) =>
+                      <span key={collateral.token.address} className="text-body-tertiary ps-2">
+                        <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
+                      </span>
+                    )}
+                  </div>
+                </Link>
               </BorrowPanel>
             }
             { mode === Mode.FarmingBaseToken &&

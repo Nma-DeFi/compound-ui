@@ -4,7 +4,6 @@ import ConnectButton from './ConnectButton';
 import NetworkSelector from './NetworkSelector';
 import { useNetworkEvents } from "../hooks/useNetworkEvents";
 import ProtocolStats from './ProtocolStats';
-import { useAutoRefreshAccruedPositions } from '../hooks/useAutoRefreshAccruedPositions';
 
 export const Path = {
     Index: '/',
@@ -16,7 +15,6 @@ export const Path = {
 export default function Layout({ children }) {
 
     useNetworkEvents()
-    //useAutoRefreshAccruedPositions()
 
     return (
         <> 

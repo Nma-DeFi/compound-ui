@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
-import Amount from "../../Amount"
+import Amount, { bna2 } from "../../Amount"
 import Apr from "../../Apr"
 import PriceFromFeed from "../../PriceFromFeed"
 import TokenIcon from "../../TokenIcon"
@@ -83,7 +83,7 @@ export default function BorrowPositions() {
                                         <div className="d-flex justify-content-start">
                                             <TokenIcon symbol={getTokenOrNativeCurrency(chainId, borrowPosition.baseToken).symbol} width={35} />
                                             <div className="ps-2">
-                                                <div><Amount value={borrowPosition.borrowBalance} /></div>
+                                                <div>{ bna2(borrowPosition.borrowBalance) } </div>
                                                 <div className="small text-body-secondary">
                                                     <PriceFromFeed priceFeed={borrowPosition.priceFeed} amount={borrowPosition.borrowBalance} placeHolderCfg={{ col: 12 }} />
                                                 </div>

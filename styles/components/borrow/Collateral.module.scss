@@ -20,8 +20,10 @@
 }
 
 #market-combo-button {
-    .icon { width: 1.6rem; }
-    .market-name { padding: 0 1rem }
+    padding: 0.6rem 1rem;
+    font-size: 1.3rem;
+    .icon { width: 1.8rem; height: 1.8; }
+    .market-name { padding: 0 1.2rem }
 }
 
 #market-combo-button::after {
@@ -29,6 +31,7 @@
 }
 
 #market-combo-dropdown {
-    .icon { width: 1.4rem; }
-    .market-name { padding: 0 1rem }
+    font-size: 1.05rem;
+    .icon { width: 1.5rem; }
+    .market-dropdown-name { padding-left: 1rem }
 }

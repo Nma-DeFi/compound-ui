@@ -2,7 +2,7 @@ import { connect } from "react-redux"
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
 import { RootState } from "../redux/types"
 import { baseTokePriceFeed, cometProxy } from "../selectors/market-selector"
-import Amount from "./Amount"
+import Amount, { bna2 } from "./Amount"
 import { NoData } from "../utils/page"
 import PriceFromFeed from "./PriceFromFeed"
 import { PriceFeed } from "../types"
@@ -44,7 +44,7 @@ export function SupplyBalanceAmount({ market, isLoading, isSuccess, supplyBalanc
                 </>
             ) : isSuccess ? (
                 <>
-                    <div className="mb-1"><Amount value={supplyBalance} /></div>
+                    <div className="mb-1">{bna2(supplyBalance)}</div>
                     <small className="text-body-secondary">
                         <PriceFromFeed priceFeed={priceFeed} amount={supplyBalance} placeHolderCfg={{ col: 4 }} />
                     </small>

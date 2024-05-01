@@ -29,7 +29,6 @@ import { usePublicClient } from 'wagmi';
 import { LiquidationRiskAsync } from '../../components/LiquidationRisk';
 import { isBorrowPosition } from '../../redux/helpers/borrow';
 import { useBorrowPositions } from '../../hooks/useBorrowPositions';
-import PlaceHolder, { PlaceHolderSize } from '../../components/PlaceHolder';
 
 export default function Collateral() {
 
@@ -220,9 +219,9 @@ export default function Collateral() {
 export function SelectMarket({ markets, currentMarket, chainId, setCurrentMarket }) {
     return (
         <div className="btn-group">
-            <button id={css['market-combo-button']} type="button" className="btn btn-light border shadow-sm rounded-5 dropdown-toggle px-3" data-bs-toggle="dropdown" aria-expanded="false">
+            <button id={css['market-combo-button']} type="button" className="btn btn-light border shadow-sm rounded-5 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <div className="d-flex align-items-center">
-                    <TokenIcon symbol={getBaseTokenOrNativeCurrency(currentMarket, chainId)?.symbol} css={css['icon']} />
+                    <TokenIcon symbol={ getBaseTokenOrNativeCurrency(currentMarket, chainId)?.symbol } css={css['icon']} />
                     <div className={css['market-name']}>
                     { getBaseTokenOrNativeCurrency(currentMarket, chainId)?.symbol } <span className="text-body-secondary">Market</span>
                     </div>
@@ -233,8 +232,8 @@ export function SelectMarket({ markets, currentMarket, chainId, setCurrentMarket
                 {markets.map((market) =>
                     <li key={market.id}>
                         <button className="dropdown-item d-flex align-items-center py-2" type="button" onClick={() => setCurrentMarket(market)}>
-                            <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} css={css['icon']} />
-                            <div className="ps-2">
+                            <TokenIcon symbol={ getBaseTokenOrNativeCurrency(market, chainId)?.symbol } css={css['icon']} />
+                            <div className={css['market-dropdown-name']}>
                             { getBaseTokenOrNativeCurrency(market, chainId)?.symbol } <span className="text-body-secondary">Market</span>
                             </div>
                         </button>

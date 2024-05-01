@@ -20,7 +20,7 @@ import DepositBaseTokenErc20, { DEPOSIT_BASE_TOKEN_ERC20_MODAL } from "../../com
 import DepositBaseTokenNative, { DEPOSIT_BASE_TOKEN_NATIVE_MODAL } from "../../components/pages/earn/DepositBaseTokenNative"
 import { ActionInfo, ActionType } from "../../types"
 import ActionResult from "../../components/action-result/ActionResult"
-import Amount from "../../components/Amount"
+import Amount, { bna2 } from "../../components/Amount"
 import Price from "../../components/Price"
 
 export default function Earn() {
@@ -123,8 +123,8 @@ export default function Earn() {
                       </div>
                   </div>
                   <div className="col text-center d-none d-md-block">
-                      <div className="mb-1"><Amount value={bn(totalBaseSupplyScaled(market))} /></div>
-                      <small className="text-body-secondary"><Price value={bn(totalBaseSupplyUsd(market))} /></small>
+                      <div className="mb-1">{ bna2(totalBaseSupplyScaled(market)) }</div>
+                      <small className="text-body-secondary"><Price value={ bn(totalBaseSupplyUsd(market)) } /></small>
                   </div>
                   { isConnected &&
                     <div className="col text-center">

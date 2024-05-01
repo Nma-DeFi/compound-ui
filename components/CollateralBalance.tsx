@@ -2,9 +2,9 @@ import { connect } from "react-redux"
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
 import { RootState } from "../redux/types"
 import { cometProxy } from "../selectors/market-selector"
-import Amount from "./Amount"
+import { bna2 } from "./Amount"
 import { NoData } from "../utils/page"
-import css from '../styles/components/CollateralBalance.module.scss';
+import css from '../styles/components/CollateralBalance.module.scss'
 import PriceFromFeed from "./PriceFromFeed"
 import { useEffect, useState } from "react"
 import { PriceFeed } from "../types"
@@ -46,7 +46,7 @@ function CollateralAmount({ market, collateral, isLoading, isSuccess, amount }) 
                 </CollateralBalanceLayout>
             ) : isSuccess ? (
                 <CollateralBalanceLayout>
-                    <div className="text-body-secondary"><Amount value={amount} /></div>
+                    <div className="text-body-secondary">{ bna2(amount) }</div>
                     <div className={`${css['collateral-balance']} text-body-tertiary`}>
                         <PriceFromFeed priceFeed={priceFeed} amount={amount} placeHolderCfg={{ col: 4 }} />
                     </div>

@@ -24,16 +24,14 @@ export function bnp(value: BigNumber.Value) {
 
     let result: string | BigNumber = bn(value ?? 0)
 
-    if (result.lt(1e3)) {
-        result = result.toFixed(2)
+    if (result.gte(1e9)) {
+        result = `${result.div(1e9).toFixed(2)}B`
+    } else if (result.gte(1e6)) {
+        result = `${result.div(1e6).toFixed(2)}M`
+    } else if (result.gte(1e4)) {
+        result = `${result.div(1e3).toFixed(2)}K`
     } else {
-        if (result.gte(1e9)) {
-            result = `${result.div(1e9).toFixed(3)}B`
-        } else if (result.gte(1e6)) {
-            result = `${result.div(1e6).toFixed(3)}M`
-        } else  {
-            result = `${result.div(1e3).toFixed(3)}K`
-        }
+        result = result.toFixed(2)
     }
 
     return result

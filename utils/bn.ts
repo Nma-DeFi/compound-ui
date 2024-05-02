@@ -23,11 +23,11 @@ export function bnf(
     let result: string | BigNumber = bn(value ?? 0)
 
     if (result.abs().gte(1e9)) {
-        result = `${result.div(1e9).toFixed(dp, rm)}B`
+        result = `${result.div(1e9).toFixed(dp, rm)}b`
     } else if (result.abs().gte(1e6)) {
-        result = `${result.div(1e6).toFixed(dp, rm)}M`
+        result = `${result.div(1e6).toFixed(dp, rm)}m`
     } else if (result.abs().gte(1e3)) {
-        result = `${result.div(1e3).toFixed(dp, rm)}K`
+        result = `${result.div(1e3).toFixed(dp, rm)}k`
     } else {
         result = result.toFixed(dp, rm)
     }

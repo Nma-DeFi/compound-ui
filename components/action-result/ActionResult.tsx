@@ -116,9 +116,9 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
                 )}
                 { mode === Mode.Success && (
                     <div className="toast-body text-center px-0 py-4">
-                        <h4 className="text-primary mb-3">Success</h4>
+                        <h4 className="text-primary mb-4">Success</h4>
                         <a href={txUrl} className="link-dark text-decoration-none" target="_blank" rel="noreferrer" >
-                            <p className="fs-6 mb-4">Transaction <i className="bi bi-box-arrow-up-right"></i></p>
+                            <p className="fs-6" style={{marginBottom: '1.6rem'}}>Transaction <i className="bi bi-box-arrow-up-right"></i></p>
                         </a>
                         <button type="button" className="btn btn-primary btn-sm text-white" data-bs-dismiss="toast">Close</button>
                     </div>

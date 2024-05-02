@@ -193,35 +193,22 @@ export default function WithdrawBaseTokenErc20(market) {
                   </div>
                 </div>
                 { mode === Mode.ExceedBalance ? (
-                    <WarningMessage>
-                      Exceed {token?.symbol} Balance
-                    </WarningMessage>
+                    <WarningMessage>Exceeds your {token?.symbol} protocol balance</WarningMessage>
                   ) : (
                     <Spacer />
                   )
                 }
                 <div className="d-grid">
-                  { mode === Mode.Init &&
+                  { mode === Mode.Init ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.NotConnected &&
+                  : mode === Mode.NotConnected ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
-                  }
-                  { mode === Mode.ExceedBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Exceed {token?.symbol} Balance</button>
-                  }
-                  { mode === Mode.ConfirmationOfWithdrawal &&
+                  : mode === Mode.ConfirmationOfWithdrawal ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.WithdrawReady &&
-                    <>
-                    { amount.isGreaterThan(Zero) ? (
-                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {token?.symbol}</button>
-                      ) : (
-                        <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {token?.symbol}</button>
-                      )
-                    }
-                    </>
+                  : mode === Mode.WithdrawReady && amount.isGreaterThan(Zero) ?
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {token?.symbol}</button>
+                  : 
+                    <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {token?.symbol}</button>
                   }
                 </div>
               </div>

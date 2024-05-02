@@ -114,10 +114,10 @@ export default function BorrowPositions() {
                         }
                     </div>
                 )}
-                <RepayErc20Token comet={comet} token={token} onRepay={setRepayResult} />
-                <RepayNativeCurrency comet={comet} token={token} onRepay={setRepayResult} />
             </div>
         ) }
+        <RepayErc20Token comet={comet} token={token} onRepay={setRepayResult} />
+        <RepayNativeCurrency comet={comet} token={token} onRepay={setRepayResult} />
         <ActionResult {...{id: REPAY_RESULT_TOAST, ...repayResult}} />
     </>
 }

@@ -17,7 +17,7 @@ import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useBorrowCapacity } from "../../hooks/useBorrowCapacity"
 import BigNumber from "bignumber.js"
 import PriceAsync from "../../components/PriceAsync"
-import { ActionInfo, Market } from "../../types"
+import { ActionInfo, Market, PriceFeed } from "../../types"
 import { usePublicClient } from "wagmi"
 import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
@@ -39,6 +39,8 @@ import Price from "../../components/Price"
 import NoData from "../../components/NoData"
 import { useLiquidationRiskByBorrowAmount } from "../../hooks/useLiquidationRisk"
 import { useTotalCollateralUsdByChain } from "../../hooks/useTotalCollateralUsdByChain"
+import { fillInput } from "../../components/AmountPercent"
+import { AsyncNumber, loadAsyncData } from "../../utils/async"
 
 const enum Mode {
   Loading,
@@ -50,11 +52,14 @@ const enum Mode {
 }
 
 export default function Borrow() {
+    const ACCRUED_ESTIMATION = 0.999
 
     const [ mode, setMode ] = useState<Mode>(Mode.Loading)
     const [ amount, setAmount ] = useState<BigNumber>(Zero)
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
+    const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
+    const [ tokenPrice, setTokenPrice ] = useState<AsyncNumber>()
 
     const { open: openWeb3Modal } = useWeb3Modal()
 
@@ -77,17 +82,17 @@ export default function Borrow() {
 
     const priceService = usePriceService({ chainId, publicClient })
 
-    const priceFeed = getPriceFeed(market, chainId)
-    const asyncAmountUsd = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
+    const asyncAmountPriceUsd = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
 
     const token = getBaseTokenOrNativeCurrency(market, chainId)
     const borrowApr = netBorrowAprScaled(market)
     const minBorrowAmount = baseBorrowMinScaled(market)
     const collaterals = collateralTokens(market)
 
-    const { isSuccess: isBorrowCapacity, data: borrowCapacity } = asyncBorrowCapacity
-    const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountUsd
+    const { isSuccess: isBorrowCapacity, data: _borrowCapacity } = asyncBorrowCapacity
+    const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountPriceUsd
 
+    const borrowCapacity = _borrowCapacity?.times(ACCRUED_ESTIMATION)
     const liquidationRisk = useLiquidationRiskByBorrowAmount({ chainId, publicClient, market, amount, enabled: (mode === Mode.ReadyToBorrow)})
 
     useEffect(() => { 
@@ -112,21 +117,24 @@ export default function Borrow() {
       }
     }, [chainId, markets])
 
+    
     useEffect(() => {
       if (market) {
         resetAmount()
       }
     }, [chainId, market])
 
+    useEffect(() => {
+      if (market && priceService) {
+        const feed = getPriceFeed(market, chainId)
+        setPriceFeed(feed)
+        const promise = priceService.getPriceFromFeed(feed)
+        loadAsyncData(promise, setTokenPrice)
+      }
+    }, [chainId, market, priceService])
+
     function isLoading() {
       if (!isMarkets || !market) return true
-      console.log(
-        'isConnected', isConnected, 
-        'isSupplyPositions', isSupplyPositions,
-        'isBorrowCapacity', isBorrowCapacity,
-        'isAmountUsd', isAmountUsd,
-        'priceService', !!priceService,
-      )
       if (isConnected &&  (!isSupplyPositions || !isBorrowCapacity || !isAmountUsd || !priceService)) return true
       return false
     }
@@ -164,11 +172,16 @@ export default function Borrow() {
       }
     }
 
-    function setInput(newInput) {
-      const id = css['borrow-input']
-      const elem = document.getElementById(id) 
-      const input = elem as HTMLInputElement
-      input.value = newInput ?? ''
+    function handleMaxBorrow(e) {
+      e.preventDefault()
+      if (!tokenPrice.isSuccess) return
+      const maxAmount = borrowCapacity.div(tokenPrice.data).dp(token.decimals, BigNumber.ROUND_FLOOR)
+      setAmount(maxAmount)
+      setInput(maxAmount)
+    }
+
+    function setInput(amount: BigNumber) {
+      fillInput({ amount, token, id: css['borrow-input'] })
     }
     
     function resetAmount() {
@@ -188,14 +201,19 @@ export default function Borrow() {
         <div className="col-12 col-xl-6 col-xxl-5 px-0 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
-            <div className="d-flex border align-items-center p-3 rounded mb-2">
+            <div className={`d-flex border align-items-center rounded mb-2 px-3 py-${mode === Mode.Loading ? '4' : '3'}`}>
                 <div className="flex-grow-1">
-                    <AmountInput id={css['borrow-input']} onChange={handleAmountChange} />
+                    { mode === Mode.Loading ? (
+                        <div><PlaceHolder size={PlaceHolderSize.LARGE} col={2} /></div>
+                      ) : (
+                        <AmountInput id={css['borrow-input']} onChange={handleAmountChange} />
+                      )
+                    }
                     <small className="text-body-tertiary">
                     { mode === Mode.Loading ? (
                         <PlaceHolder col={2} />
                       ) : (
-                        <PriceAsync asyncPrice={asyncAmountUsd} />
+                        <PriceAsync asyncPrice={asyncAmountPriceUsd} />
                       )
                     }
                     </small>
@@ -204,7 +222,7 @@ export default function Borrow() {
                   { mode === Mode.Loading ? (
                       <div className="d-flex align-items-center">
                         <div className="me-1 me-sm-2 mb-1" style={{ width: '6rem'}}>
-                          <PlaceHolder size={PlaceHolderSize.NORMAL} col={12} />
+                          <PlaceHolder size={PlaceHolderSize.LARGE} col={12} />
                         </div>
                         <i className="bi bi-chevron-down"></i>
                         </div>
@@ -269,14 +287,18 @@ export default function Borrow() {
             }
             { mode === Mode.ReadyToBorrow &&
               <BorrowPanel {...{ mode, borrowApr }}>
-                <div className="mb-1">Maximum borrowing : <span className="text-body-tertiary">
+                
+                <div className="mb-1">
+                  <Link href='#' onClick={handleMaxBorrow} className="text-decoration-none text-body">Maximum borrowing : <span className="text-body-tertiary">
                   <PriceAsync asyncPrice={{ 
                     isIdle: asyncBorrowCapacity.isPending, 
                     isLoading: asyncBorrowCapacity.isLoading, 
                     isError: asyncBorrowCapacity.isError, 
                     isSuccess: isBorrowCapacity, 
                     data: borrowCapacity
-                  }} /></span></div>
+                  }} /></span>
+                  </Link>
+                </div>
                 <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none" style={{ fontSize: '95%' }}>
                   Increase your borrowing capacity <i className="bi bi-arrow-right"></i>
                 </Link>

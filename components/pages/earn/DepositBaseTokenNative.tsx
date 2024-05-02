@@ -204,43 +204,24 @@ export default function DepositBaseTokenNative(market) {
                       <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
-                { mode === Mode.BorrowingBaseToken ? (
-                    <WarningMessage>
-                      Cannot supply and borrow {nativeCurrency.symbol} at the same time
-                    </WarningMessage>
-                  ) : mode === Mode.InsufficientBalance ? (
-                    <WarningMessage>
-                      Insufficient {nativeCurrency.symbol} Balance
-                    </WarningMessage>
-                  ) : (
+                { mode === Mode.BorrowingBaseToken ? 
+                    <WarningMessage>Cannot supply and borrow {nativeCurrency.symbol} at the same time</WarningMessage>
+                  : mode === Mode.InsufficientBalance ? 
+                    <WarningMessage>The {nativeCurrency.symbol} balance in your wallet is insufficient</WarningMessage>
+                  :
                     <Spacer />
-                  )
                 }
                 <div className="d-grid">
-                  { mode === Mode.Init &&
+                  { mode === Mode.Init ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.NotConnected &&
+                  : mode === Mode.NotConnected ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
-                  }
-                  { mode === Mode.BorrowingBaseToken &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Deposit {nativeCurrency.symbol}</button>
-                  }
-                  { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>
-                  }
-                  { mode === Mode.ConfirmationOfDeposit &&
+                  : mode === Mode.ConfirmationOfDeposit ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.DepositReady &&
-                    <>
-                    { amount.isGreaterThan(Zero) ? (
-                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit <Amount value={amount} /> {nativeCurrency.symbol}</button>
-                      ) : (
-                        <button className="btn btn-lg btn-primary text-white" type="button">Deposit {token?.symbol}</button>
-                      )
-                    }
-                    </>
+                  : mode === Mode.DepositReady && amount.isGreaterThan(Zero) ? 
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit <Amount value={amount} /> {nativeCurrency.symbol}</button>
+                  : 
+                    <button className="btn btn-lg btn-primary text-white" type="button">Deposit {nativeCurrency.symbol}</button>
                   }
                 </div>
               </div>

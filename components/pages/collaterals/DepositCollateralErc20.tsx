@@ -217,42 +217,26 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
                     <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
-                { mode === Mode.InsufficientBalance ? (
-                    <WarningMessage>
-                      Insufficient {token?.symbol} Balance
-                    </WarningMessage>
-                  ) : (
+                { mode === Mode.InsufficientBalance ? 
+                    <WarningMessage>The {token?.symbol} balance in your wallet is insufficient</WarningMessage>
+                  : 
                     <Spacer />
-                  )
                 }
                 <div className="d-grid">
-                  { mode === Mode.Init &&
+                  { mode === Mode.Init ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.NotConnected &&
+                  : mode === Mode.NotConnected ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
-                  }
-                  { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {token?.symbol} Balance</button>
-                  }
-                  { mode === Mode.InsufficientAllowance &&
+                  : mode === Mode.InsufficientAllowance ?
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleApproval}>Enable {token?.symbol}</button>
-                  }
-                  { mode === Mode.WaitingForApproval &&
+                  : mode === Mode.WaitingForApproval ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Enabling {token?.symbol} ... Wait please <SmallSpinner /></button>
-                  }
-                  { ([Mode.ConfirmationOfApproval, Mode.ConfirmationOfDeposit].includes(mode)) &&
+                  : ([Mode.ConfirmationOfApproval, Mode.ConfirmationOfDeposit].includes(mode)) ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.DepositReady &&
-                    <>
-                      { amount.isGreaterThan(Zero) ? (
-                          <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit <Amount value={amount} /> {token?.symbol}</button>
-                        ) : (
-                          <button className="btn btn-lg btn-primary text-white" type="button">Deposit {token?.symbol}</button>
-                        )
-                      }
-                    </>
+                  : mode === Mode.DepositReady && amount.isGreaterThan(Zero) ? 
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit <Amount value={amount} /> {token?.symbol}</button>
+                  : 
+                    <button className="btn btn-lg btn-primary text-white" type="button">Deposit {token?.symbol}</button>
                   }
                 </div>
               </div>

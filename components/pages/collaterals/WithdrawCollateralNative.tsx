@@ -127,7 +127,7 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
     useEffect(() => {
       if (mode === Mode.ConfirmationOfWithdrawal && withdrawHash) {
         setMode(Mode.WaitingForWithdrawal)
-        const action = ActionType.DepositCollateral
+        const action = ActionType.WithdrawCollateral
         const amountCopy = bn(amount)
         const hashCopy = structuredClone(withdrawHash)
         onWithdraw({ comet, action, token, amount: amountCopy, hash: hashCopy })
@@ -255,7 +255,7 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                 </div>
                 { mode === Mode.ExceedCollateralBalance ? (
                     <WarningMessage>
-                      Exceed {nativeCurrency.symbol} Balance
+                      Exceeds your {nativeCurrency.symbol} collateral balance
                     </WarningMessage>
                   ) : mode === Mode.LiquidationRiskTooHigh ? (
                     <WarningMessage>
@@ -266,36 +266,20 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                   )
                 }
                 <div className="d-grid">
-                  { mode === Mode.Init &&
+                  { mode === Mode.Init ?
                     <button className="btn btn-lg btn-primary text-white" type="button">Initialisation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.NotConnected &&
+                  : mode === Mode.NotConnected ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
-                  }
-                  { mode === Mode.ExceedCollateralBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button">Exceed {nativeCurrency.symbol} Balance</button>
-                  }
-                  { mode === Mode.LiquidationRiskTooHigh &&
-                    <button className="btn btn-lg btn-primary text-white" type="button">Liquidation risk too high</button>
-                  }
-                  { mode === Mode.BulkerNotApproved &&
+                  : mode === Mode.BulkerNotApproved ?
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBulkerApproval}>Activate withdrawal</button>
-                  }
-                  { mode === Mode.WaitingForBulkerApproval &&
+                  : mode === Mode.WaitingForBulkerApproval ?
                     <button className="btn btn-lg btn-primary text-white" type="button">Activating withdrawal ... Wait please <SmallSpinner /></button>
-                  }
-                  { [Mode.ConfirmationOfBulkerApproval, Mode.ConfirmationOfWithdrawal].includes(mode) &&
+                  : [Mode.ConfirmationOfBulkerApproval, Mode.ConfirmationOfWithdrawal].includes(mode) ?
                     <button className="btn btn-lg btn-primary text-white" type="button">Confirmation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.WithdrawReady &&
-                    <>
-                      { amount.isGreaterThan(Zero) ? (
-                          <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {nativeCurrency.symbol}</button>
-                        ) : (
-                          <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {nativeCurrency.symbol}</button>
-                        )
-                      }
-                    </>
+                  : mode === Mode.WithdrawReady && amount.isGreaterThan(Zero) ?
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {nativeCurrency.symbol}</button>
+                  :
+                    <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {nativeCurrency.symbol}</button>
                   }
                 </div>
               </div>

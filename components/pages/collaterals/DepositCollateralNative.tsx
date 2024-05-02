@@ -181,34 +181,23 @@ export default function DepositCollateralNative({ comet, token, onDeposit }  : D
                 </div>
                 { mode === Mode.InsufficientBalance ? (
                     <WarningMessage>
-                      Insufficient {nativeCurrency.symbol} Balance
+                      The {nativeCurrency.symbol} balance in your wallet is insufficient
                     </WarningMessage>
                   ) : (
                     <Spacer />
                   )
                 }
                 <div className="d-grid">
-                  { mode === Mode.Init &&
+                  { mode === Mode.Init ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.NotConnected &&
+                  : mode === Mode.NotConnected ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
-                  }
-                  { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>
-                  }
-                  { mode === Mode.ConfirmationOfDeposit &&
+                  : mode === Mode.ConfirmationOfDeposit ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.DepositReady &&
-                    <>
-                      { amount.isGreaterThan(Zero) ? (
-                          <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit <Amount value={amount} /> {nativeCurrency.symbol}</button>
-                        ) : (
-                          <button className="btn btn-lg btn-primary text-white" type="button">Deposit {nativeCurrency.symbol}</button>
-                        )
-                      }
-                    </>
+                  : mode === Mode.DepositReady && amount.isGreaterThan(Zero) ? 
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleDeposit}>Deposit <Amount value={amount} /> {nativeCurrency.symbol}</button>
+                  :
+                    <button className="btn btn-lg btn-primary text-white" type="button">Deposit {nativeCurrency.symbol}</button>
                   }
                 </div>
               </div>

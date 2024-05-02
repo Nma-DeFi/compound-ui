@@ -18,7 +18,7 @@ export function useBorrowCapacity({ chainId, publicClient, marketId }) {
   return useQuery({
     queryKey: ['BorrowCapacity', chainId, marketId, borrowPositions, collateralPositions],
     queryFn: () => getBorrowCapacity({ marketId, borrowPositions, collateralPositions, priceService }),
-    enabled: !!(isConnected && marketId && isCollateralPositions && isBorrowPositions && priceService),
+    enabled: Boolean(isConnected && marketId && isCollateralPositions && isBorrowPositions && priceService),
     staleTime: PRICE_STALE_TIME,
   })
 }

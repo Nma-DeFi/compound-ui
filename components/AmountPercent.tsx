@@ -17,6 +17,8 @@ export default function AmountPercent({ handler }) {
 export function fillInput({ amount, token, id } : { amount: BigNumber, token: Token, id: string}) {
     const newInput = amount ? bna(amount) : ''
     const elem = document.getElementById(id) 
-    const input = elem as HTMLInputElement
-    input.value = newInput
+    if (elem) {
+        const input = elem as HTMLInputElement
+        input.value = newInput
+    }
 }

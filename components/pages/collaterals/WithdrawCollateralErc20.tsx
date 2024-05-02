@@ -204,7 +204,7 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                 </div>
                 { mode === Mode.ExceedCollateralBalance ? (
                     <WarningMessage>
-                      Exceed {token?.symbol} Balance
+                      Exceeds your {token?.symbol} collateral balance
                     </WarningMessage>
                   ) : mode === Mode.LiquidationRiskTooHigh ? (
                     <WarningMessage>
@@ -215,30 +215,16 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                   )
                 }
                 <div className="d-grid">
-                  { mode === Mode.Init &&
+                  { mode === Mode.Init ?
                     <button className="btn btn-lg btn-primary text-white" type="button">Initialisation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.NotConnected &&
+                  : mode === Mode.NotConnected ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
-                  }
-                  { mode === Mode.ExceedCollateralBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button">Exceed {token?.symbol} Balance</button>
-                  }
-                  { mode === Mode.LiquidationRiskTooHigh &&
-                    <button className="btn btn-lg btn-primary text-white" type="button">Liquidation risk too high</button>
-                  }
-                  { mode === Mode.ConfirmationOfWithdrawal &&
+                  : mode === Mode.ConfirmationOfWithdrawal ?
                     <button className="btn btn-lg btn-primary text-white" type="button">Confirmation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.WithdrawReady &&
-                    <>
-                      { amount.isGreaterThan(Zero) ? (
-                          <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {token?.symbol}</button>
-                        ) : (
-                          <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {token?.symbol}</button>
-                        )
-                      }
-                    </>
+                  : mode === Mode.WithdrawReady && amount.isGreaterThan(Zero) ?
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {token?.symbol}</button>
+                  : 
+                    <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {token?.symbol}</button>
                   }
                 </div>
               </div>

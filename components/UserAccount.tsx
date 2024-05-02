@@ -69,16 +69,6 @@ export function UserAccount(positionsState : PositionsState) {
             <h4 className={css['title']}>Your account</h4>
             <div className="d-flex justify-content-around justify-content-xl-between small" style={{ marginBottom: '1.4rem' }}>
                 <div>
-                    <div className="fw-semibold mb-1">Collateral</div> 
-                    { (totalCollateral.isPending || totalCollateral.isLoading) ? (
-                        <div className="placeholder bg-secondary-subtle col-10"></div>
-                    ) : totalCollateral.isSuccess ? (
-                        <div className="text-body-secondary"><Price value={totalCollateral.data} /></div>
-                    ) : (
-                        <div className="text-body-secondary"><NoData /></div>
-                    )}
-                </div>
-                <div>
                     <div className="fw-semibold mb-1">Borrowing</div> 
                     { (borrowing.isIdle || borrowing.isLoading) ? (
                         <div className="placeholder bg-secondary-subtle col-10"></div>
@@ -88,14 +78,24 @@ export function UserAccount(positionsState : PositionsState) {
                         <div className="text-body-secondary"><NoData /></div>
                     )}
                 </div>
-            </div>
-            <div className="d-flex justify-content-around justify-content-xl-between mb-2 small">
                 <div>
                     <div className="fw-semibold mb-1">Earning</div> 
                     { (earning.isIdle || earning.isLoading) ? (
                         <div className="placeholder bg-secondary-subtle col-10"></div>
                     ) : earning.isSuccess ? (
                         <div className="text-body-secondary"><Price value={earning.data} /></div>
+                    ) : (
+                        <div className="text-body-secondary"><NoData /></div>
+                    )}
+                </div>
+            </div>
+            <div className="d-flex justify-content-around justify-content-xl-between mb-2 small">
+                <div>
+                    <div className="fw-semibold mb-1">Collateral</div> 
+                    { (totalCollateral.isPending || totalCollateral.isLoading) ? (
+                        <div className="placeholder bg-secondary-subtle col-10"></div>
+                    ) : totalCollateral.isSuccess ? (
+                        <div className="text-body-secondary"><Price value={totalCollateral.data} /></div>
                     ) : (
                         <div className="text-body-secondary"><NoData /></div>
                     )}

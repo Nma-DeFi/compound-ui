@@ -243,41 +243,25 @@ export default function WithdrawBaseTokenNative(market) {
                 </div>
               </div>
               { mode === Mode.ExceedBalance ? (
-                    <WarningMessage>
-                      Exceed {nativeCurrency.symbol} Balance
-                    </WarningMessage>
-                  ) : (
-                    <Spacer />
-                  )
-                }
+                  <WarningMessage>Exceeds your {nativeCurrency.symbol} protocol balance</WarningMessage>
+                ) : (
+                  <Spacer />
+              )}
               <div className="d-grid">
-                { mode === Mode.Init &&
+                { mode === Mode.Init ?
                   <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
-                }
-                { mode === Mode.NotConnected &&
+                : mode === Mode.NotConnected ?
                   <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
-                }
-                { mode === Mode.ExceedBalance &&
-                  <button className="btn btn-lg btn-primary text-white" type="button" disabled>Exceed {nativeCurrency.symbol} Balance</button>
-                }
-                { mode === Mode.BulkerNotApproved &&
+                : mode === Mode.BulkerNotApproved ?
                   <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBulkerApproval}>Activate withdrawal</button>
-                }
-                { mode === Mode.WaitingForBulkerApproval &&
+                : mode === Mode.WaitingForBulkerApproval ?
                   <button className="btn btn-lg btn-primary text-white" type="button" disabled>Activating withdrawal ... Wait please <SmallSpinner /></button>
-                }
-                { [Mode.ConfirmationOfBulkerApproval, Mode.ConfirmationOfWithdrawal].includes(mode) &&
+                : [Mode.ConfirmationOfBulkerApproval, Mode.ConfirmationOfWithdrawal].includes(mode) ?
                   <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
-                }
-                { mode === Mode.WithdrawReady &&
-                  <>
-                    { amount.isGreaterThan(Zero) ? (
-                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {nativeCurrency.symbol}</button>
-                      ) : (
-                        <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {nativeCurrency.symbol}</button>
-                      )
-                    }
-                  </>
+                : mode === Mode.WithdrawReady && amount.isGreaterThan(Zero) ? 
+                  <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {nativeCurrency.symbol}</button>
+                : 
+                  <button className="btn btn-lg btn-primary text-white" type="button">Withdraw {nativeCurrency.symbol}</button>
                 }
               </div>
             </div>

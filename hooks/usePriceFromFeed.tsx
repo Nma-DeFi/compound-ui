@@ -17,7 +17,6 @@ async function priceFromFeed(chainId, publicClient, priceFeed) {
 export function usePriceFromFeed({ chainId, publicClient, priceFeed, amount = One }) {
 
     const [ asyncPrice, setAsyncPrice ] = useState<AsyncBigNumber>(IdleData)
-
     const { isLoading, isSuccess, isError, data: price, error } =  useQuery({
         queryKey: ['PriceFromFeed', chainId, priceFeed],
         queryFn: () => priceFromFeed(chainId, publicClient, priceFeed),

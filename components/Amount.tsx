@@ -65,11 +65,11 @@ export function bna2(value: BigNumber.Value) {
         }
     } else {
         if (result.gte(1e9)) {
-            result = `${result.div(1e9).toFixed(2)}B`
+            result = `${result.div(1e9).toFixed(2)}b`
         } else if (result.gte(1e6)) {
-            result = `${result.div(1e6).toFixed(2)}M`
+            result = `${result.div(1e6).toFixed(2)}m`
         } else if (result.gte(1e4)) {
-            result = `${result.div(1e3).toFixed(2)}K`
+            result = `${result.div(1e3).toFixed(2)}k`
         } else {
             result = result.toFixed(3)
         }

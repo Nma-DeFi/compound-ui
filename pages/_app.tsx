@@ -10,17 +10,17 @@ import { store } from '../redux/store'
 import { Provider as ReduxProvider } from 'react-redux'
 import { useBootstrap } from '../hooks/useBootstrap';
 
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 
-const wagmiConfig = defaultWagmiConfig({ chains: CHAINS, projectId });
+const wagmiConfig = defaultWagmiConfig({ chains: CHAINS, projectId })
 
 createWeb3Modal({ 
   wagmiConfig, projectId, chains: CHAINS, 
   themeMode: 'light', 
   themeVariables: { '--w3m-z-index': 10000 }
-});
+})
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 export default function App({ Component, pageProps }: AppProps) {
   
@@ -36,5 +36,5 @@ export default function App({ Component, pageProps }: AppProps) {
           </ReduxProvider>
       </QueryClientProvider>
     </WagmiConfig>
-  );
+  )
 }

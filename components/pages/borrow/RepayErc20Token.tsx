@@ -255,41 +255,26 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
                     </WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
                     <WarningMessage>
-                      Not enough {token?.symbol} in your wallet
+                      The {token?.symbol} balance in your wallet is insufficient
                     </WarningMessage>
                   ) : (
                     <Spacer />
                   )
                 }
                 <div className="d-grid">
-                  { mode === Mode.Init &&
+                  { mode === Mode.Init ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.ExceedMaximumRepayment &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Maximum repayment : <AsyncAmount {...asyncBorrowBalance} /></button>
-                  }
-                  { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {token?.symbol} Balance</button>
-                  }
-                  { mode === Mode.InsufficientAllowance &&
+                  ) : mode === Mode.InsufficientAllowance ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleApproval}>Enable {token?.symbol}</button>
-                  }
-                  { mode === Mode.WaitingForApproval &&
+                  ) : mode === Mode.WaitingForApproval ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Enabling {token?.symbol} ... Wait please <SmallSpinner /></button>
-                  }
-                  { [Mode.ConfirmationOfApproval, Mode.ConfirmationOfRepayment].includes(mode) &&
+                  ) : [Mode.ConfirmationOfApproval, Mode.ConfirmationOfRepayment].includes(mode) ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.RepaymentReady &&
-                    <>
-                      { amount.isGreaterThan(Zero) ? (
-                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleRepay}>Repay <Amount value={amount} /> {token?.symbol}</button>
-                      ) : (
-                        <button className="btn btn-lg btn-primary text-white" type="button">Repay {token?.symbol}</button>
-                      )
-                      }
-                    </>
-                  }
+                  ) : mode === Mode.RepaymentReady && amount.isGreaterThan(Zero) ? (
+                    <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleRepay}>Repay <Amount value={amount} /> {token?.symbol}</button>
+                  ) : (
+                    <button className="btn btn-lg btn-primary text-white" type="button">Repay {token?.symbol}</button>
+                  )}
                 </div>
               </div>
             </div>

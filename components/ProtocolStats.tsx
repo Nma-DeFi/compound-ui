@@ -2,8 +2,9 @@ import { useEffect, useState } from "react"
 import { useCurrentChain } from "../hooks/useCurrentChain"
 import { useProtocolStats } from "../hooks/useProtocolStats"
 import { collateralBalanceUsd, totalBorrowUsd, totalSupplyUsd } from "../selectors/protocol-selector"
-import { NoData } from "../utils/page"
 import { bnp } from "./Price"
+import NoData from "./NoData"
+import PlaceHolder, { PlaceHolderSize } from "./PlaceHolder"
 
 export default function ProtocolStats() {
 
@@ -27,9 +28,9 @@ export default function ProtocolStats() {
 
     return (
         <>
-            <Stat {...{ isLoading, isSuccess, name: 'Total collateral', value: totalCollateral }}/>
-            <Stat {...{ isLoading, isSuccess, name: 'Total borrowing', value: totalBorrowing }}/>
             <Stat {...{ isLoading, isSuccess, name: 'Total earning', value: totalEarning }}/>
+            <Stat {...{ isLoading, isSuccess, name: 'Total borrowing', value: totalBorrowing }}/>
+            <Stat {...{ isLoading, isSuccess, name: 'Total collateral', value: totalCollateral }}/>
         </>
     )
 }
@@ -37,14 +38,14 @@ export default function ProtocolStats() {
 function Stat({ isLoading, isSuccess, name, value}) {
     return (
         <div className="placeholder-glow px-5">
-            <div className="fw-semibold mb-1">{name}</div> 
             { isLoading ? (
-                <div className="placeholder bg-secondary-subtle col-12"></div>
+                <div className="pb-1"><PlaceHolder col={12} size={PlaceHolderSize.LARGE} /></div>
             ) : isSuccess ? (
-                <div className="text-body-tertiary">${value}</div>
+                <div className="fw-medium" style={{ fontSize: '1.2rem' }}>${value}</div>
             ) : (
-                <div className="text-body-tertiary">{NoData}</div>
+                <NoData/>
             )}
+            <div className="text-body-secondary mt-1">{name}</div> 
         </div>
     )
 }

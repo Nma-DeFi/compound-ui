@@ -81,10 +81,10 @@ export class Erc20Service {
     }
 
     private toBigInt(amount: BigNumber) {
-        return toBigInt(amount, this.token.decimals);
+        return toBigInt(amount, this.token.decimals)
     }
 
     private fromBigInt(allowance: any) {
-        return fromBigInt(allowance as bigint, this.token.decimals);
+        return fromBigInt(allowance as bigint, this.token.decimals)
     }
 }

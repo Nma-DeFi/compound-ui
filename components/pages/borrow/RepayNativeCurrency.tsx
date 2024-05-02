@@ -210,39 +210,23 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
                   </div>
                 </div>
                 { mode === Mode.ExceedMaximumRepayment ? (
-                    <WarningMessage>
-                      Maximum repayment : <AsyncAmount {...asyncBorrowBalance} />
-                    </WarningMessage>
+                    <WarningMessage>Maximum repayment : <AsyncAmount {...asyncBorrowBalance} /></WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
-                    <WarningMessage>
-                      Not enough {nativeCurrency.symbol} in your wallet
-                    </WarningMessage>
+                    <WarningMessage>The {nativeCurrency.symbol} balance in your wallet is insufficient</WarningMessage>
                   ) : (
                     <Spacer />
                   )
                 }
                 <div className="d-grid">
-                  { mode === Mode.Init &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.InsufficientBalance &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Insufficient {nativeCurrency.symbol} Balance</button>
-                  }
-                  { mode === Mode.ExceedMaximumRepayment &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Maximum repayment : <AsyncAmount {...asyncBorrowBalance} /></button>
-                  }
-                  { mode === Mode.ConfirmationOfRepayment &&
-                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
-                  }
-                  { mode === Mode.RepaymentReady &&
-                    <>
-                      { amount.isGreaterThan(Zero) ? (
-                        <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleRepay}>Repay <Amount value={amount} /> {nativeCurrency.symbol}</button>
-                      ) : (
-                        <button className="btn btn-lg btn-primary text-white" type="button">Repay {nativeCurrency.symbol}</button>
-                      )
-                      }
-                    </>
+                  { mode === Mode.Init ? (
+                      <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
+                    )  : mode === Mode.RepaymentReady && amount.isGreaterThan(Zero) ? (
+                      <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleRepay}>Repay <Amount value={amount} /> {nativeCurrency.symbol}</button>
+                    ) : mode === Mode.ConfirmationOfRepayment ? (
+                      <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
+                    ) : (
+                      <button className="btn btn-lg btn-primary text-white" type="button">Repay {nativeCurrency.symbol}</button>
+                    )
                   }
                 </div>
               </div>

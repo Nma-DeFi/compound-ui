@@ -5,7 +5,7 @@ import { useCurrentChain } from "../hooks/useCurrentChain";
 import { useAppDispatch } from "../redux/hooks";
 import { chainSwitched } from "../redux/slices/currentChain";
 import styles from '../styles/components/NetworkSelector.module.scss';
-import { CHAINS, chainIcon, chainName, enhanceChain } from "../utils/chains";
+import { CHAINS, chainIcon, chainName, enhanceChain, orderedChainList } from "../utils/chains";
 
 const USER_REJECTED_TX = 'UserRejectedRequestError';
 
@@ -20,16 +20,8 @@ export default function NetworkSelector() {
     const dispatch = useAppDispatch()
 
     useEffect(() => {
-        const comparator = (c1, c2) => {
-            if (c1.isTestnet) {
-                return 1
-            } else if (c2.isTestnet) {
-                return -1
-            } else {
-                return 0
-            }
-        }
-        setChainList(CHAINS.map(enhanceChain).sort(comparator)) 
+        const chainList = orderedChainList()
+        setChainList(chainList) 
     }, [])
 
     function setCurrentChain(newChainId: number) {

@@ -42,11 +42,6 @@ export const borrowPositionsSlice = createSlice({
       const oldBalance = state.data[comet].borrowBalance
       const newBalance = oldBalance.minus(amount)
       state.data[comet].borrowBalance =  BigNumber.max(0, newBalance)
-      console.log('borrowPositionDecrease', 
-        'old balance', oldBalance.toFixed(), 
-        'amount', amount.toFixed(), 
-        'new balance', newBalance.toFixed(),
-        'result', state.data[comet].borrowBalance.toFixed())
     },
     borrowPositionSet: (state: BorrowPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
       const { comet, amount } = action.payload
@@ -76,7 +71,7 @@ export const borrowPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
   'borrowPositions/init',
   async (_, { getState }) => {
       const { chainId } = getState().currentChain
-      const { address } = getState().currentAccount
+      const { address: account } = getState().currentAccount
       const { publicClient } = getState().publicClient
 
       const marketDataService = new MarketDataService({ chainId })
@@ -88,12 +83,11 @@ export const borrowPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
           const comet = MarketSelector.cometProxy(market)
           const baseToken = MarketSelector.baseToken(market)
           const borrowApr = MarketSelector.netBorrowAprScaled(market)
-          const priceFeed = {
-            address: MarketSelector.baseTokePriceFeed(market),
-            kind: MarketUtils.getPriceFeedKind(market, chainId)
-          } 
+          const address = MarketSelector.baseTokePriceFeed(market)
+          const kind = MarketUtils.getPriceFeedKind(market, chainId)
+          const priceFeed = { address, kind } 
           const positionsService = new PositionsService({comet, publicClient })
-          const borrowBalance = await positionsService.borrowBalanceOf(address)
+          const borrowBalance = await positionsService.borrowBalanceOf(account)
           positions = { ...positions, [comet]: { borrowBalance, borrowApr, baseToken, priceFeed, market } }  
       }
       log(chainId, positions)

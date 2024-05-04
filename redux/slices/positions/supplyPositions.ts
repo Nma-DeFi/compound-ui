@@ -40,12 +40,7 @@ export const supplyPositionsSlice = createSlice({
       const { comet, amount } = action.payload
       const oldBalance = state.data[comet].supplyBalance
       const newBalance = oldBalance.minus(amount)
-      state.data[comet].supplyBalance = BigNumber.max(0, newBalance)
-      console.log('supplyPositionDecrease', 
-        'old balance', oldBalance.toFixed(), 
-        'amount', amount.toFixed(), 
-        'new balance', newBalance.toFixed(),
-        'result', state.data[comet].supplyBalance.toFixed())    
+      state.data[comet].supplyBalance = BigNumber.max(0, newBalance) 
     },
     supplyPositionSet: (state: SupplyPositionsState, action: PayloadAction<{ comet: Address, amount: BigNumber }>) => {
       const { comet, amount } = action.payload
@@ -75,7 +70,7 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
   'supplyPositions/init',
   async (_, { getState }) => {
       const { chainId } = getState().currentChain
-      const { address } = getState().currentAccount
+      const { address: account } = getState().currentAccount
       const { publicClient } = getState().publicClient
 
       const marketDataService = new MarketDataService({ chainId })
@@ -86,12 +81,11 @@ export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
       for (const market of markets) {
           const comet = MarketSelector.cometProxy(market)
           const baseToken = MarketSelector.baseToken(market)
-          const priceFeed = {
-            address: MarketSelector.baseTokePriceFeed(market),
-            kind: MarketUtils.getPriceFeedKind(market, chainId)
-          } 
+          const address = MarketSelector.baseTokePriceFeed(market)
+          const kind = MarketUtils.getPriceFeedKind(market, chainId)
+          const priceFeed = { address, kind } 
           const positionsService = new PositionsService({comet, publicClient })
-          const supplyBalance = await positionsService.supplyBalanceOf(address)
+          const supplyBalance = await positionsService.supplyBalanceOf(account)
           positions = { ...positions, [comet]: { baseToken, supplyBalance, priceFeed } }  
       }
       log(chainId, positions)

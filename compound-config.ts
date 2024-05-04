@@ -1,13 +1,18 @@
-import { mainnet, arbitrum, polygon, base, sepolia } from 'wagmi/chains'
+import { mainnet, arbitrum, polygon, base, sepolia, optimism, scroll } from 'wagmi/chains'
 
-const PAPERCLIPLABS_SG = 'https://api.thegraph.com/subgraphs/name/papercliplabs/compound-v3-'
+const SG_API_KEY = process.env.NEXT_PUBLIC_SUBGRAPH_API_KEY
+const SG_GATEWAY = 'https://gateway-arbitrum.network.thegraph.com/api'
+
+const subgraphQueryUrl = sgId => `${SG_GATEWAY}/${SG_API_KEY}/subgraphs/id/${sgId}`
 
 const Subgraphs = {
-    Mainnet: PAPERCLIPLABS_SG + 'mainnet',
-    Arbitrum: PAPERCLIPLABS_SG + 'arbitrum',
-    Polygon: PAPERCLIPLABS_SG + 'polygon',
-    Base: PAPERCLIPLABS_SG + 'base',
-    Sepolia: PAPERCLIPLABS_SG + 'sepolia',
+    Mainnet:  subgraphQueryUrl('5nwMCSHaTqG3Kd2gHznbTXEnZ9QNWsssQfbHhDqQSQFp'), 
+    Arbitrum: subgraphQueryUrl('Ff7ha9ELmpmg81D6nYxy4t8aGP26dPztqD1LDJNPqjLS'), 
+    Polygon:  subgraphQueryUrl('AaFtUWKfFdj2x8nnE3RxTSJkHwGHvawH3VWFBykCGzLs'), 
+    Base:     subgraphQueryUrl('2hcXhs36pTBDVUmk5K2Zkr6N4UYGwaHuco2a6jyTsijo'), 
+    Optimism: subgraphQueryUrl('FhHNkfh5z6Z2WCEBxB6V3s8RPxnJfWZ9zAfM5bVvbvbb'),
+    Scroll:   subgraphQueryUrl('6aRGn6noEdin1krLfYTnLMYaCoTujL7cHekARE4Ndxng'),
+    Sepolia:  subgraphQueryUrl('HZKpJGBKpiBhKBqQuWAiR1xCAPhrsrmGYWpQavi23DR1'), 
 }
 
 export const CompoundConfig = {
@@ -49,6 +54,22 @@ export const CompoundConfig = {
         contracts : {
             bulker: '0xaD0C044425D81a2E223f4CE699156900fead2Aaa',
             wrappedNativeToken : '0x2D5ee574e710219a521449679A4A7f2B43f046ad',
+        }
+    },
+    [optimism.id]: {
+        chain: optimism,
+        subgraph: Subgraphs.Optimism,
+        contracts : {
+            bulker: '0xcb3643CC8294B23171272845473dEc49739d4Ba3',
+            wrappedNativeToken : '0x4200000000000000000000000000000000000006',
+        }
+    },
+    [scroll.id]: {
+        chain: scroll,
+        subgraph: Subgraphs.Scroll,
+        contracts : {
+            bulker: '0x53C6D04e3EC7031105bAeA05B36cBc3C987C56fA',
+            wrappedNativeToken : '0x5300000000000000000000000000000000000004',
         }
     },
 }

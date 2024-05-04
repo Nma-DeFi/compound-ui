@@ -1,12 +1,14 @@
 import { isAddressEqual } from 'viem';
 import { CompoundConfig } from '../compound-config';
-import { arbitrum, sepolia } from 'wagmi/chains';
+import { arbitrum, optimism, sepolia } from 'wagmi/chains';
 import { Token } from '../types';
 
 export const CHAINS = Object.values(CompoundConfig).map(cfg => cfg.chain)
 
 const CHAIN_ICON_PATH = '/images/networks'
 const ARB_SHORT_NAME = 'Arbitrum'
+const OP_SHORT_NAME = 'Optimism'
+
 
 export function chainFromId(id: number) {
     return CHAINS.find(c => c.id === id)
@@ -18,7 +20,15 @@ export function chainIcon(id: number) {
 }
 
 export function chainName(id: number) {
-    return id === arbitrum.id ? ARB_SHORT_NAME : chainFromId(id)?.name
+    let name
+    if (id === arbitrum.id) {
+        name = ARB_SHORT_NAME  
+    } else if (id === optimism.id) {
+        name = OP_SHORT_NAME
+    } else {
+        name = chainFromId(id)?.name
+    }
+    return name
 }
 
 export function isTestnet(id: number) {
@@ -60,5 +70,18 @@ export function enhanceChain(chain) {
 export function transactionUrl({ chainId, txHash }) {
     const blockExplorer = chainFromId(chainId).blockExplorers.default.url
     return `${blockExplorer}/tx/${txHash}`
+}
+
+export function orderedChainList() {
+    const comparator = (c1, c2) => {
+        if (c1.isTestnet) {
+            return 1
+        } else if (c2.isTestnet) {
+            return -1
+        } else {
+            return 0
+        }
+    }
+    return CHAINS.map(enhanceChain).sort(comparator)
 }
 

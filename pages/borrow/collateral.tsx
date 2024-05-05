@@ -32,6 +32,8 @@ import { useBorrowPositions } from '../../hooks/useBorrowPositions';
 
 export default function Collateral() {
 
+    const MAX_INLINE_MARKETS = 2
+
     const { DepositCollateral } = ActionType
 
     const { isConnected } = useCurrentAccount()
@@ -160,7 +162,7 @@ export default function Collateral() {
                             <SelectMarket {...{ markets, currentMarket, chainId, setCurrentMarket }} />
                         </div>
                         <div className="d-none d-sm-flex justify-content-end pt-0">
-                            {(markets.length < 3) ? (
+                            {(markets.length <= MAX_INLINE_MARKETS) ? (
                                 <>
                                     {markets.map((market) =>
                                         <div key={market.id} className={marketCss(market)} onClick={() => setCurrentMarket(market)}>

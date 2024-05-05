@@ -5,7 +5,7 @@ import { useCurrentChain } from "../hooks/useCurrentChain";
 import { useAppDispatch } from "../redux/hooks";
 import { chainSwitched } from "../redux/slices/currentChain";
 import styles from '../styles/components/NetworkSelector.module.scss';
-import { CHAINS, chainIcon, chainName, enhanceChain, orderedChainList } from "../utils/chains";
+import { chainIcon, chainName, orderedChainList } from "../utils/chains";
 
 const USER_REJECTED_TX = 'UserRejectedRequestError';
 

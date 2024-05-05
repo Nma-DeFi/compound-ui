@@ -3,16 +3,16 @@ import { mainnet, arbitrum, polygon, base, sepolia, optimism, scroll } from 'wag
 const SG_API_KEY = process.env.NEXT_PUBLIC_SUBGRAPH_API_KEY
 const SG_GATEWAY = 'https://gateway-arbitrum.network.thegraph.com/api'
 
-const subgraphQueryUrl = sgId => `${SG_GATEWAY}/${SG_API_KEY}/subgraphs/id/${sgId}`
+const subgraphUrl = sgId => `${SG_GATEWAY}/${SG_API_KEY}/subgraphs/id/${sgId}`
 
 const Subgraphs = {
-    Mainnet:  subgraphQueryUrl('5nwMCSHaTqG3Kd2gHznbTXEnZ9QNWsssQfbHhDqQSQFp'), 
-    Arbitrum: subgraphQueryUrl('Ff7ha9ELmpmg81D6nYxy4t8aGP26dPztqD1LDJNPqjLS'), 
-    Polygon:  subgraphQueryUrl('AaFtUWKfFdj2x8nnE3RxTSJkHwGHvawH3VWFBykCGzLs'), 
-    Base:     subgraphQueryUrl('2hcXhs36pTBDVUmk5K2Zkr6N4UYGwaHuco2a6jyTsijo'), 
-    Optimism: subgraphQueryUrl('FhHNkfh5z6Z2WCEBxB6V3s8RPxnJfWZ9zAfM5bVvbvbb'),
-    Scroll:   subgraphQueryUrl('6aRGn6noEdin1krLfYTnLMYaCoTujL7cHekARE4Ndxng'),
-    Sepolia:  subgraphQueryUrl('HZKpJGBKpiBhKBqQuWAiR1xCAPhrsrmGYWpQavi23DR1'), 
+    Mainnet:  subgraphUrl('5nwMCSHaTqG3Kd2gHznbTXEnZ9QNWsssQfbHhDqQSQFp'), 
+    Arbitrum: subgraphUrl('Ff7ha9ELmpmg81D6nYxy4t8aGP26dPztqD1LDJNPqjLS'), 
+    Polygon:  subgraphUrl('AaFtUWKfFdj2x8nnE3RxTSJkHwGHvawH3VWFBykCGzLs'), 
+    Base:     subgraphUrl('2hcXhs36pTBDVUmk5K2Zkr6N4UYGwaHuco2a6jyTsijo'), 
+    Optimism: subgraphUrl('FhHNkfh5z6Z2WCEBxB6V3s8RPxnJfWZ9zAfM5bVvbvbb'),
+    Scroll:   subgraphUrl('6aRGn6noEdin1krLfYTnLMYaCoTujL7cHekARE4Ndxng'),
+    Sepolia:  subgraphUrl('HZKpJGBKpiBhKBqQuWAiR1xCAPhrsrmGYWpQavi23DR1'), 
 }
 
 export const CompoundConfig = {

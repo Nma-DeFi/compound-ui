@@ -242,13 +242,13 @@ export default function DepositBaseTokenErc20(market) {
                     <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
-                { mode === Mode.BorrowingBaseToken ? (
+                { mode === Mode.BorrowingBaseToken && amount.gt(Zero) ? (
                     <WarningMessage>
-                      Cannot supply and borrow {token?.symbol} at the same time
+                      You cannot supply and borrow {token?.symbol} at the same time
                     </WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
                     <WarningMessage>
-                      The {token?.symbol} balance in your wallet is insufficient
+                      You don't have enough {token?.symbol} in your wallet
                     </WarningMessage>
                   ) : (
                     <Spacer />

@@ -43,6 +43,7 @@ import { fillInput } from "../../components/AmountPercent"
 import { AsyncNumber, loadAsyncData } from "../../utils/async"
 
 const enum Mode {
+  InitalLoading,
   Loading,
   NotConnected,
   FarmingBaseToken,
@@ -110,7 +111,7 @@ export default function Borrow() {
         setMode(Mode.ReadyToBorrow)
       }
     })
-    
+
     useEffect(() => {
       if (isMarkets && !market) {
         setCurrentMarket(markets[0])
@@ -201,17 +202,17 @@ export default function Borrow() {
         <div className="col-12 col-xl-6 col-xxl-5 px-0 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
-            <div className={`d-flex border align-items-center rounded mb-2 px-3 py-${mode === Mode.Loading ? '4' : '3'}`}>
+            <div className={`d-flex border align-items-center rounded mb-2 px-3 py-${/*mode === Mode.Loading*/ false ? '4' : '3'}`}>
                 <div className="flex-grow-1">
-                    { mode === Mode.Loading ? (
+                    { false ? ( //mode === Mode.Loading ? (
                         <div><PlaceHolder size={PlaceHolderSize.LARGE} col={2} /></div>
                       ) : (
                         <AmountInput id={css['borrow-input']} onChange={handleAmountChange} />
                       )
                     }
                     <small className="text-body-tertiary">
-                    { mode === Mode.Loading ? (
-                        <PlaceHolder col={2} />
+                    { asyncAmountPriceUsd.isIdle ? ( //mode === Mode.Loading ? (
+                        <PlaceHolder />
                       ) : (
                         <PriceAsync asyncPrice={asyncAmountPriceUsd} />
                       )
@@ -219,7 +220,7 @@ export default function Borrow() {
                     </small>
                 </div>
                 <button type="button" className="btn btn-lg btn-light border border-light-subtle rounded-5" onClick={() => openModal(SELECT_TOKEN_TO_BORROW_MODAL)}>
-                  { mode === Mode.Loading ? (
+                  { false ? (//mode === Mode.Loading ? (
                       <div className="d-flex align-items-center">
                         <div className="me-1 me-sm-2 mb-1" style={{ width: '6rem'}}>
                           <PlaceHolder size={PlaceHolderSize.LARGE} col={12} />
@@ -241,30 +242,23 @@ export default function Borrow() {
             { mode === Mode.Loading  &&    
               <BorrowPanel {...{ mode, borrowApr, css: 'pb-1' }}>
                 <div style={{ width: '20rem'}}>
-                  <PlaceHolder size={PlaceHolderSize.NORMAL} col={12} />
+                  <PlaceHolder size={PlaceHolderSize.LARGE} col={12} />
                 </div>
               </BorrowPanel>
             }
             { mode === Mode.NotConnected &&
-              <BorrowPanel {...{ mode, borrowApr, css: 'pb-2' }}>
-                <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none text-body">
-                  <div className="d-flex align-items-center">
-                    <span className="pe-2" style={{ fontSize: '110%' }}>
-                    { collaterals.length > 1 ? 'Collaterals' : 'Collateral' }
-                    </span>
-                    { collaterals.map((collateral) =>
-                      <span key={collateral.token.address} className="text-body-tertiary ps-2">
-                        <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              </BorrowPanel>
+              <CollateralPanel {...{ chainId, mode, borrowApr, collaterals }} />
             }
             { mode === Mode.FarmingBaseToken &&
-              <BorrowPanel {...{ mode, borrowApr }}>
-                <WarningLabel>Cannot supply and borrow {token?.symbol} at the same time</WarningLabel>
-              </BorrowPanel>
+              <>
+                  { amount.isEqualTo(Zero) ?
+                    <CollateralPanel {...{ chainId, mode, borrowApr, collaterals }} />
+                  : (
+                    <BorrowPanel {...{ mode, borrowApr }}>
+                      <WarningLabel>You cannot supply and borrow {token?.symbol} at the same time</WarningLabel>
+                    </BorrowPanel>
+                  )}
+              </>
             }
             { mode === Mode.InsufficientBorrowCapacity &&
               <BorrowPanel {...{ mode, borrowApr }}>
@@ -287,7 +281,6 @@ export default function Borrow() {
             }
             { mode === Mode.ReadyToBorrow &&
               <BorrowPanel {...{ mode, borrowApr }}>
-                
                 <div className="mb-1">
                   <Link href='#' onClick={handleMaxBorrow} className="text-decoration-none text-body">Maximum borrowing : <span className="text-body-tertiary">
                   <PriceAsync asyncPrice={{ 
@@ -319,10 +312,12 @@ export default function Borrow() {
           </div>
         </div>
         <div className="col-12 col-xl-3 col-xxl-2 px-0 pt-4 pt-xl-0">
-          { isConnected &&
+          { isConnected && 
             <>
               <BorrowPositions /> 
-              <TotalCollaterals /> 
+              { (mode !== Mode.Loading) &&
+                <TotalCollaterals /> 
+              }
             </>
           }
         </div>
@@ -342,16 +337,36 @@ function BorrowPanel({ children, mode, borrowApr, css = ''} : { children: ReactN
         <div className="px-2 py-1 me-1 shadow-sm rounded small">
           { mode === Mode.Loading ? 
             (
-              <div style={{ width: '6rem'}}>
+              <div style={{ width: '6.5rem'}}>
                 <PlaceHolder size={PlaceHolderSize.SMALL} col={12} />
               </div>
             ) : (
-              <>Borrow APR : <span className="text-body-tertiary"><Apr value={borrowApr} /></span></>
+              <>Borrow APR : <span className="text-body-tertiary"><Apr value={borrowApr} /></span>
+              </>
             )
           }
         </div>
       </div>
     </div>
+  )
+}
+
+function CollateralPanel({ chainId, mode, borrowApr, collaterals }) {
+  return (
+    <BorrowPanel {...{ mode, borrowApr, css: 'pb-2' }}>
+      <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none text-body">
+        <div className="d-flex align-items-center">
+          <span className="pe-2" style={{ fontSize: '110%' }}>
+          { collaterals.length > 1 ? 'Collaterals' : 'Collateral' }
+          </span>
+          { collaterals.map((collateral) =>
+            <span key={collateral.token.address} className="text-body-tertiary ps-2">
+              <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
+            </span>
+          )}
+        </div>
+      </Link>
+    </BorrowPanel>
   )
 }
 
@@ -377,7 +392,7 @@ function TotalCollaterals() {
 
 function WarningLabel({ children }) {
   return (
-    <div className="bg-warning-subtle text-warning-emphasis px-3 py-2 rounded-3" style={{ fontSize: '95%' }}>
+    <div className="bg-warning-subtle text-warning-emphasis px-2 py-2 rounded-3" style={{ fontSize: '92%' }}>
     { children }
     </div>
   )

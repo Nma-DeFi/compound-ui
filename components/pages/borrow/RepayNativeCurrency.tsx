@@ -212,7 +212,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
                 { mode === Mode.ExceedMaximumRepayment ? (
                     <WarningMessage>Maximum repayment : <AsyncAmount {...asyncBorrowBalance} /></WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
-                    <WarningMessage>The {nativeCurrency.symbol} balance in your wallet is insufficient</WarningMessage>
+                    <WarningMessage>You don't have enough {nativeCurrency.symbol} in your wallet</WarningMessage>
                   ) : (
                     <Spacer />
                   )

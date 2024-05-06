@@ -10,7 +10,7 @@ import { useBootstrap } from "../../hooks/useBootstrap"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
 import { useMarkets } from "../../hooks/useMarkets"
 import { baseTokenAddress, totalBaseSupplyScaled, totalBaseSupplyUsd } from "../../selectors/market-selector"
-import { bn, bnf } from "../../utils/bn"
+import { bn } from "../../utils/bn"
 import { isNativeCurrencyMarket, getBaseTokenOrNativeCurrency } from "../../utils/markets"
 import { useSupplyPositions } from "../../hooks/useSupplyPositions"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
@@ -20,7 +20,7 @@ import DepositBaseTokenErc20, { DEPOSIT_BASE_TOKEN_ERC20_MODAL } from "../../com
 import DepositBaseTokenNative, { DEPOSIT_BASE_TOKEN_NATIVE_MODAL } from "../../components/pages/earn/DepositBaseTokenNative"
 import { ActionInfo, ActionType } from "../../types"
 import ActionResult from "../../components/action-result/ActionResult"
-import Amount, { bna2 } from "../../components/Amount"
+import { bna2 } from "../../components/Amount"
 import Price from "../../components/Price"
 
 export default function Earn() {

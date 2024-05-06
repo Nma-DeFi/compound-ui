@@ -45,12 +45,7 @@ export function bna(value: BigNumber.Value) {
 
     result = result.toFixed(dp, rm)
 
-    if (result.includes('.')) {
-        result = result.replace(/0+$/, '')
-        result = result.replace(/\.$/, '')
-    }
-
-    return result
+    return trimZeros(result)
 }
 
 export function bna2(value: BigNumber.Value) {
@@ -59,10 +54,7 @@ export function bna2(value: BigNumber.Value) {
 
     if (result.lt(1)) {
         result = result.toFixed(6, BigNumber.ROUND_UP)
-        if (result.includes('.')) {
-            result = result.replace(/0+$/, '')
-            result = result.replace(/\.$/, '')
-        }
+        result = trimZeros(result)
     } else {
         if (result.gte(1e9)) {
             result = `${result.div(1e9).toFixed(2)}b`
@@ -72,8 +64,17 @@ export function bna2(value: BigNumber.Value) {
             result = `${result.div(1e3).toFixed(2)}k`
         } else {
             result = result.toFixed(3)
+            result = trimZeros(result)
         }
     } 
 
     return result
+}
+
+function trimZeros(num: string) {
+    if (num.includes('.')) {
+        num = num.replace(/0+$/, '')
+        num = num.replace(/\.$/, '')
+    }
+    return num
 }

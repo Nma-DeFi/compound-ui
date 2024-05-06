@@ -204,10 +204,10 @@ export default function DepositBaseTokenNative(market) {
                       <AmountPercent handler={handleWalletBalancePercent} />
                   </div>
                 </div>
-                { mode === Mode.BorrowingBaseToken ? 
-                    <WarningMessage>Cannot supply and borrow {nativeCurrency.symbol} at the same time</WarningMessage>
+                { mode === Mode.BorrowingBaseToken && amount.gt(Zero) ? 
+                    <WarningMessage>You cannot supply and borrow {nativeCurrency.symbol} at the same time</WarningMessage>
                   : mode === Mode.InsufficientBalance ? 
-                    <WarningMessage>The {nativeCurrency.symbol} balance in your wallet is insufficient</WarningMessage>
+                    <WarningMessage>You don't have enough {nativeCurrency.symbol} in your wallet</WarningMessage>
                   :
                     <Spacer />
                 }

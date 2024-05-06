@@ -6,14 +6,29 @@ import TokenIcon from "../../components/TokenIcon"
 import { ChainDataService } from "../../services/chain-data-service"
 import { getBaseTokenOrNativeCurrency } from "../../utils/markets"
 import { GrowSpinners } from "../../components/Spinner"
+import { RewardsService } from "../../services/rewards-service"
+import { useCurrentAccount } from "../../hooks/useCurrentAccount"
+import { usePublicClient } from "wagmi"
+import { useCurrentChain } from "../../hooks/useCurrentChain"
 
 export default function Claim() {
 
     const [ chainList, setChainList ] = useState([])
+
+    const { address } = useCurrentAccount()
+    const { currentChainId: chainId } = useCurrentChain()
+    const publicClient = usePublicClient({ chainId })
     
     useEffect(() => {
         ChainDataService.findAllChains().then(setChainList)
     }, [])
+
+    useEffect(() => {
+        if (address) {
+            const rewardService = new RewardsService({ publicClient })
+            rewardService.findAllRewards(address)
+        }
+    }, [address])
 
     return ( 
         <>
@@ -57,7 +72,7 @@ export default function Claim() {
                                         </thead>
                                         <tbody>
                                             {chain.markets.map(market =>
-                                                <tr>
+                                                <tr key={market.id}>
                                                     <td>
                                                         <TokenIcon symbol={ getBaseTokenOrNativeCurrency(market, chain.id).symbol } css={`d-none d-sm-inline me-2 ${css['market-icon']}`} />
                                                         { getBaseTokenOrNativeCurrency(market, chain.id).symbol } <span className="text-body-secondary">Market</span>

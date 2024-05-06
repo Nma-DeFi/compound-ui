@@ -255,7 +255,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
                     </WarningMessage>
                   ) : mode === Mode.InsufficientBalance ? (
                     <WarningMessage>
-                      The {token?.symbol} balance in your wallet is insufficient
+                      You don't have enough {token?.symbol} in your wallet
                     </WarningMessage>
                   ) : (
                     <Spacer />

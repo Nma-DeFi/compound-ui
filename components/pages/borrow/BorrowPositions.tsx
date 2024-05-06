@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react"
 import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
-import Amount, { bna2 } from "../../Amount"
+import { bna2 } from "../../Amount"
 import Apr from "../../Apr"
 import PriceFromFeed from "../../PriceFromFeed"
 import TokenIcon from "../../TokenIcon"
 import LiquidationRisk from "../../LiquidationRisk"
-import Spinner from "../../Spinner"
 import { useCurrentChain } from "../../../hooks/useCurrentChain"
 import { ActionInfo, Market } from "../../../types"
 import { useBootstrap } from "../../../hooks/useBootstrap"
@@ -28,7 +27,7 @@ export default function BorrowPositions() {
     const [ market, setMarket ] = useState<Market>()
     const [ repayResult, setRepayResult ] = useState<ActionInfo>()
 
-    const { isLoading, isSuccess, data } = useBorrowPositions()
+    const { isSuccess, data } = useBorrowPositions()
 
     const { openModal } = useBootstrap()
 
@@ -65,15 +64,10 @@ export default function BorrowPositions() {
     }
 
     return <>
-        { isShown() && (
+        { isShown() &&  (
             <div className="bg-body p-3 rounded border shadow pb-4" style={{ marginBottom: '2rem' }}>     
                 <h4 style={{ marginBottom: '1.25rem' }}>Your { borrowPositions.length > 1 ? 'borrowings' : 'borrowing' }</h4>
-                { isLoading &&
-                    <div className="py-4">
-                        <Spinner css="d-flex mx-auto text-secondary text-opacity-25" />
-                    </div>
-                }
-                { isSuccess && borrowPositions.map((borrowPosition, index) => 
+                { borrowPositions.map((borrowPosition, index) => 
                     <div key={index}>
                         <div style={{ padding: '0.6rem 0'}}>       
                             <table className="table table-borderless align-middle mb-0">
@@ -102,7 +96,7 @@ export default function BorrowPositions() {
                                         </button>
                                     </td>
                                     <td className="px-0 py-2 text-center small">
-                                        <div className="">Borrow APR</div> 
+                                        <div>Borrow APR</div> 
                                         <div className="text-body-secondary"><Apr value={ borrowPosition.borrowApr } /></div>
                                     </td>
                                 </tr>

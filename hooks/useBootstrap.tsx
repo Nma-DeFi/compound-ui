@@ -9,7 +9,8 @@ export function useBootstrap() {
         openToast: null,
         hideToast: null,
         getOrCreateTooltip: null,
-    });
+        getOrCreateCollapse: null,
+    })
 
     useEffect(() => {
         import('../utils/bootstrap').then(bs => setBootstrap(bs))

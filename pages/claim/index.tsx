@@ -36,7 +36,7 @@ export default function Claim() {
                 <title>Claim</title>
             </Head>
             <div className="col-12 col-lg-7 col-xxl-6 px-0 px-xl-5">
-                <div className="bg-body p-4 pt-3 rounded border shadow mb-4">
+                <div className="bg-body px-3 px-md-4 pb-4 pt-3 rounded border shadow mb-4">
                     <div className="d-flex justify-content-between mb-3">
                         <h2 className="m-0">Claim</h2>
                         <div className="small text-center">
@@ -60,7 +60,7 @@ export default function Claim() {
                                 </button>
                             </h2>
                             <div id={`collapse${chain.id}`} className="accordion-collapse collapse">
-                                <div className="accordion-body">
+                                <div className="accordion-body px-2 px-md-3">
                                     <div className="table-responsive mb-1">
                                     <table className="table table-striped table-borderless align-middle">
                                         <thead>

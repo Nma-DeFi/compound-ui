@@ -1,4 +1,4 @@
-import { Modal, Toast, Tooltip } from "bootstrap";
+import { Modal, Toast, Tooltip, Collapse } from "bootstrap";
 
 export const openModal = (id: string) => {
     Modal.getOrCreateInstance(`#${id}`).show()
@@ -18,4 +18,8 @@ export const hideToast = (id: string) => {
 
 export const getOrCreateTooltip = (elem: Element) => {
     return Tooltip.getOrCreateInstance(elem)
+}
+
+export const getOrCreateCollapse = (elem: Element, options) => {
+    return Collapse.getOrCreateInstance(elem, options)
 }

@@ -5,6 +5,8 @@ import NetworkSelector from './NetworkSelector';
 import { useNetworkEvents } from "../hooks/useNetworkEvents";
 import ProtocolStats from './ProtocolStats';
 import { useAutoRefreshAccruedPositions } from '../hooks/useAutoRefreshAccruedPositions';
+import { useEffect } from 'react';
+import { useBootstrap } from '../hooks/useBootstrap';
 
 export const Path = {
     Index: '/',
@@ -17,6 +19,16 @@ export default function Layout({ children }) {
 
     useNetworkEvents()
     useAutoRefreshAccruedPositions()
+    
+    const { getOrCreateCollapse } = useBootstrap()
+
+    useEffect(() => {
+        if (!getOrCreateCollapse) return
+        const menuToggle = document.getElementById('navbarSupportedContent')
+        const navLinks = menuToggle.querySelectorAll('.nav-item')
+        const bsCollapse = getOrCreateCollapse(menuToggle, {toggle: false})
+        navLinks.forEach(l => l.addEventListener('click', () => bsCollapse.toggle()))
+    }, [getOrCreateCollapse])
 
     return (
         <> 

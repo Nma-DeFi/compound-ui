@@ -86,7 +86,7 @@ export const borrowPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
           const address = MarketSelector.baseTokePriceFeed(market)
           const kind = MarketUtils.getPriceFeedKind(market, chainId)
           const priceFeed = { address, kind } 
-          const positionsService = new PositionsService({comet, publicClient })
+          const positionsService = new PositionsService({ comet, publicClient })
           const borrowBalance = await positionsService.borrowBalanceOf(account)
           positions = { ...positions, [comet]: { borrowBalance, borrowApr, baseToken, priceFeed, market } }  
       }

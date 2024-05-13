@@ -25,8 +25,8 @@ export default function Layout({ children }) {
     useEffect(() => {
         if (!getOrCreateCollapse) return
         const menuToggle = document.getElementById('navbarSupportedContent')
+        const bsCollapse = getOrCreateCollapse(menuToggle, { toggle: false })
         const navLinks = menuToggle.querySelectorAll('.nav-item')
-        const bsCollapse = getOrCreateCollapse(menuToggle, {toggle: false})
         navLinks.forEach(l => l.addEventListener('click', () => bsCollapse.toggle()))
     }, [getOrCreateCollapse])
 
@@ -56,7 +56,9 @@ export default function Layout({ children }) {
                         </div>
                         <div>
                             <ConnectButton />
-                            <div className="d-block d-xl-none mt-4"><NetworkSelector /></div>
+                            <div className="d-block d-xl-none mt-4">
+                                <NetworkSelector id="navbar-chain-selector" fontSize="120%" collapseNavbar={true} />
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSwitchNetwork } from "wagmi";
 import { useCurrentAccount } from "../hooks/useCurrentAccount";
 import { useCurrentChain } from "../hooks/useCurrentChain";
@@ -10,7 +10,7 @@ import { useBootstrap } from "../hooks/useBootstrap";
 
 const USER_REJECTED_TX = 'UserRejectedRequestError';
 
-export default function NetworkSelector({ id='chain-selector', fontSize = '110%', collapseNavbar = false }) {
+export default function NetworkSelector({ id = 'chain-selector', fontSize = '110%', collapseNavbar = false }) {
 
     const { currentChainId } = useCurrentChain()
     const { isConnected } = useCurrentAccount()
@@ -25,10 +25,12 @@ export default function NetworkSelector({ id='chain-selector', fontSize = '110%'
     useEffect(() => {
         if (!getOrCreateCollapse || !collapseNavbar) return
         const menuToggle = document.getElementById('navbarSupportedContent')
-        const bsCollapse = getOrCreateCollapse(menuToggle, { toggle: false })
-        const chainSelector = document.getElementById(id)
-        const chainLinks = chainSelector.querySelectorAll('.chain-link-item')
-        chainLinks.forEach(l => l.addEventListener('click', () => bsCollapse.toggle()))
+        if (menuToggle) {
+            const bsCollapse = getOrCreateCollapse(menuToggle, { toggle: false })
+            const chainSelector = document.getElementById(id)
+            const chainLinks = chainSelector.querySelectorAll('.chain-link-item')
+            chainLinks.forEach(l => l.addEventListener('click', () => bsCollapse.toggle()))
+        }
     }, [getOrCreateCollapse])
 
     useEffect(() => {
@@ -73,5 +75,5 @@ export default function NetworkSelector({ id='chain-selector', fontSize = '110%'
                 ))}
                 </ul>
             </div>
-        );
+        )
 }

@@ -4,6 +4,7 @@ import currentAccount from './slices/currentAccount'
 import currentChain from './slices/currentChain'
 import currentMarket from './slices/currentMarket'
 import publicClient from './slices/publicClient'
+import rewardsOwed from './slices/rewardsOwed'
 import supplyPositions from './slices/positions/supplyPositions'
 import borrowPositions from './slices/positions/borrowPositions'
 import collateralPositions from './slices/positions/collateralPositions'
@@ -22,6 +23,7 @@ export const store = configureStore({
     supplyPositions,
     borrowPositions,
     collateralPositions,
+    rewardsOwed,
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware({
     serializableCheck: false,

@@ -6,29 +6,19 @@ import TokenIcon from "../../components/TokenIcon"
 import { ChainDataService } from "../../services/chain-data-service"
 import { getBaseTokenOrNativeCurrency } from "../../utils/markets"
 import { GrowSpinners } from "../../components/Spinner"
-import { RewardsService } from "../../services/rewards-service"
+import { useRewardsOwed } from "../../hooks/useRewardsOwed"
+import Amount from "../../components/Amount"
+import { bn } from "../../utils/bn"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
-import { usePublicClient } from "wagmi"
-import { useCurrentChain } from "../../hooks/useCurrentChain"
+import BigNumber from "bignumber.js"
 
 export default function Claim() {
 
     const [ chainList, setChainList ] = useState([])
-
-    const { address } = useCurrentAccount()
-    const { currentChainId: chainId } = useCurrentChain()
-    const publicClient = usePublicClient({ chainId })
     
     useEffect(() => {
         ChainDataService.findAllChains().then(setChainList)
     }, [])
-
-    useEffect(() => {
-        if (address) {
-            const rewardService = new RewardsService({ publicClient })
-            rewardService.findAllRewards(address)
-        }
-    }, [address])
 
     return ( 
         <>
@@ -77,12 +67,7 @@ export default function Claim() {
                                                         <TokenIcon symbol={ getBaseTokenOrNativeCurrency(market, chain.id).symbol } css={`d-none d-sm-inline me-2 ${css['market-icon']}`} />
                                                         { getBaseTokenOrNativeCurrency(market, chain.id).symbol } <span className="text-body-secondary">Market</span>
                                                     </td>
-                                                    <td className="text-center">
-                                                        <div className="d-flex justify-content-center align-items-center mb-1">
-                                                            {/*<TokenIcon symbol="COMP" css={` me-2 ${css['claimable-comp-icon']}`} />*/}<div><NoData /></div>
-                                                        </div>
-                                                        <div className="small text-body-secondary"><NoData /></div>
-                                                    </td>
+                                                    <RewardsBalance chain={chain.id} market={market.id} />
                                                     <td className="text-end">
                                                         <button type="button" className="btn btn-primary text-white" disabled>Claim</button>
                                                     </td>
@@ -106,6 +91,35 @@ export default function Claim() {
                 </div>
             </div>
         </>
+    )
+}
+
+export function RewardsBalance({ chain, market }) {
+
+    const [ reward, setReward ] = useState<BigNumber>()
+
+    const { isSuccess: isRewards, data: rewards} = useRewardsOwed()
+        
+    useEffect(() => {
+        if (isRewards) {
+            let balance = null
+            if (chain in rewards && market in rewards[chain]) {
+                balance = rewards[chain][market].balance
+            } 
+            setReward(balance)
+        }
+    }, [rewards])
+
+    return isRewards ? (
+        <td className="text-center">
+            <div className="d-flex justify-content-center align-items-center mb-1"><Amount value={reward} /></div>
+            <div className="small text-body-secondary"><NoData /></div>
+        </td>   
+    ) : (
+        <td className="text-center">
+            <div className="d-flex justify-content-center align-items-center mb-1"><NoData /></div>
+            <div className="small text-body-secondary"><NoData /></div>
+        </td>   
     )
 }
   

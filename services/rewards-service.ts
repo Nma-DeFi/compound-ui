@@ -3,44 +3,47 @@ import { ChainDataService } from "./chain-data-service";
 import { cometRewardsAbi } from "../abi/cometRewardsAbi";
 import { CompoundConfig } from "../compound-config";
 import { cometProxy } from "../selectors/market-selector";
+import { isTestnet } from "../utils/chains";
+import { fromBigInt } from "../utils/bn";
+import { RewardsOwedData } from "../redux/slices/rewardsOwed";
+
+const REWARD_TOKEN = { symbol: 'COMP', name: 'Compound', decimals: 18 }
 
 export class RewardsService {
 
-    publicClient
+    static async findAllRewards(account: Address): Promise<RewardsOwedData> {
+        const chainsWithMarkets = (await ChainDataService.findAllChains()).filter(c => !isTestnet(c.id))
 
-    constructor({ publicClient }) {
-        this.publicClient = publicClient
-    }
+        let rewards = {}
 
-    async findAllRewards(account: Address) {
-        const chainsWithMarkets = await ChainDataService.findAllChains()
-
-        for (const chain of chainsWithMarkets.filter(c => !c.isTestnet)) {
-            console.log('findAllRewards', account, chain)
+        for (const chain of chainsWithMarkets) {
             
-            const rewardsContract = { 
-                address: CompoundConfig[chain.id].contracts.cometRewards, 
-                abi: cometRewardsAbi 
-            }
-            //console.log('findAllRewards rewardsContract', rewardsContract)
-
             const contracts = chain.markets.map(market => ({
-                ...rewardsContract,
+                address: CompoundConfig[chain.id].contracts.cometRewards, 
+                abi: cometRewardsAbi,
                 functionName: 'getRewardOwed',
                 args: [ cometProxy(market), account ]                
             }))
 
-            //console.log('findAllRewards contracts', contracts)
-
             const publicClient = createPublicClient({ chain, transport: http() })
 
-            try {
-                const rewards = await publicClient.multicall({ contracts, allowFailure: false })
-                console.log('findAllRewards result', rewards)
-            } catch (e) {
-                console.error('findAllRewards error', e, chain.name, contracts)
-            }
+            type RewardsOwedArray = Array<{ token: Address; owed: bigint}>
+
+            const rewardsOwed = (await publicClient.multicall({ contracts, allowFailure: false })) as RewardsOwedArray
+
+            let rewardsByChain = {}
+            contracts.forEach((contract, i) => {
+                const tokenBalance = {
+                    token: rewardsOwed[i].token, 
+                    balance: fromBigInt(rewardsOwed[i].owed, REWARD_TOKEN.decimals)
+                }
+                rewardsByChain = { ...rewardsByChain, [contract.args[0]]: tokenBalance }  
+            })           
+
+            rewards = { ...rewards, [chain.id]:  rewardsByChain }
         }
+
+        return rewards
     }
 
 }

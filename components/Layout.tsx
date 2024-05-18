@@ -25,9 +25,11 @@ export default function Layout({ children }) {
     useEffect(() => {
         if (!getOrCreateCollapse) return
         const menuToggle = document.getElementById('navbarSupportedContent')
-        const bsCollapse = getOrCreateCollapse(menuToggle, { toggle: false })
-        const navLinks = menuToggle.querySelectorAll('.nav-item')
-        navLinks.forEach(l => l.addEventListener('click', () => bsCollapse.toggle()))
+        if (menuToggle) {
+            const bsCollapse = getOrCreateCollapse(menuToggle, { toggle: false })
+            const navLinks = menuToggle.querySelectorAll('.nav-item')
+            navLinks.forEach(l => l.addEventListener('click', () => bsCollapse.toggle()))    
+        }
     }, [getOrCreateCollapse])
 
     return (

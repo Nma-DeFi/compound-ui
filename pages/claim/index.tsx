@@ -8,17 +8,30 @@ import { getBaseTokenOrNativeCurrency } from "../../utils/markets"
 import { GrowSpinners } from "../../components/Spinner"
 import { useRewardsOwed } from "../../hooks/useRewardsOwed"
 import Amount from "../../components/Amount"
-import { bn } from "../../utils/bn"
-import { useCurrentAccount } from "../../hooks/useCurrentAccount"
 import BigNumber from "bignumber.js"
+import PriceFromSymbol from "../../components/PriceFromSymbol"
+import { REWARD_TOKEN } from "../../services/rewards-service"
+import { useCurrentAccount } from "../../hooks/useCurrentAccount"
+import { useBootstrap } from "../../hooks/useBootstrap"
+import ClaimOneMarket, { CLAIM_MODAL } from "../../components/pages/claim/ClaimOneMarket"
 
 export default function Claim() {
 
     const [ chainList, setChainList ] = useState([])
-    
+    const [ claimInfo, setClaimInfo ] = useState(null)
+
+    const { isConnected } = useCurrentAccount()
+
+    const { openModal } = useBootstrap()
+
     useEffect(() => {
         ChainDataService.findAllChains().then(setChainList)
     }, [])
+
+    function handleClaim(chain, market) {
+        setClaimInfo({ chain, market })
+        openModal(CLAIM_MODAL)
+    }
 
     return ( 
         <>
@@ -34,7 +47,7 @@ export default function Claim() {
                             <div className="text-body-secondary"><NoData /></div>
                         </div>
                     </div>
-                    { chainList.length === 0 && <GrowSpinners nb={6} css="text-center py-5" /> }
+                    { chainList.length === 0 && <GrowSpinners nb={5} css="text-center py-5" /> }
                     <div id={ css['claim-accordion'] } className="accordion">
                     { chainList.map(chain => 
                         <div className="accordion-item" key={chain.id}>
@@ -69,7 +82,11 @@ export default function Claim() {
                                                     </td>
                                                     <RewardsBalance chain={chain.id} market={market.id} />
                                                     <td className="text-end">
+                                                    { !isConnected ?
                                                         <button type="button" className="btn btn-primary text-white" disabled>Claim</button>
+                                                    :  
+                                                        <button type="button" className="btn btn-primary text-white" onClick={() => handleClaim(chain, market)}>Claim</button>
+                                                    }
                                                     </td>
                                                 </tr>
                                             )}
@@ -90,30 +107,36 @@ export default function Claim() {
                     </div>
                 </div>
             </div>
+            <ClaimOneMarket {...claimInfo} />
         </>
     )
 }
 
 export function RewardsBalance({ chain, market }) {
 
-    const [ reward, setReward ] = useState<BigNumber>()
+    const [ balance, setBalance ] = useState<BigNumber>()
 
+    const { isConnected } = useCurrentAccount()
     const { isSuccess: isRewards, data: rewards} = useRewardsOwed()
         
     useEffect(() => {
         if (isRewards) {
             let balance = null
-            if (chain in rewards && market in rewards[chain]) {
+            if ((chain in rewards) && (market in rewards[chain])) {
                 balance = rewards[chain][market].balance
             } 
-            setReward(balance)
+            setBalance(balance)
         }
     }, [rewards])
 
-    return isRewards ? (
+    return isConnected && isRewards ? (
         <td className="text-center">
-            <div className="d-flex justify-content-center align-items-center mb-1"><Amount value={reward} /></div>
-            <div className="small text-body-secondary"><NoData /></div>
+            <div className="d-flex justify-content-center align-items-center mb-1">
+                <Amount value={balance} />
+            </div>
+            <div className="small text-body-secondary">
+                <PriceFromSymbol symbol={REWARD_TOKEN.symbol} amount={balance} placeHolderCfg={{ col: 2 }} />
+            </div>
         </td>   
     ) : (
         <td className="text-center">

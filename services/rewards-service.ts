@@ -7,7 +7,7 @@ import { isTestnet } from "../utils/chains";
 import { fromBigInt } from "../utils/bn";
 import { RewardsOwedData } from "../redux/slices/rewardsOwed";
 
-const REWARD_TOKEN = { symbol: 'COMP', name: 'Compound', decimals: 18 }
+export const REWARD_TOKEN = { symbol: 'COMP', name: 'Compound', decimals: 18 }
 
 export class RewardsService {
 
@@ -32,12 +32,13 @@ export class RewardsService {
             const rewardsOwed = (await publicClient.multicall({ contracts, allowFailure: false })) as RewardsOwedArray
 
             let rewardsByChain = {}
+
             contracts.forEach((contract, i) => {
-                const tokenBalance = {
+                const rewardBalance = {
                     token: rewardsOwed[i].token, 
                     balance: fromBigInt(rewardsOwed[i].owed, REWARD_TOKEN.decimals)
                 }
-                rewardsByChain = { ...rewardsByChain, [contract.args[0]]: tokenBalance }  
+                rewardsByChain = { ...rewardsByChain, [contract.args[0]]: rewardBalance }  
             })           
 
             rewards = { ...rewards, [chain.id]:  rewardsByChain }

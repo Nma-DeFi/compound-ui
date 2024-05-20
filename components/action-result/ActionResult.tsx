@@ -13,17 +13,19 @@ import { borrowPositionDecrease, borrowPositionIncrease, borrowPositionSet } fro
 import { Zero } from "../../utils/bn";
 import { ToastEvent, useToastEvent } from "../../hooks/useBootstrap";
 import { Hash } from "viem";
+import { rewardsOwedSet } from "../../redux/slices/rewardsOwed";
 
 export const ACTION_RESULT_TOAST = 'action-result-toast'
 
 type ActionResultParam = ActionInfo & { 
     id?: string
+    claimChainId?: number
     onSuccess?: () => void 
 }
 
 const enum Mode { Loading, Success, Error }
 
-export default function ActionResult({ id, comet, action, token, amount, hash, onSuccess } : ActionResultParam) {
+export default function ActionResult({ id, comet, action, token, amount, hash, claimChainId, onSuccess } : ActionResultParam) {
 
     const toastId = id || ACTION_RESULT_TOAST
 
@@ -76,6 +78,9 @@ export default function ActionResult({ id, comet, action, token, amount, hash, o
                     break
                 case ActionType.RepayMax:
                     dispatch(borrowPositionSet({ comet, amount: Zero }))
+                    break
+                case ActionType.ClaimOneMarket:
+                    dispatch(rewardsOwedSet({ chainId: claimChainId, comet, amount: Zero }))
                     break
             }
             const txUrl = transactionUrl({ chainId, txHash: data.transactionHash })

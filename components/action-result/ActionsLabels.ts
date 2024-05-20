@@ -33,4 +33,8 @@ export const ActionLabels = {
         header : 'Repay max',
         content : 'Repaying',
     },
+    [ActionType.ClaimOneMarket] : {
+        header : 'Claim market',
+        content : 'Claiming',
+    },
 }

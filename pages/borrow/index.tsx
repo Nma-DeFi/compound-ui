@@ -158,7 +158,6 @@ export default function Borrow() {
     }
 
     function handleBorrow() {
-      if (amount.isZero()) return
       const borrowInfo = { 
         comet, token, amount, 
         priceFeed, borrowApr, 
@@ -302,7 +301,7 @@ export default function Borrow() {
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={() => openWeb3Modal()}>Connect Wallet</button>
                   ) : mode === Mode.Loading ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Loading <SmallSpinner /></button>
-                  ) : mode === Mode.ReadyToBorrow ? (
+                  ) : mode === Mode.ReadyToBorrow && amount.isGreaterThan(0) ? (
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={() => handleBorrow()}>Borrow {token?.symbol}</button>
                   ) : (
                     <button className="btn btn-lg btn-primary text-white" type="button">Borrow {token?.symbol}</button>

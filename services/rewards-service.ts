@@ -47,4 +47,24 @@ export class RewardsService {
         return rewards
     }
 
+    static async claim({ chain, account, market, publicClient, walletClient }) {
+        console.log(
+            Date.now(),
+            'RewardsService.claim',
+            'chain', chain.name,
+            'account', account,
+            'market', market.id,
+        )
+
+        const { request } = await publicClient.simulateContract({
+            address: CompoundConfig[chain.id].contracts.cometRewards, 
+            abi: cometRewardsAbi,
+            functionName: 'claim',
+            args: [ market.id, account, true ],   
+            account,
+        })
+
+        return await walletClient.writeContract(request)
+    }
+
 }

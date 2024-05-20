@@ -2,8 +2,9 @@ import { encodeAbiParameters, maxUint256 } from "viem";
 import { bulkerAbi } from "../abi/bulkerAbi";
 import { cometAbi } from "../abi/cometAbi";
 import { CompoundConfig } from "../compound-config";
-import { bnf, toBigInt } from "../utils/bn";
+import { toBigInt } from "../utils/bn";
 import { nativeCurrency } from "../utils/chains";
+import { bna } from "../components/Amount";
 
 export class SupplyService {
 
@@ -30,7 +31,7 @@ export class SupplyService {
             Date.now(),
             'SupplyService.simulateSupplyErc20Token',
             'token', asset,
-            'amount', bnf(amount),
+            'amount', bna(amount),
             'maxed', maxed,
             'account', this.account
         )
@@ -59,7 +60,7 @@ export class SupplyService {
             'SupplyService.supplyErc20Token',
             'account', this.account,
             'token', token,
-            'amount', bnf(amount),
+            'amount', bna(amount),
             'maxed', maxed,
         )
 
@@ -81,7 +82,7 @@ export class SupplyService {
             Date.now(),
             'SupplyService.simulateSupplyNativeCurrency',
             'account', this.account,
-            'amount', bnf(amount),
+            'amount', bna(amount),
             'maxed', maxed,
             'currency', symbol,
             'contract', bulkerContract
@@ -129,7 +130,7 @@ export class SupplyService {
             Date.now(),
             'SupplyService.supplyNativeCurrency',
             'account', this.account,
-            'amount', bnf(amount),
+            'amount', bna(amount),
             'maxed', maxed,
         )
 

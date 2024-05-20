@@ -39,7 +39,7 @@ export default function LiquidationRisk({ market, css, style = undefined, minRis
     return isSuccess && <LiquidationRiskProgress {...{ risk, css, style, minRiskLabel }} />
 }
 
-export function LiquidationRiskProgress({ risk, css, style, minRiskLabel = DEFAULT_MIN_RISK_LABEL }) {
+export function LiquidationRiskProgress({ risk, style, css = '', minRiskLabel = DEFAULT_MIN_RISK_LABEL }) {
 
     function riskLevel() {
         if (risk < 50) {

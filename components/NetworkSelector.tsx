@@ -8,7 +8,7 @@ import styles from '../styles/components/NetworkSelector.module.scss';
 import { chainIcon, chainName, orderedChainList } from "../utils/chains";
 import { useBootstrap } from "../hooks/useBootstrap";
 
-const USER_REJECTED_TX = 'UserRejectedRequestError';
+export const USER_REJECTED_TX = 'UserRejectedRequestError';
 
 export default function NetworkSelector({ id = 'chain-selector', fontSize = '110%', collapseNavbar = false }) {
 

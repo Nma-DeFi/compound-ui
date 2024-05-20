@@ -25,7 +25,8 @@ export enum ActionType {
   WithdrawMaxBaseToken,
   DepositCollateral,
   WithdrawCollateral,
-  Borrow, Repay, RepayMax
+  Borrow, Repay, RepayMax,
+  ClaimOneMarket
 }
 
 export type ActionInfo = {

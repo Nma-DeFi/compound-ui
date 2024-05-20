@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { ModalEvent, useModalEvent } from '../../../hooks/useBootstrap'
+import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { useRewardsOwed } from '../../../hooks/useRewardsOwed'
-import { REWARD_TOKEN } from '../../../services/rewards-service'
+import { REWARD_TOKEN, RewardsService } from '../../../services/rewards-service'
 import css from '../../../styles/components/claim/ClaimOneMarket.module.scss'
 import Amount from '../../Amount'
 import TokenIcon from '../../TokenIcon'
@@ -10,31 +10,65 @@ import { SmallSpinner } from '../../Spinner'
 import PriceFromSymbol from '../../PriceFromSymbol'
 import { chainIcon, chainName } from '../../../utils/chains'
 import { getBaseTokenOrNativeCurrency } from '../../../utils/markets'
+import { Zero, bn } from '../../../utils/bn'
+import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
+import { usePublicClient, useSwitchNetwork, useWalletClient } from 'wagmi'
+import { useCurrentChain } from '../../../hooks/useCurrentChain'
+import { USER_REJECTED_TX } from '../../NetworkSelector'
+import { Hash } from 'viem'
+import { ActionType } from '../../../types'
+import { ACTION_RESULT_TOAST } from '../../action-result/ActionResult'
 
 export const CLAIM_MODAL = 'claim-modal'
 
 const enum Mode {
     Init,
     ClaimReady,
+    ConfirmTransaction,
+    WaitingForTransaction,
 }
 
-export default function ClaimOneMarket({ chain, market }) {
+export default function ClaimOneMarket({ chain, market, onClaim }) {
 
     const [ mode, setMode ] = useState<Mode>()
     const [ amount, setAmount ] = useState<BigNumber>()
+    const [ hash, setHash ] = useState<Hash>()
+
+    const { currentChainId } = useCurrentChain()
+    const { address: account } = useCurrentAccount()
+
+    const { switchNetworkAsync } = useSwitchNetwork()
 
     const { isSuccess: isRewards, data: rewards } = useRewardsOwed()
 
+    const publicClient = usePublicClient({ chainId: chain?.id })
+    const { isSuccess: isWalletClient, data: walletClient } = useWalletClient({ chainId: chain?.id })
+
+    const { hideModal, openToast } = useBootstrap()
     const modalEvent = useModalEvent(CLAIM_MODAL)
 
     useEffect(() => {
-        if (mode === Mode.Init && isRewards) {
+        if (mode === Mode.Init && isRewards && isWalletClient) {
             if ((chain.id in rewards) && (market.id in rewards[chain.id])) {
                 setAmount(rewards[chain.id][market.id].balance)
                 setMode(Mode.ClaimReady)
             } 
         }
-      }, [mode, rewards])
+      }, [mode, rewards, walletClient])
+
+      useEffect(() => {
+        if (mode === Mode.ConfirmTransaction && hash) {
+          setMode(Mode.WaitingForTransaction)
+          const action = ActionType.ClaimOneMarket
+          const comet = market.id
+          const token = REWARD_TOKEN
+          const claimChainId = chain.id
+          const amountCopy = bn(amount)
+          const hashCopy = structuredClone(hash)
+          onClaim({ action, comet, token, claimChainId, amount: amountCopy, hash: hashCopy })
+          hideModal(CLAIM_MODAL)
+        }
+      }, [mode, hash])
 
     useEffect(() => {
         switch (modalEvent) {
@@ -52,8 +86,27 @@ export default function ClaimOneMarket({ chain, market }) {
     }
     
     function onHide() {
+        if (mode === Mode.WaitingForTransaction) {
+            openToast(ACTION_RESULT_TOAST)
+        }
         setMode(null)
         setAmount(null)
+        setHash(null)
+    }
+
+    function handleClaim() {
+        setMode(Mode.ConfirmTransaction)
+        if (chain.id !== currentChainId) {
+            switchNetworkAsync(chain.id)
+                .then(chain => RewardsService.claim({ chain, account, market, publicClient, walletClient }))
+                .then(setHash)
+                .catch(error => {
+                    if (error.name !== USER_REJECTED_TX) { throw error }
+                    setMode(Mode.ClaimReady)
+                })
+        } else {
+            RewardsService.claim({ chain, account, market, publicClient, walletClient }).then(setHash)
+        }
     }
 
     return (
@@ -65,9 +118,16 @@ export default function ClaimOneMarket({ chain, market }) {
                             <h3 className="m-0">Claim rewards</h3>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <table className="table">
+                            { mode > Mode.Init &&
+                                <div className={`${css['chain']} d-flex align-items-center`}>
+                                    <div className="fw-semibold me-3">Chain :</div>
+                                    <img className={`${css['network-icon']} me-1`} src={chainIcon(chain.id)} alt={chainName(chain.id)} />
+                                    <div className="text-dark">{chainName(chain.id)}</div>
+                                </div>
+                            }
+                        <table className="table border-top">
                             <tbody>
-                                <tr>
+                                {/*<tr>
                                     <td className={`${css['table-label']} table-light fw-semibold`}>Chain</td>
                                     <td className="text-center">
                                         <div className="d-flex justify-content-center">
@@ -79,7 +139,7 @@ export default function ClaimOneMarket({ chain, market }) {
                                             }
                                         </div>
                                     </td>
-                                </tr>
+                                </tr>*/}
                                 <tr>
                                     <td className={`${css['table-label']} table-light fw-semibold`}>Market</td>
                                     <td className="text-center">
@@ -111,8 +171,10 @@ export default function ClaimOneMarket({ chain, market }) {
                         <div className={`${css['button-grid']} d-grid`}>
                         { mode === Mode.Init ? (
                             <button className="btn btn-lg btn-primary text-white" type="button" disabled>Initialisation <SmallSpinner /></button>
-                        ) : mode === Mode.ClaimReady ? (
-                            <button className="btn btn-lg btn-primary text-white" type="button">Claim <Amount value={amount} /> {REWARD_TOKEN.symbol}</button>
+                        ) : mode === Mode.ClaimReady && amount.isGreaterThan(Zero) ? (
+                            <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleClaim}>Claim <Amount value={amount} /> {REWARD_TOKEN.symbol}</button>
+                        ) : mode === Mode.ConfirmTransaction ? (
+                            <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
                         ) : (
                             <button className="btn btn-lg btn-primary text-white" type="button">Claim {REWARD_TOKEN.symbol}</button>
                         )}

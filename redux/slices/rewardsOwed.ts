@@ -20,7 +20,14 @@ const initialState : RewardsOwedState = IdleData
 export const rewardsOwedSlice = createSlice({
     name: 'rewardsOwed',
     initialState,
-    reducers: {},
+    reducers: {
+        rewardsOwedSet: (state: RewardsOwedState, 
+            action: PayloadAction<{ chainId: number, comet: Address, amount: BigNumber }>) => {
+            const { chainId, comet, amount } = action.payload
+            state.data[chainId][comet].balance = amount
+            Object.assign(state, AsyncStatus.Success)
+        }
+    },
     extraReducers(builder) {
         builder
             .addCase(rewardsOwedInit.pending, (state: RewardsOwedState) => {
@@ -49,6 +56,6 @@ export const rewardsOwedInit = createAsyncThunk<any, void, ThunkApiFields>(
     }
 )
 
-export const {} = rewardsOwedSlice.actions
+export const { rewardsOwedSet } = rewardsOwedSlice.actions
 
 export default rewardsOwedSlice.reducer

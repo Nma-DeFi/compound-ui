@@ -14,11 +14,14 @@ import { REWARD_TOKEN } from "../../services/rewards-service"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
 import { useBootstrap } from "../../hooks/useBootstrap"
 import ClaimOneMarket, { CLAIM_MODAL } from "../../components/pages/claim/ClaimOneMarket"
+import ActionResult from "../../components/action-result/ActionResult"
+import { ActionInfo } from "../../types"
 
 export default function Claim() {
 
     const [ chainList, setChainList ] = useState([])
     const [ claimInfo, setClaimInfo ] = useState(null)
+    const [ claimResult, setClaimResult ] = useState<ActionInfo>()
 
     const { isConnected } = useCurrentAccount()
 
@@ -29,7 +32,7 @@ export default function Claim() {
     }, [])
 
     function handleClaim(chain, market) {
-        setClaimInfo({ chain, market })
+        setClaimInfo({ chain, market, onClaim: setClaimResult })
         openModal(CLAIM_MODAL)
     }
 
@@ -107,7 +110,8 @@ export default function Claim() {
                     </div>
                 </div>
             </div>
-            <ClaimOneMarket {...claimInfo} />
+            <ClaimOneMarket { ...claimInfo } />
+            <ActionResult { ...claimResult } />
         </>
     )
 }

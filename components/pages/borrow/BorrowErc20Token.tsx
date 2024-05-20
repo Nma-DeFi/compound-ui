@@ -121,7 +121,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
                 <tr>
                   <td className={`${css['table-label']} table-light fw-semibold`}>Liquidation risk</td>
                   <td className="align-middle px-3">
-                    <LiquidationRiskProgress {...{ risk: liquidationRisk, css: '', style: { height: '20px' } }} />
+                    <LiquidationRiskProgress {...{ risk: liquidationRisk, style: { height: '20px' } }} />
                   </td>
                 </tr>
               </tbody>

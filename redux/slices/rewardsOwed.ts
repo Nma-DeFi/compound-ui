@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js"
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { ThunkApiFields } from "../types"
 import { RewardsService } from "../../services/rewards-service"
+import { Zero } from "../../utils/bn"
 
 export type RewardsOwedByChain = Record<Address, {
     token: Token
@@ -26,7 +27,15 @@ export const rewardsOwedSlice = createSlice({
             const { chainId, comet, amount } = action.payload
             state.data[chainId][comet].balance = amount
             Object.assign(state, AsyncStatus.Success)
-        }
+        },
+        rewardsOwedResetByChain: (state: RewardsOwedState, 
+            action: PayloadAction<{ chainId: number }>) => {
+            const { chainId } = action.payload
+            Object.keys(state.data[chainId]).forEach(comet => {
+                state.data[chainId][comet].balance = Zero
+            })
+            Object.assign(state, AsyncStatus.Success)
+        },
     },
     extraReducers(builder) {
         builder
@@ -56,6 +65,6 @@ export const rewardsOwedInit = createAsyncThunk<any, void, ThunkApiFields>(
     }
 )
 
-export const { rewardsOwedSet } = rewardsOwedSlice.actions
+export const { rewardsOwedSet, rewardsOwedResetByChain } = rewardsOwedSlice.actions
 
 export default rewardsOwedSlice.reducer

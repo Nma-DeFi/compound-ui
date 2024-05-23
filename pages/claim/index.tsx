@@ -10,12 +10,18 @@ import { useRewardsOwed } from "../../hooks/useRewardsOwed"
 import Amount from "../../components/Amount"
 import BigNumber from "bignumber.js"
 import PriceFromSymbol from "../../components/PriceFromSymbol"
-import { REWARD_TOKEN } from "../../services/rewards-service"
+import { COMP_TOKEN } from "../../services/rewards-service"
 import { useCurrentAccount } from "../../hooks/useCurrentAccount"
 import { useBootstrap } from "../../hooks/useBootstrap"
 import ClaimOneMarket, { CLAIM_MODAL } from "../../components/pages/claim/ClaimOneMarket"
 import ActionResult from "../../components/action-result/ActionResult"
 import { ActionInfo } from "../../types"
+import ClaimAllMarkets, { CLAIM_ALL_MODAL } from "../../components/pages/claim/ClaimAllMarkets"
+import { useTotalRewardsUsd } from "../../hooks/useTotalRewardsUsd"
+import PriceAsync from "../../components/PriceAsync"
+import { fromUseQueryAsync } from "../../utils/async"
+import { getTotalRewardsByChain } from "../../redux/helpers/rewards"
+import { Zero } from "../../utils/bn"
 
 export default function Claim() {
 
@@ -24,8 +30,12 @@ export default function Claim() {
     const [ claimResult, setClaimResult ] = useState<ActionInfo>()
 
     const { isConnected } = useCurrentAccount()
-
     const { openModal } = useBootstrap()
+
+    const rewardsOwedState = useRewardsOwed()
+    const totalRewardsUsd = useTotalRewardsUsd(rewardsOwedState)
+    const { isSuccess: isRewards } = rewardsOwedState
+
 
     useEffect(() => {
         ChainDataService.findAllChains().then(setChainList)
@@ -34,6 +44,11 @@ export default function Claim() {
     function handleClaim(chain, market) {
         setClaimInfo({ chain, market, onClaim: setClaimResult })
         openModal(CLAIM_MODAL)
+    }
+    
+    function handleClaimAll(chain) {
+        setClaimInfo({ chain })
+        openModal(CLAIM_ALL_MODAL)
     }
 
     return ( 
@@ -47,7 +62,9 @@ export default function Claim() {
                         <h2 className="m-0">Claim</h2>
                         <div className="small text-center">
                             <div className="fw-semibold mb-1">Total rewards</div> 
-                            <div className="text-body-secondary"><NoData /></div>
+                            <div className="text-body-secondary">
+                                { isConnected ? <PriceAsync asyncPrice={fromUseQueryAsync(totalRewardsUsd)} placeHolderCfg={{ col: 6 }} /> : <NoData /> }
+                            </div>
                         </div>
                     </div>
                     { chainList.length === 0 && <GrowSpinners nb={5} css="text-center py-5" /> }
@@ -60,9 +77,11 @@ export default function Claim() {
                                         <img src={chain.icon} style={{ width: '1.8rem' }} alt="Ethereum" />
                                         <div className="fs-5 ms-3">{chain.shortName}</div>
                                     </div>
-                                    <div className="d-flex align-items-center small rounded-5 text-bg-light p-2 me-3">
-                                        <TokenIcon symbol="COMP" css={`${css['comp-icon']} me-2 d-none d-sm-block`} /> Rewards
-                                    </div>
+                                    { isRewards && getTotalRewardsByChain({ rewardsOwed: rewardsOwedState, chainId: chain.id }).isGreaterThan(Zero) &&
+                                        <div className="d-flex align-items-center small rounded-5 text-bg-light p-2 me-3">
+                                            <TokenIcon symbol="COMP" css={`${css['comp-icon']} me-2 d-none d-sm-block`} /> Rewards
+                                        </div>
+                                    }
                                 </button>
                             </h2>
                             <div id={`collapse${chain.id}`} className="accordion-collapse collapse">
@@ -77,7 +96,7 @@ export default function Claim() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {chain.markets.map(market =>
+                                            { chain.markets.map(market =>
                                                 <tr key={market.id}>
                                                     <td>
                                                         <TokenIcon symbol={ getBaseTokenOrNativeCurrency(market, chain.id).symbol } css={`d-none d-sm-inline me-2 ${css['market-icon']}`} />
@@ -93,10 +112,10 @@ export default function Claim() {
                                                     </td>
                                                 </tr>
                                             )}
-                                            { chain.markets.length > 1 &&
+                                            { (isConnected && chain.markets.length > 1) &&
                                                 <tr>
                                                     <td className="text-center py-2" colSpan={3} style={{ cursor: 'pointer' }}>
-                                                        <button type="button" className="btn btn-primary text-white" disabled>Claim all markets</button>
+                                                        <button type="button" className="btn btn-primary text-white" onClick={() => handleClaimAll(chain)}>Claim all markets</button>
                                                     </td>
                                                 </tr>
                                             }
@@ -111,6 +130,7 @@ export default function Claim() {
                 </div>
             </div>
             <ClaimOneMarket { ...claimInfo } />
+            <ClaimAllMarkets { ...claimInfo } />
             <ActionResult { ...claimResult } />
         </>
     )
@@ -139,7 +159,7 @@ export function RewardsBalance({ chain, market }) {
                 <Amount value={balance} />
             </div>
             <div className="small text-body-secondary">
-                <PriceFromSymbol symbol={REWARD_TOKEN.symbol} amount={balance} placeHolderCfg={{ col: 2 }} />
+                <PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={balance} placeHolderCfg={{ col: 2 }} />
             </div>
         </td>   
     ) : (

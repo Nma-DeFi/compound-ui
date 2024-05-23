@@ -26,14 +26,14 @@ export enum ActionType {
   DepositCollateral,
   WithdrawCollateral,
   Borrow, Repay, RepayMax,
-  ClaimOneMarket
+  ClaimOneMarket, ClaimAllMarkets,
 }
 
 export type ActionInfo = {
   action: ActionType
   token: Asset
   amount: BigNumber
-  hash: Hash, 
+  hash: Hash,
   comet?: Address
 }
 

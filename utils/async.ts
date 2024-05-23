@@ -41,3 +41,13 @@ export function loadAsyncData<T>(promise: Promise<T>, setData: (d: AsyncData<T>)
     promise.then(d => setData({data: d, ...AsyncStatus.Success }))
           .catch(e => setData({data: e, ...AsyncStatus.Error }))
 }
+
+export function fromUseQueryAsync(uqAsync): AsyncData<any>  {
+    return ({
+        isIdle: uqAsync.isPending, 
+        isLoading: uqAsync.isLoading, 
+        isError: uqAsync.isError, 
+        isSuccess: uqAsync.isSuccess, 
+        data: uqAsync.data,
+  })
+}

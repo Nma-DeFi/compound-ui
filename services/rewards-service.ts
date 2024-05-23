@@ -7,7 +7,11 @@ import { isTestnet } from "../utils/chains";
 import { fromBigInt } from "../utils/bn";
 import { RewardsOwedData } from "../redux/slices/rewardsOwed";
 
-export const REWARD_TOKEN = { symbol: 'COMP', name: 'Compound', decimals: 18 }
+export const COMP_TOKEN = { 
+    symbol: 'COMP', 
+    name: 'Compound', 
+    decimals: 18,
+}
 
 export class RewardsService {
 
@@ -36,7 +40,7 @@ export class RewardsService {
             contracts.forEach((contract, i) => {
                 const rewardBalance = {
                     token: rewardsOwed[i].token, 
-                    balance: fromBigInt(rewardsOwed[i].owed, REWARD_TOKEN.decimals)
+                    balance: fromBigInt(rewardsOwed[i].owed, COMP_TOKEN.decimals)
                 }
                 rewardsByChain = { ...rewardsByChain, [contract.args[0]]: rewardBalance }  
             })           
@@ -53,18 +57,33 @@ export class RewardsService {
             'RewardsService.claim',
             'chain', chain.name,
             'account', account,
-            'market', market.id,
+            'market', market,
         )
 
         const { request } = await publicClient.simulateContract({
             address: CompoundConfig[chain.id].contracts.cometRewards, 
             abi: cometRewardsAbi,
             functionName: 'claim',
-            args: [ market.id, account, true ],   
+            args: [ market, account, true ],   
             account,
         })
 
         return await walletClient.writeContract(request)
+    }
+
+    static async claimAllMarkets({ chain, account, markets, publicClient, walletClient }) {
+        console.log(Date.now(),
+            'RewardsService.claimAllMarkets',
+            'chain', chain.name,
+            'markets', markets,
+            'account', account,
+        )
+
+        const promises = markets.map(async (market: Address) => { 
+            return await RewardsService.claim({ chain, account, market, publicClient, walletClient })
+        })
+
+        return Promise.all(promises)
     }
 
 }

@@ -40,7 +40,7 @@ import NoData from "../../components/NoData"
 import { useLiquidationRiskByBorrowAmount } from "../../hooks/useLiquidationRisk"
 import { useTotalCollateralUsdByChain } from "../../hooks/useTotalCollateralUsdByChain"
 import { fillInput } from "../../components/AmountPercent"
-import { AsyncNumber, loadAsyncData } from "../../utils/async"
+import { AsyncNumber, fromUseQueryAsync, loadAsyncData } from "../../utils/async"
 
 const enum Mode {
   InitalLoading,
@@ -282,13 +282,7 @@ export default function Borrow() {
               <BorrowPanel {...{ mode, borrowApr }}>
                 <div className="mb-1">
                   <Link href='#' onClick={handleMaxBorrow} className="text-decoration-none text-body">Maximum borrowing : <span className="text-body-tertiary">
-                  <PriceAsync asyncPrice={{ 
-                    isIdle: asyncBorrowCapacity.isPending, 
-                    isLoading: asyncBorrowCapacity.isLoading, 
-                    isError: asyncBorrowCapacity.isError, 
-                    isSuccess: isBorrowCapacity, 
-                    data: borrowCapacity
-                  }} /></span>
+                  <PriceAsync asyncPrice={fromUseQueryAsync(asyncBorrowCapacity)} /></span>
                   </Link>
                 </div>
                 <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none" style={{ fontSize: '95%' }}>

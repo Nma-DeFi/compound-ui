@@ -1,10 +1,10 @@
 import { arbitrum } from "viem/chains"
 import { baseTokePriceFeed, baseToken } from "../selectors/market-selector"
-import { PriceFeed, PriceFeedKind } from "../types"
+import { PriceFeed, PriceFeedKind, Token } from "../types"
 import { getTokenOrNativeCurrency, isWrappedNativeToken, nativeCurrency } from "./chains"
 import { Address, isAddressEqual } from 'viem';
 
-const BASE_TOKEN_NAMES = {
+const BASE_TOKENS_INFO = {
     [arbitrum.id] : {
         '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA': {
             symbol: 'USDC.e',
@@ -21,11 +21,11 @@ const BASE_TOKEN_NAMES = {
     }
 }
 
-function customBaseTokenData({ chainId, marketId }) {
-    if (!(chainId in BASE_TOKEN_NAMES)) return undefined
-    const entry = Object.entries(BASE_TOKEN_NAMES[chainId])
+function customBaseTokenInfo({ chainId, marketId }): Token {
+    if (!(chainId in BASE_TOKENS_INFO)) return undefined
+    const entry = Object.entries(BASE_TOKENS_INFO[chainId])
         .find(([m, _]) => isAddressEqual(marketId as Address, m as Address))
-    return entry?.[1]
+    return entry?.[1] as Token
 }
   
 export function isNativeCurrencyMarket(market, chainId) {
@@ -35,7 +35,7 @@ export function isNativeCurrencyMarket(market, chainId) {
 
 export function getBaseTokenOrNativeCurrency(market, chainId) {
     if (!chainId || !market || !baseToken(market)) return undefined
-    const customBaseToken = customBaseTokenData({ chainId, marketId: market.id })
+    const customBaseToken = customBaseTokenInfo({ chainId, marketId: market.id })
     return customBaseToken ?? getTokenOrNativeCurrency(chainId, baseToken(market))
 }
 

@@ -15,6 +15,7 @@ import NoData from './NoData';
 import { useTotalCollateralUsdByChain } from '../hooks/useTotalCollateralUsdByChain';
 import { useRewardsOwed } from '../hooks/useRewardsOwed';
 import { useTotalRewardsUsdByChain } from '../hooks/useTotalRewardsUsdByChain';
+import { chainIcon, chainName } from '../utils/chains';
 
 export default function UserAccount() {
     const { isConnected } = useCurrentAccount()
@@ -56,11 +57,18 @@ export default function UserAccount() {
         }
     }, [borrowPositions, priceService])
 
+    console.log('css', css)
+
 
     return isConnected && (
         <div id={css['user-account']} className="bg-body py-4 border rounded shadow text-center rounded-4">
             <h4 className={css['title']}>Your account</h4>
-            <div className="d-flex justify-content-around justify-content-xl-between small" style={{ marginBottom: '1.4rem' }}>
+            <div className={`${css['chain']} d-flex  justify-content-center align-items-center`}>
+                <div className={`${css['chain-label']} fw-semibold`}>Chain</div>
+                <img className={css['network-icon']} src={chainIcon(chainId)} alt={chainName(chainId)} />
+                {chainName(chainId)}
+            </div>
+            <div className={`${css['data-row']} d-flex justify-content-around justify-content-xl-between`}>
                 <div>
                     <div className="fw-semibold mb-1">Borrowing</div> 
                     { (borrowing.isIdle || borrowing.isLoading) ? (
@@ -82,7 +90,7 @@ export default function UserAccount() {
                     )}
                 </div>
             </div>
-            <div className="d-flex justify-content-around justify-content-xl-between mb-2 small">
+            <div className={`${css['data-row']} d-flex justify-content-around justify-content-xl-between mb-2`}>
                 <div>
                     <div className="fw-semibold mb-1">Collateral</div> 
                     { (totalCollateral.isPending || totalCollateral.isLoading) ? (

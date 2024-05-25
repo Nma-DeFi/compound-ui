@@ -50,19 +50,19 @@ export default function Layout({ children }) {
                     <span className="navbar-toggler-icon"></span>
                     </button>
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
+                        <div className="d-block d-xl-none mt-4">
+                                <NetworkSelector id="navbar-chain-selector" fontSize="120%" collapseNavbar={true} />
+                        </div>
                         <ul className="navbar-nav d-flex d-xl-none py-4 fs-5">
                             <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
-                            <li className="nav-item"><NavLink href={Path.Earn}><i className="bi bi-flower2 me-1"></i> Earn</NavLink></li>
-                            <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-stars me-1"></i> Claim</NavLink></li>
+                            <li className="nav-item"><NavLink href={Path.Earn}><i className="bi bi-stars me-1"></i> Earn</NavLink></li>
+                            <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-balloon me-1"></i> Claim</NavLink></li>
                         </ul>
                         <div className="d-none d-xl-flex justify-content-center flex-grow-1 text-center">
                             <ProtocolStats />
                         </div>
                         <div>
                             <ConnectButton />
-                            <div className="d-block d-xl-none mt-4">
-                                <NetworkSelector id="navbar-chain-selector" fontSize="120%" collapseNavbar={true} />
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -75,8 +75,8 @@ export default function Layout({ children }) {
                             <div id="pages-navigation" className="bg-body px-3 py-4 border rounded-4 shadow">
                                 <ul className="nav nav-pills flex-column mb-auto">
                                     <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
-                                    <li className="nav-item"><NavLink href={Path.Earn}><i className="bi bi-flower2 me-1"></i> Earn</NavLink></li>
-                                    <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-stars me-1"></i> Claim</NavLink></li>
+                                    <li className="nav-item"><NavLink href={Path.Earn}><i className="bi bi-stars me-1"></i> Earn</NavLink></li>
+                                    <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-balloon me-1"></i> Claim</NavLink></li>
                                 </ul>
                             </div>
                             <div className="d-flex justify-content-around fs-4 text-primary">

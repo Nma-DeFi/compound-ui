@@ -68,7 +68,7 @@ export default function NetworkSelector({ id = 'chain-selector', fontSize = '110
                             <div className="d-flex align-items-center">
                                 <img className={styles['network-menu-icon']} src={chain.icon} alt="Network icon" /> 
                                 {chain.shortName}
-                                {chain.isTestnet && <span className="ms-auto fs-6 text-warning">(Testnet)</span> }
+                                {chain.isTestnet && <span className="ms-auto fs-6 text-warning">Testnet</span> }
                             </div>
                         </button>
                     </li>

@@ -15,7 +15,8 @@ import * as MarketUtils from "../../../utils/markets"
 import ActionResult from "../../action-result/ActionResult"
 import RepayNativeCurrency, { REPAY_NATIVE_CURRENCY } from "./RepayNativeCurrency"
 import { Zero } from "../../../utils/bn"
-import { getTokenOrNativeCurrency } from "../../../utils/chains"
+import { chainIcon, chainName, getTokenOrNativeCurrency } from "../../../utils/chains"
+import css from '../../../styles/components/borrow/BorrowPositions.module.scss'
 
 export const REPAY_RESULT_TOAST = 'repay-result-toast'
 
@@ -66,7 +67,12 @@ export default function BorrowPositions() {
     return <>
         { isShown() &&  (
             <div className="bg-body p-3 rounded border shadow pb-4" style={{ marginBottom: '2rem' }}>     
-                <h4 style={{ marginBottom: '1.25rem' }}>Your { borrowPositions.length > 1 ? 'borrowings' : 'borrowing' }</h4>
+                <h4 className={css['title']}>Your { borrowPositions.length > 1 ? 'borrowings' : 'borrowing' }</h4>
+                <div className={`${css['chain']} d-flex align-items-center`}>
+                    <div className={`${css['chain-label']} fw-semibold`}>Chain</div>
+                    <img className={css['network-icon']} src={chainIcon(chainId)} alt={chainName(chainId)} />
+                    {chainName(chainId)}
+                </div>
                 { borrowPositions.map((borrowPosition, index) => 
                     <div key={index}>
                         <div style={{ padding: '0.6rem 0'}}>       

@@ -6,6 +6,7 @@ import { accountConnected, accountDisconnected } from "../redux/slices/currentAc
 import { chainSwitched } from "../redux/slices/currentChain"
 import { accruedPositionsReset } from "../redux/slices/positions/supplyPositions"
 import { collateralPositionsReset } from "../redux/slices/positions/collateralPositions"
+import { rewardsOwedReset } from "../redux/slices/rewardsOwed"
 
 
 export const resetPositions = (dispatch) => {
@@ -15,6 +16,7 @@ export const resetPositions = (dispatch) => {
 
 export const resetConnectedAccount = (dispatch) => {
     dispatch(accountDisconnected())
+    dispatch(rewardsOwedReset())
     resetPositions(dispatch)
 }
 

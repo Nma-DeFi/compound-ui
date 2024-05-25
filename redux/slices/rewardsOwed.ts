@@ -22,6 +22,10 @@ export const rewardsOwedSlice = createSlice({
     name: 'rewardsOwed',
     initialState,
     reducers: {
+        rewardsOwedReset: (state: RewardsOwedState) => {
+            state.data = undefined
+            Object.assign(state, AsyncStatus.Idle)
+        },
         rewardsOwedSet: (state: RewardsOwedState, 
             action: PayloadAction<{ chainId: number, comet: Address, amount: BigNumber }>) => {
             const { chainId, comet, amount } = action.payload
@@ -65,6 +69,6 @@ export const rewardsOwedInit = createAsyncThunk<any, void, ThunkApiFields>(
     }
 )
 
-export const { rewardsOwedSet, rewardsOwedResetByChain } = rewardsOwedSlice.actions
+export const { rewardsOwedSet, rewardsOwedReset, rewardsOwedResetByChain } = rewardsOwedSlice.actions
 
 export default rewardsOwedSlice.reducer

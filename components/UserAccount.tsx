@@ -1,16 +1,11 @@
 import { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
 import { useCurrentAccount } from '../hooks/useCurrentAccount';
-import { SupplyPositionsState } from '../redux/slices/positions/supplyPositions';
-import { RootState } from '../redux/types';
 import css from '../styles/components/UserAccount.module.scss';
 import Price from './Price';
 import { usePublicClient } from 'wagmi';
 import { useCurrentChain } from '../hooks/useCurrentChain';
 import { usePriceService } from '../hooks/usePriceService';
 import { AsyncBigNumber, IdleData, loadAsyncData } from '../utils/async';
-import { CollateralPositionsState } from '../redux/slices/positions/collateralPositions';
-import { BorrowPositionsState } from '../redux/slices/positions/borrowPositions';
 import { useCollateralPositions } from '../hooks/useCollateralPositions';
 import { useBorrowPositions } from '../hooks/useBorrowPositions';
 import { useSupplyPositions } from '../hooks/useSupplyPositions';
@@ -18,32 +13,30 @@ import { getTotalBorrowingsUsdBalance } from '../redux/helpers/borrow';
 import { getTotalEarningsUsdBalance } from '../redux/helpers/supply';
 import NoData from './NoData';
 import { useTotalCollateralUsdByChain } from '../hooks/useTotalCollateralUsdByChain';
+import { useRewardsOwed } from '../hooks/useRewardsOwed';
+import { useTotalRewardsUsdByChain } from '../hooks/useTotalRewardsUsdByChain';
 
-type PositionsState = { 
-    supplyPositions: SupplyPositionsState, 
-    borrowPositions: BorrowPositionsState, 
-    collateralPositions: CollateralPositionsState 
-}
-
-export function UserAccount(positionsState : PositionsState) {
-
-    useCollateralPositions()
-    useBorrowPositions()
-    useSupplyPositions()
-
-    const { isSuccess: isSupplyPositions, data: supplyPositions } = positionsState.supplyPositions
-    const { isSuccess: isBorrowPositions, data: borrowPositions } = positionsState.borrowPositions
-
-    const totalCollateral = useTotalCollateralUsdByChain({ asyncCollateralPositions: positionsState.collateralPositions })
-    
-    const [ earning, setEarning ] = useState<AsyncBigNumber>(IdleData)
-    const [ borrowing, setBorrowing ] = useState<AsyncBigNumber>(IdleData)
-
+export default function UserAccount() {
     const { isConnected } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
 
     const publicClient = usePublicClient({ chainId })
     const priceService = usePriceService({ chainId, publicClient})
+
+    const asyncBorrowPositions = useBorrowPositions()
+    const asyncSupplyPositions = useSupplyPositions()
+    const asyncCollateralPositions = useCollateralPositions()
+    const asyncRewardsOwed = useRewardsOwed()
+
+    const totalCollateral = useTotalCollateralUsdByChain({ asyncCollateralPositions })
+    const totalRewards = useTotalRewardsUsdByChain(asyncRewardsOwed)
+
+    const { isSuccess: isSupplyPositions, data: supplyPositions } = asyncSupplyPositions
+    const { isSuccess: isBorrowPositions, data: borrowPositions } = asyncBorrowPositions
+    
+    const [ earning, setEarning ] = useState<AsyncBigNumber>(IdleData)
+    const [ borrowing, setBorrowing ] = useState<AsyncBigNumber>(IdleData)
+
 
     useEffect(() => {
         if (isSupplyPositions && priceService) {
@@ -102,14 +95,15 @@ export function UserAccount(positionsState : PositionsState) {
                 </div>
                 <div>
                     <div className="fw-semibold text-primary mb-1">Rewards</div> 
-                    <div className="text-body-secondary"><NoData /></div>
+                    { (totalRewards.isPending || totalRewards.isLoading) ? (
+                        <div className="placeholder bg-secondary-subtle col-10"></div>
+                    ) : totalRewards.isSuccess ? (
+                        <div className="text-body-secondary"><Price value={totalRewards.data} /></div>
+                    ) : (
+                        <div className="text-body-secondary"><NoData /></div>
+                    )}
                 </div>
             </div>
         </div>
     )
 }
-
-const mapStateToProps = ({ supplyPositions, borrowPositions, collateralPositions } : RootState) => { 
-    return { supplyPositions, borrowPositions, collateralPositions }
-}
-export default connect(mapStateToProps)(UserAccount)

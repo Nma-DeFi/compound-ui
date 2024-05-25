@@ -7,6 +7,7 @@ import ProtocolStats from './ProtocolStats';
 import { useAutoRefreshAccruedPositions } from '../hooks/useAutoRefreshAccruedPositions';
 import { useEffect } from 'react';
 import { useBootstrap } from '../hooks/useBootstrap';
+import { useAutoRefreshRewardsOwed } from '../hooks/useAutoRefreshRewardsOwed';
 
 export const Path = {
     Index: '/',
@@ -19,6 +20,7 @@ export default function Layout({ children }) {
 
     useNetworkEvents()
     useAutoRefreshAccruedPositions()
+    useAutoRefreshRewardsOwed()
     
     const { getOrCreateCollapse } = useBootstrap()
 

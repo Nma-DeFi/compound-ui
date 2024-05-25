@@ -123,7 +123,8 @@ export default function DepositCollateralNative({ comet, token, onDeposit }  : D
     }
 
     function setInput(amount: BigNumber) {
-      fillInput({ amount, token, id: css['deposit-native-input'] })
+      const id = css['deposit-native-input'] 
+      fillInput({ amount, token, id })
     }
 
     function handleAmountChange(event) {
@@ -181,7 +182,7 @@ export default function DepositCollateralNative({ comet, token, onDeposit }  : D
                 </div>
                 { mode === Mode.InsufficientBalance ? (
                     <WarningMessage>
-                      The {nativeCurrency.symbol} balance in your wallet is insufficient
+                      You don't have enough {nativeCurrency.symbol} in your wallet
                     </WarningMessage>
                   ) : (
                     <Spacer />

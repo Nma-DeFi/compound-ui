@@ -127,7 +127,7 @@ export default function ClaimOneMarket({ chain, market, onClaim }) {
                         </div>
                             { mode >= Mode.Init &&
                                 <div className={`${css['chain']} d-flex align-items-center`}>
-                                    <div className={`${css['chain-label']} fw-semibold`}>Chain :</div>
+                                    <div className={`${css['chain-label']} fw-semibold`}>Chain</div>
                                     <img className={css['network-icon']} src={chainIcon(chain.id)} alt={chainName(chain.id)} />
                                     {chainName(chain.id)}
                                 </div>
@@ -153,7 +153,7 @@ export default function ClaimOneMarket({ chain, market, onClaim }) {
                                             <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="20" />
                                             <Amount value={amount} /> 
                                             <span className="text-body-secondary ps-1">{ COMP_TOKEN.symbol }</span>
-                                            <small className="ps-3 text-body-secondary">(<PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={amount} placeHolderCfg={{ col: 2 }} />)</small>
+                                            <span className="ps-3"><PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={amount} placeHolderCfg={{ col: 2 }} /></span>
                                         </div>
                                     }
                                     </td>

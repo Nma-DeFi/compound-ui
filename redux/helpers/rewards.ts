@@ -9,8 +9,15 @@ export async function getTotalRewardsUsd(
         rewardsOwed: RewardsOwedData
     }): Promise<BigNumber> {
     const compPrice = await (new PriceService()).getPriceFromSymbol(COMP_TOKEN.symbol)
+    return getTotalRewards({ rewardsOwed }).times(compPrice)
+}
+
+export function getTotalRewards(
+    { rewardsOwed } : {
+        rewardsOwed: RewardsOwedData
+    }): BigNumber {
     const rewardsByChain : Array<BigNumber> = Object.keys(rewardsOwed).map(chain => getTotalRewardsByChain({ rewardsOwed, chainId: Number(chain) }))
-    return rewardsByChain.reduce((accumulator, currentValue) => accumulator.plus(currentValue.times(compPrice)), Zero)
+    return rewardsByChain.reduce((accumulator, currentValue) => accumulator.plus(currentValue), Zero)
 }
 
 export async function getTotalRewardsUsdByChain(
@@ -27,6 +34,8 @@ export function getTotalRewardsByChain(
         rewardsOwed: RewardsOwedData
         chainId: number
     }): BigNumber {
-    const rewardsByMarket : Array<BigNumber> = Object.values(rewardsOwed[chainId] ?? []).map(rewardByMarket => rewardByMarket.balance)
+    const rewardsByMarket : Array<BigNumber> = Object.values(rewardsOwed[chainId])
+        .filter(rewardByMarket => Boolean(rewardByMarket))
+        .map(rewardByMarket => rewardByMarket.balance)
     return rewardsByMarket.reduce((accumulator, currentValue) => accumulator.plus(currentValue), Zero)
 }

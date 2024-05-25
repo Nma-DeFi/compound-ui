@@ -3,9 +3,9 @@ import { ChainDataService } from "./chain-data-service";
 import { cometRewardsAbi } from "../abi/cometRewardsAbi";
 import { CompoundConfig } from "../compound-config";
 import { cometProxy } from "../selectors/market-selector";
-import { isTestnet } from "../utils/chains";
 import { fromBigInt } from "../utils/bn";
 import { RewardsOwedData } from "../redux/slices/rewardsOwed";
+import { Token } from "graphql";
 
 export const COMP_TOKEN = { 
     symbol: 'COMP', 
@@ -16,7 +16,7 @@ export const COMP_TOKEN = {
 export class RewardsService {
 
     static async findAllRewards(account: Address): Promise<RewardsOwedData> {
-        const chainsWithMarkets = (await ChainDataService.findAllChains()).filter(c => !isTestnet(c.id))
+        const chainsWithMarkets = await ChainDataService.findAllChains()
 
         let rewards = {}
 
@@ -31,16 +31,28 @@ export class RewardsService {
 
             const publicClient = createPublicClient({ chain, transport: http() })
 
-            type RewardsOwedArray = Array<{ token: Address; owed: bigint}>
+            type RewardsOwedArray = Array<{
+                error: Error
+                result?: undefined
+                status: 'failure'
+            } | {
+                error?: undefined
+                result: { token: Token; owed: bigint }
+                status: 'success'
+            }>
 
-            const rewardsOwed = (await publicClient.multicall({ contracts, allowFailure: false })) as RewardsOwedArray
+            const rewardsOwed = (await publicClient.multicall({ contracts })) as RewardsOwedArray
 
             let rewardsByChain = {}
 
             contracts.forEach((contract, i) => {
-                const rewardBalance = {
-                    token: rewardsOwed[i].token, 
-                    balance: fromBigInt(rewardsOwed[i].owed, COMP_TOKEN.decimals)
+                const { status, result } = rewardsOwed[i]
+                let rewardBalance = null
+                if (status === 'success') {
+                    rewardBalance = {
+                        token: result.token, 
+                        balance: fromBigInt(result.owed, COMP_TOKEN.decimals)
+                    }
                 }
                 rewardsByChain = { ...rewardsByChain, [contract.args[0]]: rewardBalance }  
             })           

@@ -17,10 +17,7 @@ import ClaimOneMarket, { CLAIM_MODAL } from "../../components/pages/claim/ClaimO
 import ActionResult from "../../components/action-result/ActionResult"
 import { ActionInfo } from "../../types"
 import ClaimAllMarkets, { CLAIM_ALL_MODAL } from "../../components/pages/claim/ClaimAllMarkets"
-import { useTotalRewardsUsd } from "../../hooks/useTotalRewardsUsd"
-import PriceAsync from "../../components/PriceAsync"
-import { fromUseQueryAsync } from "../../utils/async"
-import { getTotalRewardsByChain } from "../../redux/helpers/rewards"
+import { getTotalRewards, getTotalRewardsByChain } from "../../redux/helpers/rewards"
 import { Zero } from "../../utils/bn"
 
 export default function Claim() {
@@ -33,9 +30,7 @@ export default function Claim() {
     const { openModal } = useBootstrap()
 
     const rewardsOwedState = useRewardsOwed()
-    const totalRewardsUsd = useTotalRewardsUsd(rewardsOwedState)
-    const { isSuccess: isRewards } = rewardsOwedState
-
+    const { isSuccess: isRewards, data: rewards } = rewardsOwedState
 
     useEffect(() => {
         ChainDataService.findAllChains().then(setChainList)
@@ -51,6 +46,20 @@ export default function Claim() {
         openModal(CLAIM_ALL_MODAL)
     }
 
+    function totalRewards() {
+        if (!isRewards) return undefined
+        return getTotalRewards({ rewardsOwed: rewards })
+    }
+
+    function totalRewardsBychain(chainId) {
+        if (!isRewards) return undefined
+        return getTotalRewardsByChain({ rewardsOwed: rewards, chainId })
+    }
+    
+    function isRewardsByMarket(chainId, marketId) {
+        return isRewards && rewards[chainId] && rewards[chainId][marketId]    
+    }
+
     return ( 
         <>
             <Head>
@@ -62,8 +71,19 @@ export default function Claim() {
                         <h2 className="m-0">Claim</h2>
                         <div className="small text-center">
                             <div className="fw-semibold mb-1">Total rewards</div> 
-                            <div className="text-body-secondary">
-                                { isConnected ? <PriceAsync asyncPrice={fromUseQueryAsync(totalRewardsUsd)} placeHolderCfg={{ col: 6 }} /> : <NoData /> }
+                            <div className="text-body-secondary" style={{ fontSize: '90%' }}>
+                                { isConnected && isRewards ? ( 
+                                        <div className="d-flex">
+                                            <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="18" />
+                                            <Amount value={totalRewards()} /> 
+                                            <div className="ps-2">
+                                                <PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={totalRewards()} placeHolderCfg={{ col: 6 }} />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <NoData /> 
+                                    )
+                                 }
                             </div>
                         </div>
                     </div>
@@ -77,7 +97,7 @@ export default function Claim() {
                                         <img src={chain.icon} style={{ width: '1.8rem' }} alt="Ethereum" />
                                         <div className="fs-5 ms-3">{chain.shortName}</div>
                                     </div>
-                                    { isRewards && getTotalRewardsByChain({ rewardsOwed: rewardsOwedState, chainId: chain.id }).isGreaterThan(Zero) &&
+                                    { totalRewardsBychain(chain.id)?.isGreaterThan(Zero) &&
                                         <div className="d-flex align-items-center small rounded-5 text-bg-light p-2 me-3">
                                             <TokenIcon symbol="COMP" css={`${css['comp-icon']} me-2 d-none d-sm-block`} /> Rewards
                                         </div>
@@ -104,17 +124,17 @@ export default function Claim() {
                                                     </td>
                                                     <RewardsBalance chain={chain.id} market={market.id} />
                                                     <td className="text-end">
-                                                    { !isConnected ?
-                                                        <button type="button" className="btn btn-primary text-white" disabled>Claim</button>
-                                                    :  
+                                                    { isConnected && isRewardsByMarket(chain.id, market.id) ?
                                                         <button type="button" className="btn btn-primary text-white" onClick={() => handleClaim(chain, market)}>Claim</button>
+                                                    :  
+                                                        <button type="button" className="btn btn-primary text-white" disabled>Claim</button>
                                                     }
                                                     </td>
                                                 </tr>
                                             )}
-                                            { (isConnected && chain.markets.length > 1) &&
+                                            { isConnected && chain.markets.length > 1 && totalRewardsBychain(chain.id)?.gt(0) &&
                                                 <tr>
-                                                    <td className="text-center py-2" colSpan={3} style={{ cursor: 'pointer' }}>
+                                                    <td className="text-center" colSpan={3} style={{ cursor: 'pointer', padding: '0.7rem 0' }}>
                                                         <button type="button" className="btn btn-primary text-white" onClick={() => handleClaimAll(chain)}>Claim all markets</button>
                                                     </td>
                                                 </tr>
@@ -146,14 +166,14 @@ export function RewardsBalance({ chain, market }) {
     useEffect(() => {
         if (isRewards) {
             let balance = null
-            if ((chain in rewards) && (market in rewards[chain])) {
+            if (rewards[chain] && rewards[chain][market]) {
                 balance = rewards[chain][market].balance
             } 
             setBalance(balance)
         }
     }, [rewards])
 
-    return isConnected && isRewards ? (
+    return isConnected && !!balance ? (
         <td className="text-center">
             <div className="d-flex justify-content-center align-items-center mb-1">
                 <Amount value={balance} />

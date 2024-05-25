@@ -22,6 +22,7 @@ import { ActionInfo, ActionType } from "../../types"
 import ActionResult from "../../components/action-result/ActionResult"
 import { bna2 } from "../../components/Amount"
 import Price from "../../components/Price"
+import WarningMessage from "../../components/WarningMessage"
 
 export default function Earn() {
 
@@ -95,7 +96,7 @@ export default function Earn() {
             </div>
 
             { isError &&
-              <p className="p-3">Data currently unavailable</p>
+              <WarningMessage>Data currently unavailable</WarningMessage>
             }
 
             { isLoading && 

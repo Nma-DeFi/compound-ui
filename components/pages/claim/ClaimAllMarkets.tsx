@@ -14,7 +14,7 @@ import PriceFromSymbol from '../../PriceFromSymbol'
 import { getTotalRewardsByChain } from '../../../redux/helpers/rewards'
 import { useCurrentChain } from '../../../hooks/useCurrentChain'
 import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
-import { Hash } from 'viem'
+import { Address, Hash } from 'viem'
 import { USER_REJECTED_TX } from '../../NetworkSelector'
 import { useAppDispatch } from '../../../redux/hooks'
 import { rewardsOwedResetByChain } from '../../../redux/slices/rewardsOwed'
@@ -101,9 +101,9 @@ export default function ClaimAllMarkets({ chain }) {
 
     function handleClaim() {
         setMode(Mode.ConfirmTransaction)
-        const markets: Array<String> = Object.entries(rewards[chain.id])
+        const markets: Array<Address> = Object.entries(rewards[chain.id])
             .filter(([_market, reward]) => reward.balance.isGreaterThan(Zero))
-            .map(([market, _reward]) => market) 
+            .map(([market, _reward]) => market as Address) 
 
         if (chain.id !== currentChainId) {
             switchNetworkAsync(chain.id)

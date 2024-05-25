@@ -146,7 +146,8 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
     }
 
     function setInput(amount: BigNumber) {
-      fillInput({ amount, token, id: css['deposit-input'] })
+      const id = css['deposit-input'] 
+      fillInput({ amount, token, id })
     }
 
     function loadBalance() {
@@ -218,7 +219,7 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
                   </div>
                 </div>
                 { mode === Mode.InsufficientBalance ? 
-                    <WarningMessage>The {token?.symbol} balance in your wallet is insufficient</WarningMessage>
+                    <WarningMessage>You don't have enough {token?.symbol} in your wallet</WarningMessage>
                   : 
                     <Spacer />
                 }

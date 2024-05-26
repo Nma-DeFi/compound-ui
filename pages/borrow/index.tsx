@@ -201,7 +201,7 @@ export default function Borrow() {
         <div className="col-12 col-xl-6 col-xxl-5 px-0 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
-            <div className={`d-flex border align-items-center rounded mb-2 px-3 py-${/*mode === Mode.Loading*/ false ? '4' : '3'}`}>
+            <div className="d-flex border align-items-center rounded mb-2 p-3">
                 <div className="flex-grow-1">
                     <AmountInput id={css['borrow-input']} onChange={handleAmountChange} />
                     <small className="text-body-tertiary">

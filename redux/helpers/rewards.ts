@@ -34,7 +34,7 @@ export function getTotalRewardsByChain(
         rewardsOwed: RewardsOwedData
         chainId: number
     }): BigNumber {
-    const rewardsByMarket : Array<BigNumber> = Object.values(rewardsOwed[chainId])
+    const rewardsByMarket : Array<BigNumber> = Object.values(rewardsOwed?.[chainId] ?? [])
         .filter(rewardByMarket => Boolean(rewardByMarket))
         .map(rewardByMarket => rewardByMarket.balance)
     return rewardsByMarket.reduce((accumulator, currentValue) => accumulator.plus(currentValue), Zero)

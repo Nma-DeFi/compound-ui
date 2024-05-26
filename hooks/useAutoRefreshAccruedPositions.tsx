@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAppDispatch } from "../redux/hooks"
-import { accruedPositionsReset } from "../redux/slices/positions/supplyPositions"
+import { accruedPositionsRefresh } from '../redux/helpers/common'
 import { useCurrentAccount } from "./useCurrentAccount"
 
 const REFRESH_INTERVAL = 60 * 1000
@@ -15,7 +15,7 @@ export function useAutoRefreshAccruedPositions() {
         queryKey: ['AutoRefreshAccruedPositions'],
         queryFn: () => { 
             console.log(Date.now(), 'Auto-refresh accrued positions')
-            dispatch(accruedPositionsReset()) 
+            dispatch(accruedPositionsRefresh()) 
             return Promise.resolve(true)
         },
         enabled: isConnected,

@@ -203,14 +203,9 @@ export default function Borrow() {
             <h2 className="mb-4">Borrow</h2>
             <div className={`d-flex border align-items-center rounded mb-2 px-3 py-${/*mode === Mode.Loading*/ false ? '4' : '3'}`}>
                 <div className="flex-grow-1">
-                    { false ? ( //mode === Mode.Loading ? (
-                        <div><PlaceHolder size={PlaceHolderSize.LARGE} col={2} /></div>
-                      ) : (
-                        <AmountInput id={css['borrow-input']} onChange={handleAmountChange} />
-                      )
-                    }
+                    <AmountInput id={css['borrow-input']} onChange={handleAmountChange} />
                     <small className="text-body-tertiary">
-                    { asyncAmountPriceUsd.isIdle ? ( //mode === Mode.Loading ? (
+                    { asyncAmountPriceUsd.isIdle ? (
                         <PlaceHolder />
                       ) : (
                         <PriceAsync asyncPrice={asyncAmountPriceUsd} />
@@ -219,23 +214,13 @@ export default function Borrow() {
                     </small>
                 </div>
                 <button type="button" className="btn btn-lg btn-light border border-light-subtle rounded-5" onClick={() => openModal(SELECT_TOKEN_TO_BORROW_MODAL)}>
-                  { false ? (//mode === Mode.Loading ? (
-                      <div className="d-flex align-items-center">
-                        <div className="me-1 me-sm-2 mb-1" style={{ width: '6rem'}}>
-                          <PlaceHolder size={PlaceHolderSize.LARGE} col={12} />
-                        </div>
-                        <i className="bi bi-chevron-down"></i>
-                        </div>
-                    ) : (
-                      <div className="d-flex align-items-center">
-                        <TokenIcon symbol={ token?.symbol } css="me-2 me-sm-3" width="35" />
-                        <span className="me-2 me-sm-3">
-                          { token?.symbol }
-                        </span> 
-                        <i className="bi bi-chevron-down"></i>
-                      </div>
-                    )
-                  }
+                  <div className="d-flex align-items-center">
+                    <TokenIcon symbol={ token?.symbol } css="me-2 me-sm-3" width="35" />
+                    <span className="me-2 me-sm-3">
+                      { token?.symbol }
+                    </span> 
+                    <i className="bi bi-chevron-down"></i>
+                  </div>
                 </button>
             </div>
             { mode === Mode.Loading  &&    
@@ -308,9 +293,7 @@ export default function Borrow() {
           { isConnected && 
             <>
               <BorrowPositions /> 
-              { (mode !== Mode.Loading) &&
-                <TotalCollaterals /> 
-              }
+              <TotalCollaterals /> 
             </>
           }
         </div>
@@ -349,10 +332,10 @@ function CollateralPanel({ chainId, mode, borrowApr, collaterals }) {
     <BorrowPanel {...{ mode, borrowApr, css: 'pb-2' }}>
       <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none text-body">
         <div className="d-flex align-items-center">
-          <span className="pe-2" style={{ fontSize: '110%' }}>
+          <span style={{ fontSize: '110%', marginRight: '0.4rem' }}>
           { collaterals.length > 1 ? 'Collaterals' : 'Collateral' }
           </span>
-          { collaterals.map((collateral) =>
+          { collaterals.map(collateral =>
             <span key={collateral.token.address} className="text-body-tertiary ps-2">
               <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
             </span>

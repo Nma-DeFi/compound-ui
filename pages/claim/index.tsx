@@ -19,6 +19,7 @@ import { ActionInfo } from "../../types"
 import ClaimAllMarkets, { CLAIM_ALL_MODAL } from "../../components/pages/claim/ClaimAllMarkets"
 import { getTotalRewards, getTotalRewardsByChain } from "../../redux/helpers/rewards"
 import { Zero } from "../../utils/bn"
+import PlaceHolder from "../../components/PlaceHolder"
 
 export default function Claim() {
 
@@ -71,19 +72,27 @@ export default function Claim() {
                         <h2 className="m-0">Claim</h2>
                         <div className="small text-center">
                             <div className="fw-semibold mb-1">Total rewards</div> 
-                            <div className="text-body-secondary" style={{ fontSize: '90%' }}>
-                                { isConnected && isRewards ? ( 
-                                        <div className="d-flex">
-                                            <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="18" />
-                                            <Amount value={totalRewards()} /> 
-                                            <div className="ps-2">
-                                                <PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={totalRewards()} placeHolderCfg={{ col: 6 }} />
-                                            </div>
-                                        </div>
-                                    ) : (
+                            <div className="text-body-secondary" style={{ fontSize: '95%' }}>
+                                { !isConnected ? ( 
                                         <NoData /> 
+                                    ) : (
+                                        <>
+                                            { !isRewards ? ( 
+                                                <PlaceHolder col={8} /> 
+                                            ) : (
+                                                <div className="d-flex justify-content-center">
+                                                    <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="18" />
+                                                    <Amount value={totalRewards()} /> 
+                                                    { totalRewards().gt(0) &&
+                                                        <div className="ps-2">
+                                                            <PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={totalRewards()} placeHolderCfg={{ col: 6 }} />
+                                                        </div>
+                                                    }
+                                                </div>
+                                            )}
+                                        </>
                                     )
-                                 }
+                                }
                             </div>
                         </div>
                     </div>

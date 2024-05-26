@@ -18,6 +18,7 @@ import { Address, Hash } from 'viem'
 import { USER_REJECTED_TX } from '../../NetworkSelector'
 import { useAppDispatch } from '../../../redux/hooks'
 import { rewardsOwedResetByChain } from '../../../redux/slices/rewardsOwed'
+import PlaceHolder, { PlaceHolderSize } from '../../PlaceHolder'
 
 export const CLAIM_ALL_MODAL = 'claim-all-modal'
 
@@ -33,7 +34,7 @@ const enum Mode {
 export default function ClaimAllMarkets({ chain }) {
 
     const [ mode, setMode ] = useState<Mode>()
-    const [ hashes, setHashes ] = useState<Array<Hash>>()
+    const [ hashes, setHashes ] = useState<Array<Hash>>([])
 
     const { currentChainId } = useCurrentChain()
     const { address: account } = useCurrentAccount()
@@ -144,11 +145,18 @@ export default function ClaimAllMarkets({ chain }) {
                                                 <span className="fw-semibold">{ getBaseTokenOrNativeCurrency(market, chain.id).symbol }</span> Market
                                             </td>
                                             <td>
-                                                <div className="d-flex justify-content-center align-items-center">
-                                                    <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="20" />
-                                                    <Amount value={ rewards[chain.id][market.id].balance } /> 
-                                                    <span className="text-body-secondary ps-1">{ COMP_TOKEN.symbol }</span>
-                                                </div>
+                                                { rewards && (chain.id in rewards) && (market.id in rewards[chain.id]) ? (
+                                                    <div className="d-flex justify-content-center align-items-center">
+                                                        <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="20" />
+                                                        <Amount value={ rewards[chain.id][market.id].balance } /> 
+                                                        <span className="text-body-secondary ps-1">{ COMP_TOKEN.symbol }</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-center">
+                                                        <PlaceHolder size={PlaceHolderSize.NORMAL} col={6} />
+                                                    </div>
+                                                )}
+
                                             </td>
                                         </tr>
                                     )}

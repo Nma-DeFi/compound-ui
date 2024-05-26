@@ -83,7 +83,7 @@ export class RewardsService {
         return await walletClient.writeContract(request)
     }
 
-    static async claimAllMarkets({ chain, account, markets, publicClient, walletClient }) {
+    static claimAllMarkets({ chain, account, markets, publicClient, walletClient }) {
         console.log(Date.now(),
             'RewardsService.claimAllMarkets',
             'chain', chain.name,

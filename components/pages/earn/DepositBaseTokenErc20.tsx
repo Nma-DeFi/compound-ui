@@ -50,7 +50,7 @@ export default function DepositBaseTokenErc20(market) {
     const { data: walletClient } = useWalletClient()
 
     const comet = MarketSelector.cometProxy(market)
-    const baseToken = MarketSelector.baseToken(market)
+    const baseToken = MarketUtils.getBaseTokenOrNativeCurrency(market, chainId)
 
     const priceFeed : PriceFeed = {
         address: MarketSelector.baseTokePriceFeed(market),

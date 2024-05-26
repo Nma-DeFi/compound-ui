@@ -4,7 +4,7 @@ import { Address, useAccount, useNetwork } from "wagmi"
 import { useAppDispatch } from "../redux/hooks"
 import { accountConnected, accountDisconnected } from "../redux/slices/currentAccount"
 import { chainSwitched } from "../redux/slices/currentChain"
-import { accruedPositionsReset } from "../redux/slices/positions/supplyPositions"
+import { accruedPositionsReset } from '../redux/helpers/common'
 import { collateralPositionsReset } from "../redux/slices/positions/collateralPositions"
 import { rewardsOwedReset } from "../redux/slices/rewardsOwed"
 

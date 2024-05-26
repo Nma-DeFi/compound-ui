@@ -8,6 +8,13 @@ import { useAutoRefreshAccruedPositions } from '../hooks/useAutoRefreshAccruedPo
 import { useEffect } from 'react';
 import { useBootstrap } from '../hooks/useBootstrap';
 import { useAutoRefreshRewardsOwed } from '../hooks/useAutoRefreshRewardsOwed';
+import css from '../styles/components/Layout.module.scss'
+
+const SocialLinks = {
+    Discord: 'https://discord.gg/compound',
+    X: 'https://x.com/compoundfinance',
+    Github: 'https://github.com/compound-finance',
+}
 
 export const Path = {
     Index: '/',
@@ -79,11 +86,10 @@ export default function Layout({ children }) {
                                     <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-balloon me-1"></i> Claim</NavLink></li>
                                 </ul>
                             </div>
-                            <div className="d-flex justify-content-around fs-4 text-primary">
-                                <a href="#"><i className="bi bi-github"></i></a>
-                                <a href="#"><i className="bi bi-discord"></i></a>
-                                <a href="#"><i className="bi bi-twitter"></i></a>
-                                <a href="#"><i className="bi bi-medium"></i></a>
+                            <div className={`${css['social-links']} d-flex justify-content-around text-primary`}>
+                                <a href={SocialLinks.Github}><i className="bi bi-github"></i></a>
+                                <a href={SocialLinks.Discord}><i className="bi bi-discord"></i></a>
+                                <a href={SocialLinks.X}><i className="bi bi-twitter-x"></i></a>
                             </div>
                         </div>
                     </div>

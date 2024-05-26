@@ -9,7 +9,7 @@ import { AsyncData, AsyncStatus, IdleData } from '../../../utils/async';
 import { ThunkApiFields } from '../../types';
 import * as MarketUtils from '../../../utils/markets';
 import { log } from '../../helpers/supply';
-import { borrowPositionsReset } from './borrowPositions';
+import { fromBigInt } from '../../../utils/bn';
 
 export type SupplyBalance = {
   baseToken: Token
@@ -63,40 +63,53 @@ export const supplyPositionsSlice = createSlice({
           state.data = undefined
           Object.assign(state, AsyncStatus.Error)
         })
+        .addCase(supplyPositionsRefresh.fulfilled, (state: SupplyPositionsState, action: PayloadAction<SupplyPositionsData>) => {
+          state.data = action.payload
+          Object.assign(state, AsyncStatus.Success)
+        })
+        .addCase(supplyPositionsRefresh.rejected, (state: SupplyPositionsState, action: PayloadAction<unknown>) => {
+          console.error(action)
+          state.data = undefined
+          Object.assign(state, AsyncStatus.Error)
+        })
   }
 })
 
+const loadSupplyPositions = async (_, { getState }) => {
+  const { chainId } = getState().currentChain
+  const { address: account } = getState().currentAccount
+  const { publicClient } = getState().publicClient
+
+  const marketDataService = new MarketDataService({ chainId })
+  const markets = await marketDataService.findAllMarkets()
+  const comets = markets.map(m => m.cometProxy)
+
+  const supplyBalances = await PositionsService.supplyBalancesOf({ publicClient, account, markets: comets })
+
+  let positions: SupplyPositionsData = {}
+
+  markets.forEach((market, index) => {
+      const comet = MarketSelector.cometProxy(market)
+      const baseToken = MarketUtils.getBaseTokenOrNativeCurrency(market, chainId)
+      const address = MarketSelector.baseTokePriceFeed(market)
+      const kind = MarketUtils.getPriceFeedKind(market, chainId)
+      const priceFeed = { address, kind } 
+      const supplyBalance = fromBigInt(supplyBalances[index], baseToken.decimals)
+      positions = { ...positions, [comet]: { baseToken, supplyBalance, priceFeed } }  
+  })
+  log(chainId, positions)
+  return positions
+}
+
 export const supplyPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
   'supplyPositions/init',
-  async (_, { getState }) => {
-      const { chainId } = getState().currentChain
-      const { address: account } = getState().currentAccount
-      const { publicClient } = getState().publicClient
-
-      const marketDataService = new MarketDataService({ chainId })
-      const markets = await marketDataService.findAllMarkets()
-  
-      let positions: SupplyPositionsData = {}
-  
-      for (const market of markets) {
-          const comet = MarketSelector.cometProxy(market)
-          const baseToken = MarketSelector.baseToken(market)
-          const address = MarketSelector.baseTokePriceFeed(market)
-          const kind = MarketUtils.getPriceFeedKind(market, chainId)
-          const priceFeed = { address, kind } 
-          const positionsService = new PositionsService({comet, publicClient })
-          const supplyBalance = await positionsService.supplyBalanceOf(account)
-          positions = { ...positions, [comet]: { baseToken, supplyBalance, priceFeed } }  
-      }
-      log(chainId, positions)
-      return positions
-    }
+  loadSupplyPositions
 )
 
-export const accruedPositionsReset = () => (dispatch) => {
-  dispatch(supplyPositionsReset()) 
-  dispatch(borrowPositionsReset())
-}
+export const supplyPositionsRefresh = createAsyncThunk<any, void, ThunkApiFields>(
+  'supplyPositions/refresh',
+  loadSupplyPositions
+)
 
 export const { supplyPositionsReset, supplyPositionIncrease, supplyPositionDecrease, supplyPositionSet  } = supplyPositionsSlice.actions
 

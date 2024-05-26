@@ -33,7 +33,7 @@ export default function BorrowPositions() {
     const { openModal } = useBootstrap()
 
     const comet = MarketSelector.cometProxy(market)
-    const baseToken = MarketSelector.baseToken(market)
+    const baseToken = MarketUtils.getBaseTokenOrNativeCurrency(market, chainId)
 
     const priceFeed = {
         address: MarketSelector.baseTokePriceFeed(market),

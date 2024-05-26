@@ -110,7 +110,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
                       <TokenIcon symbol={ token?.symbol } css="me-1" width="20" />
                       <Amount value={ amount } /> 
                       <span className="text-body-secondary ps-1">{ token?.symbol }</span>
-                      <small className="ps-3 text-body-secondary">(<PriceAsync asyncPrice={price} />)</small>
+                      <span className="ps-3"><PriceAsync asyncPrice={price} /></span>
                     </div>
                   </td>
                 </tr>

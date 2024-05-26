@@ -40,6 +40,25 @@ export class PositionsService {
         return fromBigInt(balance, decimals)
     }
 
+    static async supplyBalancesOf({ publicClient, account, markets }) {
+        const contracts = markets.map(market => ({
+                address: market,
+                abi: cometAbi,
+                functionName: 'balanceOf',
+                args: [ account ], 
+            })
+        )
+        const balances = await publicClient.multicall({ contracts, allowFailure: false })
+        console.log(
+            Date.now(), 
+            'PositionsService.supplyBalancesOf',
+            'account', account,
+            'markets', markets,
+            'balances', balances,
+        )
+        return balances
+    }
+
     async borrowBalanceOf(account) {
         const [ balance, decimals ] = await this.publicClient.multicall({
             contracts: [
@@ -64,6 +83,25 @@ export class PositionsService {
             'decimals', decimals,
         )
         return fromBigInt(balance, decimals)
+    }
+
+    static async borrowBalancesOf({ publicClient, account, markets }) {
+        const contracts = markets.map(market => ({
+                address: market,
+                abi: cometAbi,
+                functionName: 'borrowBalanceOf',
+                args: [ account ], 
+            })
+        )
+        const balances = await publicClient.multicall({ contracts, allowFailure: false })
+        console.log(
+            Date.now(), 
+            'PositionsService.borrowBalancesOf',
+            'account', account,
+            'markets', markets,
+            'balances', balances,
+        )
+        return balances
     }
 
     async collateralBalanceOf({ account, token }) {

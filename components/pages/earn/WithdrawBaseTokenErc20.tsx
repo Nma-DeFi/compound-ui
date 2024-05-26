@@ -42,8 +42,8 @@ export default function WithdrawBaseTokenErc20(market) {
     const { isConnected, address: account } = useCurrentAccount()
 
     const comet = MarketSelector.cometProxy(market)
-    const baseToken = MarketSelector.baseToken(market)
-
+    const baseToken = MarketUtils.getBaseTokenOrNativeCurrency(market, chainId)
+    
     const priceFeed : PriceFeed = {
         address: MarketSelector.baseTokePriceFeed(market),
         kind: MarketUtils.getPriceFeedKind(market, chainId)

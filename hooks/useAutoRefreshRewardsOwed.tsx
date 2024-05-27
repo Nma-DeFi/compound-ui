@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useAppDispatch } from "../redux/hooks"
 import { useCurrentAccount } from "./useCurrentAccount"
-import { rewardsOwedReset } from "../redux/slices/rewardsOwed"
+import { rewardsOwedRefresh } from "../redux/slices/rewardsOwed"
 
 const REFRESH_INTERVAL = 60 * 1000
 
@@ -15,7 +15,7 @@ export function useAutoRefreshRewardsOwed() {
         queryKey: ['AutoRefreshRewardsOwed'],
         queryFn: () => { 
             console.log(Date.now(), 'Auto-refresh owed rewards')
-            dispatch(rewardsOwedReset()) 
+            dispatch(rewardsOwedRefresh()) 
             return Promise.resolve(true)
         },
         enabled: isConnected,

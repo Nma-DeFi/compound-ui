@@ -3,7 +3,6 @@ import NoData from "../../components/NoData"
 import css from '../../styles/pages/Claim.module.scss'
 import { useEffect, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
-import { ChainDataService } from "../../services/chain-data-service"
 import { getBaseTokenOrNativeCurrency } from "../../utils/markets"
 import { GrowSpinners } from "../../components/Spinner"
 import { useRewardsOwed } from "../../hooks/useRewardsOwed"
@@ -20,22 +19,20 @@ import ClaimAllMarkets, { CLAIM_ALL_MODAL } from "../../components/pages/claim/C
 import { getTotalRewards, getTotalRewardsByChain } from "../../redux/helpers/rewards"
 import { Zero } from "../../utils/bn"
 import PlaceHolder from "../../components/PlaceHolder"
+import { useChains } from "../../hooks/useChains"
+import WarningMessage from "../../components/WarningMessage"
 
 export default function Claim() {
 
-    const [ chainList, setChainList ] = useState([])
     const [ claimInfo, setClaimInfo ] = useState(null)
     const [ claimResult, setClaimResult ] = useState<ActionInfo>()
 
     const { isConnected } = useCurrentAccount()
     const { openModal } = useBootstrap()
 
-    const rewardsOwedState = useRewardsOwed()
-    const { isSuccess: isRewards, data: rewards } = rewardsOwedState
+    const chains = useChains()
 
-    useEffect(() => {
-        ChainDataService.findAllChains().then(setChainList)
-    }, [])
+    const { isSuccess: isRewards, data: rewards } = useRewardsOwed()
 
     function handleClaim(chain, market) {
         setClaimInfo({ chain, market, onClaim: setClaimResult })
@@ -96,9 +93,14 @@ export default function Claim() {
                             </div>
                         </div>
                     </div>
-                    { chainList.length === 0 && <GrowSpinners nb={5} css="text-center py-5" /> }
+                    { chains.isError && 
+                        <WarningMessage>Data currently unavailable</WarningMessage>
+                    }
+                    { chains.isLoading && 
+                        <GrowSpinners nb={5} css="text-center py-5" /> 
+                    }
                     <div id={ css['claim-accordion'] } className="accordion">
-                    { chainList.map(chain => 
+                    { chains.isSuccess && chains.data.map(chain => 
                         <div className="accordion-item" key={chain.id}>
                             <h2 className="accordion-header">
                                 <button className={`accordion-button collapsed ${css['accordion-button-custom']}`} type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${chain.id}`} aria-expanded="false" aria-controls={`collapse${chain.id}`}>
@@ -157,10 +159,10 @@ export default function Claim() {
                     )}
                     </div>
                 </div>
+                <ClaimOneMarket { ...claimInfo } />
+                <ClaimAllMarkets { ...claimInfo } />
+                <ActionResult { ...claimResult } />
             </div>
-            <ClaimOneMarket { ...claimInfo } />
-            <ClaimAllMarkets { ...claimInfo } />
-            <ActionResult { ...claimResult } />
         </>
     )
 }

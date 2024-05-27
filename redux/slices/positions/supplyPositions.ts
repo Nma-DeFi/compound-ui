@@ -90,7 +90,6 @@ const loadSupplyPositions = async (_, { getState }) => {
 
   markets.forEach((market, index) => {
       const comet = MarketSelector.cometProxy(market)
-      //const baseToken = MarketUtils.getBaseTokenOrNativeCurrency(market, chainId)
       const baseToken = MarketSelector.baseToken(market)
       const address = MarketSelector.baseTokePriceFeed(market)
       const kind = MarketUtils.getPriceFeedKind(market, chainId)

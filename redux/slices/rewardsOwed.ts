@@ -58,15 +58,31 @@ export const rewardsOwedSlice = createSlice({
                 state.data = undefined
                 Object.assign(state, AsyncStatus.Error)
             })
+            .addCase(rewardsOwedRefresh.fulfilled, 
+                (state: RewardsOwedState, action: PayloadAction<RewardsOwedData>) => {
+                state.data = action.payload
+                Object.assign(state, AsyncStatus.Success)
+            })
+            .addCase(rewardsOwedRefresh.rejected, 
+                (state: RewardsOwedState, action: PayloadAction<unknown>) => {
+                console.error(action)
+                state.data = undefined
+                Object.assign(state, AsyncStatus.Error)
+            })
     }
 })
 
+const loadAllRewards = async (_, { getState }) => {
+    const { address } = getState().currentAccount
+    return await RewardsService.findAllRewards(address)
+}
+
 export const rewardsOwedInit = createAsyncThunk<any, void, ThunkApiFields>(
-    'rewardsOwed/init',
-    async (_, { getState }) => {
-        const { address } = getState().currentAccount
-        return await RewardsService.findAllRewards(address)
-    }
+    'rewardsOwed/init', loadAllRewards
+)
+
+export const rewardsOwedRefresh = createAsyncThunk<any, void, ThunkApiFields>(
+    'rewardsOwed/refresh', loadAllRewards
 )
 
 export const { rewardsOwedSet, rewardsOwedReset, rewardsOwedResetByChain } = rewardsOwedSlice.actions

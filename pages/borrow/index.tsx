@@ -288,6 +288,10 @@ export default function Borrow() {
                 }
             </div>
           </div>
+          <SelectTokenToBorrow onSelect={setCurrentMarket} />
+          <BorrowErc20Token  {...borrowInfo} />
+          <BorrowNativeCurrency  {...borrowInfo} />
+          <ActionResult {...{ ...borrowResult, onSuccess: resetAmount }} />
         </div>
         <div className="col-12 col-xl-3 col-xxl-2 px-0 pt-4 pt-xl-0">
           { isConnected && 
@@ -297,10 +301,6 @@ export default function Borrow() {
             </>
           }
         </div>
-        <SelectTokenToBorrow onSelect={setCurrentMarket} />
-        <BorrowErc20Token  {...borrowInfo} />
-        <BorrowNativeCurrency  {...borrowInfo} />
-        <ActionResult {...{ ...borrowResult, onSuccess: resetAmount }} />
       </>
     )
 }

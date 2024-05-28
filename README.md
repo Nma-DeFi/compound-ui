@@ -4,7 +4,7 @@ This project is a minimal frontend for the [Compound V3](https://docs.compound.f
 
 See the [demo site](https://compound-ui-one.vercel.app).
 
-It is built with the [Compound V3 Community Subgraphs](https://github.com/papercliplabs/compound-v3-subgraph) by [Paperclip Labs](https://paperclip.xyz).
+It is built with the [Compound V3 Community Subgraphs](https://github.com/papercliplabs/compound-v3-subgraph), created by [Paperclip Labs](https://paperclip.xyz).
 
 ## Run the App in Development Mode
 

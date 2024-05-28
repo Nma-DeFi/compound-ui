@@ -58,6 +58,11 @@ export default function Claim() {
         return isRewards && rewards[chainId] && rewards[chainId][marketId]    
     }
 
+    function nbMarketsWithRewards(chainId) {
+        if (!(isRewards && rewards[chainId])) return 0
+        return Object.values(rewards[chainId]).filter(r => r?.balance.gt(0)).length
+    }
+
     return ( 
         <>
             <Head>
@@ -143,7 +148,7 @@ export default function Claim() {
                                                     </td>
                                                 </tr>
                                             )}
-                                            { isConnected && chain.markets.length > 1 && totalRewardsBychain(chain.id)?.gt(0) &&
+                                            { isConnected && nbMarketsWithRewards(chain.id) > 1  &&
                                                 <tr>
                                                     <td className="text-center" colSpan={3} style={{ cursor: 'pointer', padding: '0.7rem 0' }}>
                                                         <button type="button" className="btn btn-primary text-white" onClick={() => handleClaimAll(chain)}>Claim all markets</button>

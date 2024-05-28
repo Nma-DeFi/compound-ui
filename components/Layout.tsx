@@ -60,7 +60,7 @@ export default function Layout({ children }) {
                         <div className="d-block d-xl-none mt-4">
                                 <NetworkSelector id="navbar-chain-selector" fontSize="120%" collapseNavbar={true} />
                         </div>
-                        <ul className="navbar-nav d-flex d-xl-none py-4 fs-5">
+                        <ul className={`${css['collapse-menu']} navbar-nav d-flex d-xl-none fs-5`}>
                             <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>
                             <li className="nav-item"><NavLink href={Path.Earn}><i className="bi bi-stars me-1"></i> Earn</NavLink></li>
                             <li className="nav-item"><NavLink href={Path.Claim}><i className="bi bi-balloon me-1"></i> Claim</NavLink></li>

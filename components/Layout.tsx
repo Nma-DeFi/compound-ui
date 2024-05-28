@@ -46,7 +46,7 @@ export default function Layout({ children }) {
             <Head>
                 <meta charSet="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <title>Compound UI</title>
+                <title>Compound Lite</title>
             </Head>
             <nav className="navbar navbar-expand-xl sticky-top bg-white border-bottom shadow-sm px-1 py-3">
                 <div className="container-fluid">

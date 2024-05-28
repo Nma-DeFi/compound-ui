@@ -64,11 +64,7 @@ export default function Earn() {
   }, [])
 
   return ( 
-      <>
-        <Head>
-          <title>Earn</title>
-        </Head>
-        
+      <>       
         <div className="col-12 col-xl-8 px-0 px-xl-5">
           
             <DepositBaseTokenErc20 { ...earnActionInfo } />

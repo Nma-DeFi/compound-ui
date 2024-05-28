@@ -65,9 +65,6 @@ export default function Claim() {
 
     return ( 
         <>
-            <Head>
-                <title>Claim</title>
-            </Head>
             <div className="col-12 col-lg-7 col-xxl-6 px-0 px-xl-5">
                 <div className="bg-body px-3 px-md-4 pb-4 pt-3 rounded border shadow mb-4">
                     <div className="d-flex justify-content-between mb-3">

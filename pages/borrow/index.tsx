@@ -195,9 +195,6 @@ export default function Borrow() {
 
     return ( 
       <>
-        <Head>
-          <title>Borrow</title>
-        </Head>
         <div className="col-12 col-xl-6 col-xxl-5 px-0 px-xl-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>

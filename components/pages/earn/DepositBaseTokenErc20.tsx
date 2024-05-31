@@ -171,7 +171,8 @@ export default function DepositBaseTokenErc20(market) {
     }
 
     function setInput(amount: BigNumber) {
-      fillInput({ amount, token, id: css['deposit-input'] })
+      const id = css['deposit-input']
+      fillInput({ amount, id })
     }
 
     function loadBalance() {

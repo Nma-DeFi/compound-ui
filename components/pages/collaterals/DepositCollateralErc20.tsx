@@ -147,7 +147,7 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
 
     function setInput(amount: BigNumber) {
       const id = css['deposit-input'] 
-      fillInput({ amount, token, id })
+      fillInput({ amount, id })
     }
 
     function loadBalance() {

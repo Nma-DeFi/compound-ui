@@ -135,7 +135,7 @@ export default function WithdrawBaseTokenErc20(market) {
     }
     
     function setInput(amount: BigNumber) {
-      fillInput({ amount, token, id: css['withdraw-input'] })
+      fillInput({ amount, id: css['withdraw-input'] })
     }
 
     function handleAmountChange(event) {

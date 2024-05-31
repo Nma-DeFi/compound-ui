@@ -121,7 +121,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
     }
 
     function setInput(amount: BigNumber) {
-      fillInput({ amount, token, id: css['repay-input'] })
+      fillInput({ amount, id: css['repay-input'] })
     }
         
     function loadTokenBalance() {

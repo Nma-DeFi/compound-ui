@@ -181,7 +181,7 @@ export default function Borrow() {
     }
 
     function setInput(amount: BigNumber) {
-      fillInput({ amount, token, id: css['borrow-input'] })
+      fillInput({ amount, id: css['borrow-input'] })
     }
     
     function resetAmount() {

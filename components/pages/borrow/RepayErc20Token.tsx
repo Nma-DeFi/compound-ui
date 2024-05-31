@@ -164,7 +164,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
     }
     
     function setInput(amount: BigNumber) {
-      fillInput({ amount, token, id: css['repay-input'] })
+      fillInput({ amount, id: css['repay-input'] })
     }
 
     function handleAmountChange(event) {

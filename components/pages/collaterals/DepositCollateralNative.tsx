@@ -124,7 +124,7 @@ export default function DepositCollateralNative({ comet, token, onDeposit }  : D
 
     function setInput(amount: BigNumber) {
       const id = css['deposit-native-input'] 
-      fillInput({ amount, token, id })
+      fillInput({ amount, id })
     }
 
     function handleAmountChange(event) {

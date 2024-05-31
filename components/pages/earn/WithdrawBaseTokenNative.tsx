@@ -180,7 +180,7 @@ export default function WithdrawBaseTokenNative(market) {
   }
   
   function setInput(amount: BigNumber) {
-    fillInput({ amount, token, id: css['withdraw-native-input'] })
+    fillInput({ amount, id: css['withdraw-native-input'] })
   }
 
   function handleAmountChange(event) {

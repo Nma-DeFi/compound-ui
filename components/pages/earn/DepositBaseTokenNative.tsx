@@ -148,7 +148,7 @@ export default function DepositBaseTokenNative(market) {
     }
 
     function setInput(amount: BigNumber) {
-      fillInput({ amount, token, id: css['deposit-native-input'] })
+      fillInput({ amount, id: css['deposit-native-input'] })
     }
 
     function handleAmountChange(event) {

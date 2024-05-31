@@ -3,7 +3,7 @@ import { useCurrentChain } from "../../../hooks/useCurrentChain"
 import * as MarketSelector from "../../../selectors/market-selector"
 import { ActionType, PriceFeed, Token } from "../../../types"
 import * as MarketUtils from "../../../utils/markets"
-import { AsyncBigNumber, IdleData, loadAsyncData } from "../../../utils/async"
+import { AsyncBigNumber, IdleData, SuccessData, loadAsyncData } from "../../../utils/async"
 import BigNumber from "bignumber.js"
 import { Zero, bn } from "../../../utils/bn"
 import { Hash } from "viem"
@@ -108,7 +108,7 @@ export default function DepositBaseTokenErc20(market) {
 
     useEffect(() => { 
       if (isSuccessApproval) {
-        loadAllowance()
+        setAsyncAllowance(SuccessData(amount))
       } 
     }, [isSuccessApproval])
 

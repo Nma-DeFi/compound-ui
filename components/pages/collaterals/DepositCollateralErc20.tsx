@@ -13,7 +13,7 @@ import AmountInput from '../../AmountInput'
 import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
 import TokenIcon from '../../TokenIcon'
-import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
+import { AsyncBigNumber, IdleData, SuccessData, loadAsyncData } from '../../../utils/async'
 import css from '../../../styles/components/collaterals/DepositCollateralErc20.module.scss'
 import AsyncAmount from '../../AmountAsync'
 import { ActionType, DepositParam } from '../../../types'
@@ -87,7 +87,7 @@ export default function DepositCollateralErc20({ comet, token, onDeposit } : Dep
 
     useEffect(() => { 
       if (isSuccessApproval) {
-        loadAllowance()
+        setAsyncAllowance(SuccessData(amount))
       } 
     }, [isSuccessApproval])
 

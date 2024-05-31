@@ -110,7 +110,7 @@ export default function Claim() {
                                         <img src={chain.icon} style={{ width: '1.8rem' }} alt="Ethereum" />
                                         <div className="fs-5 ms-3">{chain.shortName}</div>
                                     </div>
-                                    { totalRewardsBychain(chain.id)?.isGreaterThan(Zero) &&
+                                    { isConnected && totalRewardsBychain(chain.id)?.isGreaterThan(Zero) &&
                                         <div className="d-flex align-items-center small rounded-5 text-bg-light p-2 me-3">
                                             <TokenIcon symbol="COMP" css={`${css['comp-icon']} me-2 d-none d-sm-block`} /> Rewards
                                         </div>

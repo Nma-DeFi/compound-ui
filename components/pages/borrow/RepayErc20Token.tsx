@@ -12,7 +12,7 @@ import { useCurrentChain } from '../../../hooks/useCurrentChain'
 import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
 import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi'
 import { useErc20Service } from '../../../hooks/useErc20Service'
-import { AsyncBigNumber, IdleData, loadAsyncData } from '../../../utils/async'
+import { AsyncBigNumber, IdleData, SuccessData, loadAsyncData } from '../../../utils/async'
 import AsyncAmount from '../../AmountAsync'
 import { Hash } from 'viem'
 import Amount from '../../Amount'
@@ -92,7 +92,8 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
 
     useEffect(() => { 
       if (isSuccessApproval) {
-        loadTokenAllowance()
+        const allowance = amountToApprove()
+        setAsyncAllowance(SuccessData(allowance))
       } 
     }, [isSuccessApproval])
 
@@ -202,9 +203,13 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
 
     function handleApproval() {
       setMode(Mode.ConfirmationOfApproval)
-      const allowance = amount.isEqualTo(borrowBalance) ? borrowBalance.times(ACCRUED_ESTIMATION) : amount
+      const allowance = amountToApprove()
       erc20service.approve(comet, allowance).then(setApprovalHash)
     }
+
+  function amountToApprove() {
+    return amount.isEqualTo(borrowBalance) ? borrowBalance.times(ACCRUED_ESTIMATION) : amount
+  }
 
     function handleWalletBalancePercent(factor: number) {
       const newAmount = borrowBalance.times(factor).dp(token.decimals)

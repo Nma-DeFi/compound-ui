@@ -16,7 +16,7 @@ import TokenIcon from "../../TokenIcon"
 import { LiquidationRiskProgress } from "../../LiquidationRisk"
 import { useAllowanceService } from "../../../hooks/useAllowanceService"
 import { usePositionsService } from "../../../hooks/usePositionsService"
-import { AsyncBigNumber, AsyncBoolean, IdleData, loadAsyncData } from "../../../utils/async"
+import { AsyncBigNumber, AsyncBoolean, IdleData, SuccessData, loadAsyncData } from "../../../utils/async"
 import { CompoundConfig } from "../../../compound-config"
 import { ActionType } from "../../../types"
 import { bn } from "../../../utils/bn"
@@ -89,7 +89,7 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
   
   useEffect(() => { 
     if (isSuccessBulkerApproval) {
-      loadBulkerPermission()
+      setBulkerPermission(SuccessData(true))
     } 
   }, [isSuccessBulkerApproval])
 
@@ -153,6 +153,7 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
   }
 
   function handleBulkerApproval() {
+    setMode(Mode.ConfirmBulkerApproval)
     allowanceService.allow(bulker, true).then(setBulkerApprovalHash)
   }
 

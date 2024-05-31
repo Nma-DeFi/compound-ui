@@ -220,7 +220,7 @@ export default function WithdrawCollateralErc20({ comet, token, onWithdraw } : W
                   : mode === Mode.NotConnected ?
                     <button className="btn btn-lg btn-primary text-white" type="button" disabled>Connect Wallet</button>
                   : mode === Mode.ConfirmationOfWithdrawal ?
-                    <button className="btn btn-lg btn-primary text-white" type="button">Confirmation <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
                   : mode === Mode.WithdrawReady && amount.isGreaterThan(Zero) ?
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {token?.symbol}</button>
                   : 

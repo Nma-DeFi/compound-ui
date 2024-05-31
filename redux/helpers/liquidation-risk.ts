@@ -45,14 +45,7 @@ export async function getLiquidationRiskByBorrowAmount({ chainId, market, collat
     borrowMax = borrowMax.plus(balance.times(price).times(factor))
   }
 
-  const liquidationRisk = borrowCurrent.div(borrowMax).times(100).toNumber()
-
-  console.log('getLiquidationRiskByBorrowAmount', 
-    'borrowCurrent', bnf(borrowCurrent), 
-    'borrowMax', bnf(borrowMax), 
-    'liquidationRisk', liquidationRisk)
-
-  return liquidationRisk
+  return borrowCurrent.div(borrowMax).times(100).toNumber()
 }
 
 export async function getLiquidationRiskByCollateralWithdrawal({ chainId, market, borrowPositions, collateralPositions, priceService, collateral, amount } : {
@@ -70,10 +63,6 @@ export async function getLiquidationRiskByCollateralWithdrawal({ chainId, market
   const newBalance: BigNumber = oldBalance.minus(amount)
 
   modifiedCollateralPositions[market.cometProxy][collateral.address].balance = BigNumber.max(0, newBalance)
-
-  console.log('getLiquidationRiskByCollateralAmount', 'oldBalance', oldBalance.toString())
-  console.log('getLiquidationRiskByCollateralAmount', 'newBalance', newBalance.toString())
-  console.log('getLiquidationRiskByCollateralAmount', 'result', BigNumber.max(0, newBalance).toString())
 
   return getLiquidationRisk({ chainId, market, priceService, borrowPositions, collateralPositions: modifiedCollateralPositions })
 }

@@ -13,7 +13,8 @@ import { borrowPositionDecrease, borrowPositionIncrease, borrowPositionSet } fro
 import { Zero } from "../../utils/bn";
 import { ToastEvent, useToastEvent } from "../../hooks/useBootstrap";
 import { Hash } from "viem";
-import { rewardsOwedSet } from "../../redux/slices/rewardsOwed";
+import { rewardsOwedRefresh, rewardsOwedSet } from "../../redux/slices/rewardsOwed";
+import { accruedPositionsRefresh } from "../../redux/helpers/common";
 
 export const ACTION_RESULT_TOAST = 'action-result-toast'
 
@@ -96,6 +97,8 @@ export default function ActionResult({ id, comet, action, token, amount, hash, c
             console.error(error) 
             setMode(Mode.Error)
             setActiveTx(undefined)
+            dispatch(accruedPositionsRefresh()) 
+            dispatch(rewardsOwedRefresh()) 
         }
     }, [isError])
 

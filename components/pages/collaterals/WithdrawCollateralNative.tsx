@@ -9,7 +9,7 @@ import { useCurrentAccount } from '../../../hooks/useCurrentAccount';
 import { useCurrentChain } from '../../../hooks/useCurrentChain';
 import { useWithdrawService } from '../../../hooks/useWithdrawService';
 import css from '../../../styles/components/collaterals/WithdrawCollateralNative.module.scss';
-import { AsyncBigNumber, AsyncData, IdleData, loadAsyncData } from '../../../utils/async';
+import { AsyncBigNumber, AsyncData, IdleData, SuccessData, loadAsyncData } from '../../../utils/async';
 import { Zero, bn } from '../../../utils/bn';
 import * as ChainUtils from '../../../utils/chains';
 import Amount from '../../Amount';
@@ -108,7 +108,7 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
     
     useEffect(() => { 
       if (isSuccessBulkerApproval) {
-        loadBulkerPermission()
+        setBulkerPermission(SuccessData(true))
       } 
     }, [isSuccessBulkerApproval])
 
@@ -273,9 +273,9 @@ export default function WithdrawCollateralNative({ comet, token, onWithdraw } : 
                   : mode === Mode.BulkerNotApproved ?
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleBulkerApproval}>Activate withdrawal</button>
                   : mode === Mode.WaitingForBulkerApproval ?
-                    <button className="btn btn-lg btn-primary text-white" type="button">Activating withdrawal ... Wait please <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Activating withdrawal ... Wait please <SmallSpinner /></button>
                   : [Mode.ConfirmationOfBulkerApproval, Mode.ConfirmationOfWithdrawal].includes(mode) ?
-                    <button className="btn btn-lg btn-primary text-white" type="button">Confirmation <SmallSpinner /></button>
+                    <button className="btn btn-lg btn-primary text-white" type="button" disabled>Confirmation <SmallSpinner /></button>
                   : mode === Mode.WithdrawReady && amount.isGreaterThan(Zero) ?
                     <button className="btn btn-lg btn-primary text-white" type="button" onClick={handleWithdraw}>Withdraw <Amount value={amount} /> {nativeCurrency.symbol}</button>
                   :

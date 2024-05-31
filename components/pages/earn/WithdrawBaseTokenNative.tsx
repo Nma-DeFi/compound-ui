@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { Zero, bn } from '../../../utils/bn'
 import * as ChainUtils from '../../../utils/chains'
 import { Hash } from 'viem'
-import { AsyncBigNumber, AsyncBoolean, IdleData, loadAsyncData } from '../../../utils/async'
+import { AsyncBigNumber, AsyncBoolean, IdleData, SuccessData, loadAsyncData } from '../../../utils/async'
 import BigNumber from 'bignumber.js'
 import { ModalEvent, useBootstrap, useModalEvent } from '../../../hooks/useBootstrap'
 import { usePositionsService } from '../../../hooks/usePositionsService'
@@ -106,7 +106,7 @@ export default function WithdrawBaseTokenNative(market) {
   
   useEffect(() => { 
     if (isSuccessBulkerApproval) {
-      loadBulkerPermission()
+      setBulkerPermission(SuccessData(true))
     } 
   }, [isSuccessBulkerApproval])
 

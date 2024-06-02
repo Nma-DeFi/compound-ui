@@ -11,12 +11,40 @@ import { PriceFeed } from "../types"
 import { getPriceFeedKind } from "../utils/markets"
 import { useCurrentChain } from "../hooks/useCurrentChain"
 import PlaceHolder, { PlaceHolderSize } from "./PlaceHolder"
+import { useCollateralPositions } from "../hooks/useCollateralPositions"
+import { AsyncBigNumber, IdleData, LoadingData, SuccessData } from "../utils/async"
 
 
 export function CollateralBalance({ market, collateral, isLoading, isSuccess, amount }) {
 
     const { isConnected } = useCurrentAccount()
     
+    return isConnected 
+        ? <CollateralAmount {...{ market, collateral, isLoading, isSuccess, amount }} /> 
+        : <NoCollateralBalance />
+}
+
+export function CollateralBalance2({ market, collateral }) {
+
+    const [asyncCollateralBalance, setAsyncCollateralBalance] = useState<AsyncBigNumber>(IdleData)
+    const { isLoading, isSuccess, data: amount } = asyncCollateralBalance 
+
+    const { isConnected } = useCurrentAccount()
+    const { currentChainId: chainId } = useCurrentChain()
+    const asyncCollateralPositions = useCollateralPositions()
+
+    useEffect(() => {
+        setAsyncCollateralBalance(LoadingData)
+        if (market && asyncCollateralPositions.isSuccess) {
+            const comet = cometProxy(market)
+            const token = collateral.token.address
+            const collateralBalance = asyncCollateralPositions.data[comet]?.[token]?.balance
+            if (collateralBalance) {
+                setAsyncCollateralBalance(SuccessData(collateralBalance))
+            }
+        }
+    }, [chainId, market, asyncCollateralPositions])
+        
     return isConnected 
         ? <CollateralAmount {...{ market, collateral, isLoading, isSuccess, amount }} /> 
         : <NoCollateralBalance />

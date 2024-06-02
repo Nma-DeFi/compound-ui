@@ -1,6 +1,4 @@
-import { connect } from "react-redux"
 import { useCurrentAccount } from "../hooks/useCurrentAccount"
-import { RootState } from "../redux/types"
 import { cometProxy } from "../selectors/market-selector"
 import { bna2 } from "./Amount"
 import { NoData } from "../utils/page"
@@ -14,20 +12,8 @@ import PlaceHolder, { PlaceHolderSize } from "./PlaceHolder"
 import { useCollateralPositions } from "../hooks/useCollateralPositions"
 import { AsyncBigNumber, IdleData, LoadingData, SuccessData } from "../utils/async"
 
-
-export function CollateralBalance({ market, collateral, isLoading, isSuccess, amount }) {
-
-    const { isConnected } = useCurrentAccount()
-    
-    return isConnected 
-        ? <CollateralAmount {...{ market, collateral, isLoading, isSuccess, amount }} /> 
-        : <NoCollateralBalance />
-}
-
-export function CollateralBalance2({ market, collateral }) {
-
+export default function CollateralBalance({ market, collateral }) {
     const [asyncCollateralBalance, setAsyncCollateralBalance] = useState<AsyncBigNumber>(IdleData)
-    const { isLoading, isSuccess, data: amount } = asyncCollateralBalance 
 
     const { isConnected } = useCurrentAccount()
     const { currentChainId: chainId } = useCurrentChain()
@@ -40,17 +26,19 @@ export function CollateralBalance2({ market, collateral }) {
             const token = collateral.token.address
             const collateralBalance = asyncCollateralPositions.data[comet]?.[token]?.balance
             if (collateralBalance) {
-                setAsyncCollateralBalance(SuccessData(collateralBalance))
+                const successBalance = SuccessData(collateralBalance)
+                setAsyncCollateralBalance(successBalance)
             }
         }
     }, [chainId, market, asyncCollateralPositions])
         
     return isConnected 
-        ? <CollateralAmount {...{ market, collateral, isLoading, isSuccess, amount }} /> 
+        ? <CollateralAmount {...{ market, collateral, asyncCollateralBalance }} /> 
         : <NoCollateralBalance />
 }
 
-function CollateralAmount({ market, collateral, isLoading, isSuccess, amount }) { 
+function CollateralAmount({ market, collateral, asyncCollateralBalance }) { 
+    const { isLoading, isSuccess, data: amount } = asyncCollateralBalance
 
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
     const { currentChainId: chainId } = useCurrentChain()
@@ -99,13 +87,5 @@ const CollateralBalanceLayout = ({ children}) => (
         <>{ children }</>
     </div>
 )
-
-const mapStateToProps = (state: RootState, { market, collateral }) => {
-    const { isLoading, isSuccess, data: positions } = state.collateralPositions
-    const comet = cometProxy(market) 
-    const amount = positions?.[comet][collateral.token.address].balance
-    return { isLoading, isSuccess, amount }
-}
-export default connect(mapStateToProps)(CollateralBalance)
 
 

@@ -1,8 +1,7 @@
-import Head from "next/head"
 import { useEffect, useState } from "react"
 import { GrowSpinners } from "../../components/Spinner"
 import SupplyApr from "../../components/SupplyApr"
-import SupplyBalance, { SupplyBalance2 } from "../../components/SupplyBalance"
+import SupplyBalance from "../../components/SupplyBalance"
 import UserAccount from "../../components/UserAccount"
 import WithdrawBaseTokenErc20, { WITHDRAW_BASE_TOKEN_ERC20_MODAL } from "../../components/pages/earn/WithdrawBaseTokenErc20"
 import WithdrawBaseTokenNative, { WITHDRAW_BASE_TOKEN_NATIVE_MODAL } from "../../components/pages/earn/WithdrawBaseTokenNative"
@@ -125,7 +124,7 @@ export default function Earn() {
                   </div>
                   { isConnected &&
                     <div className="col text-center">
-                      <SupplyBalance2 market={market} />
+                      <SupplyBalance market={market} />
                     </div>
                   }
                   <div className="col text-center">

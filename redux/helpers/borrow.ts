@@ -51,7 +51,7 @@ export async function getTotalBorrowingsUsdBalance(
 }
 
 export function isBorrowPosition(comet: Address, positions: BorrowPositionsData) {
-  return Boolean(positions && positions[comet].borrowBalance.isGreaterThan(Zero))
+  return Boolean(positions && positions[comet]?.borrowBalance.isGreaterThan(Zero))
 }
 
 export function log(chainId: number, positions: BorrowPositionsData) {

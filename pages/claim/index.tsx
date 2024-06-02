@@ -189,6 +189,7 @@ export function RewardsBalance({ chain, market }) {
     return isConnected && !!balance ? (
         <td className="text-center">
             <div className="d-flex justify-content-center align-items-center mb-1">
+                <TokenIcon symbol={COMP_TOKEN.symbol} css={css['comp-icon']} />
                 <Amount value={balance} />
             </div>
             <div className="small text-body-secondary">

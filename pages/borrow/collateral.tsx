@@ -16,7 +16,7 @@ import WithdrawCollateralErc20, { WITHDRAW_COLLATERAL_ERC20_MODAL } from '../../
 import WithdrawCollateralNative, { WITHDRAW_COLLATERAL_NATIVE_MODAL } from '../../components/pages/collaterals/WithdrawCollateralNative';
 import { useCollateralPositions } from '../../hooks/useCollateralPositions';
 import { useCurrentAccount } from '../../hooks/useCurrentAccount';
-import CollateralBalance, { CollateralBalance2 } from '../../components/CollateralBalance';
+import CollateralBalance from '../../components/CollateralBalance';
 import css from '../../styles/components/borrow/Collateral.module.scss';
 import PriceAsync from '../../components/PriceAsync';
 import { useTotalCollateralUsdByMarket } from '../../hooks/useTotalCollateralUsdByMarket';
@@ -197,7 +197,7 @@ export default function Collateral() {
                         </div>
                     </div>
                     <div className="col-6 col-sm-4 d-flex justify-content-start justify-content-sm-center">
-                        <CollateralBalance2 market={currentMarket} collateral={collateral} />
+                        <CollateralBalance market={currentMarket} collateral={collateral} />
                     </div>
                     <div className="col-6 col-sm-3">
                         <div className="d-flex flex-column">

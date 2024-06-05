@@ -1,4 +1,5 @@
 import { cometAbi } from "../abi/cometAbi"
+import { collateralTokens } from "../selectors/market-selector"
 import { fromBigInt } from "../utils/bn"
 
 export class PositionsService {
@@ -122,22 +123,40 @@ export class PositionsService {
         return fromBigInt(balance, decimals)
     }
 
-    async collateralBalancesOf({ account, tokens }) {
-        const contracts = tokens.map(({ token }) => ({
-                ...this.contract,
-                functionName: 'collateralBalanceOf',
-                args: [ account, token.address ], 
+    static async collateralBalancesOf({ publicClient, account, markets }) {
+        let collateralBalances = {}
+        const contracts = []
+        
+        markets.forEach(market => {
+            let positionsByCollateralTokens = {}
+            collateralTokens(market).forEach(({ token }) => {
+                contracts.push({
+                    address: market.id,
+                    abi: cometAbi,
+                    functionName: 'collateralBalanceOf',
+                    args: [ account, token.address ], 
+                })
+                positionsByCollateralTokens = { ...positionsByCollateralTokens, [token.address]: null }
             })
-        )
-        const balances = await this.publicClient.multicall({ contracts, allowFailure: false })
+            collateralBalances = { ...collateralBalances, [market.id]: positionsByCollateralTokens }
+        })
+
+        const multicallData = await publicClient.multicall({ contracts, allowFailure: false })
+
+        contracts.forEach((contract, index) => {
+            const comet = contract.address
+            const token = contract.args[1]
+            collateralBalances[comet][token] = multicallData[index]
+        })
+
         console.log(
             Date.now(), 
             'PositionsService.collateralBalancesOf',
             'account', account,
-            'tokens', tokens,
-            'comet', this.contract.address,
-            'balances', balances,
+            'markets', markets,
+            'balances', collateralBalances,
         )
-        return balances
+
+        return collateralBalances
     }
 }

@@ -63,40 +63,43 @@ export const collateralPositionsSlice = createSlice({
     }
 })
 
+const loadCollateralPositions = async (_, { getState }) => {
+    const { chainId } = getState().currentChain
+    const { address: account } = getState().currentAccount
+    const { publicClient } = getState().publicClient
+
+    const marketDataService = new MarketDataService({ chainId })
+    const markets = await marketDataService.findAllMarkets()
+
+    const collateralBalances = await PositionsService.collateralBalancesOf({ publicClient, account, markets })
+
+    let positions: CollateralPositionsData = {}
+
+    for (const market of markets) {
+        const comet = MarketSelector.cometProxy(market)
+        const tokens = MarketSelector.collateralTokens(market)
+        let positionsByMarket: CollateralPositionsByMarket = {}
+        for (let index = 0; index < tokens.length; index++) {
+            const { token, priceFeed: priceFeedAddress, borrowCollateralFactor, liquidateCollateralFactor } = tokens[index]
+            const balance = fromBigInt(collateralBalances[comet][token.address], token.decimals)
+            const priceFeed = { address: priceFeedAddress, kind: getPriceFeedKind(market, chainId) }
+            const collateralFactor = Number(borrowCollateralFactor)
+            const liquidationThreshold = Number(liquidateCollateralFactor)
+            const positionData = { token, balance, priceFeed, collateralFactor, liquidationThreshold }
+            positionsByMarket = { ...positionsByMarket, [token.address]: positionData }
+        }
+        positions = { ...positions, [comet]: positionsByMarket }
+    }
+    console.log(Date.now(), 'collateralPositions', chainId, positions)
+    return positions
+}
+
 export const collateralPositionsInit = createAsyncThunk<any, void, ThunkApiFields>(
     'collateralPositions/init',
-    async (_, { getState }) => {
-        const { chainId } = getState().currentChain
-        const { address: account } = getState().currentAccount
-        const { publicClient } = getState().publicClient
-
-        const marketDataService = new MarketDataService({ chainId })
-        const markets = await marketDataService.findAllMarkets()
-    
-        let positions: CollateralPositionsData = {}
-
-        for (const market of markets) {
-            const comet = MarketSelector.cometProxy(market)
-            const tokens = MarketSelector.collateralTokens(market)
-            const positionsService = new PositionsService({ comet, publicClient })
-            const balances = await positionsService.collateralBalancesOf({ account, tokens })
-            let positionsByMarket : CollateralPositionsByMarket = {}
-            for (let index = 0; index < tokens.length; index++) {
-                const { token, priceFeed: address, borrowCollateralFactor, liquidateCollateralFactor } = tokens[index]
-                const balance = fromBigInt(balances[index], token.decimals)
-                const priceFeed = { address, kind: getPriceFeedKind(market, chainId) } 
-                const collateralFactor = Number(borrowCollateralFactor)
-                const liquidationThreshold = Number(liquidateCollateralFactor)
-                const positionData = { token, balance, priceFeed, collateralFactor, liquidationThreshold }
-                positionsByMarket = { ...positionsByMarket,  [token.address]: positionData }
-            }
-            positions = { ...positions, [comet]: positionsByMarket }  
-        }
-        console.log(Date.now(), 'collateralPositions', chainId, positions)
-        return positions
-    }
+    loadCollateralPositions
 )
 
 export const { collateralPositionsReset, collateralPositionIncrease, collateralPositionDecrease } = collateralPositionsSlice.actions
 
 export default collateralPositionsSlice.reducer
+

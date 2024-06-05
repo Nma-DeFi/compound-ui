@@ -26,8 +26,8 @@ export const Path = {
 export default function Layout({ children }) {
 
     useNetworkEvents()
-    useAutoRefreshAccruedPositions()
-    useAutoRefreshRewardsOwed()
+    //useAutoRefreshAccruedPositions()
+    //useAutoRefreshRewardsOwed()
     
     const { getOrCreateCollapse } = useBootstrap()
 

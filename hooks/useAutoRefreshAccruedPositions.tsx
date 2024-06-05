@@ -3,7 +3,7 @@ import { useAppDispatch } from "../redux/hooks"
 import { accruedPositionsRefresh } from '../redux/helpers/common'
 import { useCurrentAccount } from "./useCurrentAccount"
 
-const REFRESH_INTERVAL = 60 * 1000
+const REFRESH_INTERVAL = 600 * 1000
 
 export function useAutoRefreshAccruedPositions() {
 

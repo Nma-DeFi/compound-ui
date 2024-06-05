@@ -3,7 +3,7 @@ import { useAppDispatch } from "../redux/hooks"
 import { useCurrentAccount } from "./useCurrentAccount"
 import { rewardsOwedRefresh } from "../redux/slices/rewardsOwed"
 
-const REFRESH_INTERVAL = 60 * 1000
+const REFRESH_INTERVAL = 600 * 1000
 
 export function useAutoRefreshRewardsOwed() {
 

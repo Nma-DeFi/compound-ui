@@ -290,7 +290,7 @@ export default function Borrow() {
           <BorrowNativeCurrency  {...borrowInfo} />
           <ActionResult {...{ ...borrowResult, onSuccess: resetAmount }} />
         </div>
-        <div className="col-12 col-lg-3 px-0 pt-4 pt-xl-0">
+        <div className="col-12 col-lg-3 px-0 pt-4 pt-lg-0">
           { isConnected && 
             <>
               <BorrowPositions /> 

@@ -58,7 +58,7 @@ export default function Layout({ children }) {
                     </button>
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <div className="d-block d-xl-none mt-4">
-                                <NetworkSelector id="navbar-chain-selector" fontSize="120%" collapseNavbar={true} />
+                            <NetworkSelector id="navbar-chain-selector" fontSize="120%" collapseNavbar={true} />
                         </div>
                         <ul className={`${css['collapse-menu']} navbar-nav d-flex d-xl-none fs-5`}>
                             <li className="nav-item"><NavLink href={Path.Borrow}><i className="bi bi-box-arrow-down me-1"></i> Borrow</NavLink></li>

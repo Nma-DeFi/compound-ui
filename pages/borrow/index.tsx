@@ -195,7 +195,7 @@ export default function Borrow() {
 
     return ( 
       <>
-        <div className="col-12 col-lg-7 col-xl-6 col-xxl-5 px-0 px-lg-5">
+        <div className="col-12 col-lg-8 col-xl-6 col-xxl-5 px-0 px-lg-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
             <div className="d-flex border align-items-center rounded mb-2 p-3">
@@ -345,7 +345,7 @@ function CollateralPanel({ chainId, mode, borrowApr, collaterals }) {
 
 function TotalCollaterals() {
   const asyncCollateralPositions = useCollateralPositions()
-  const { isPending, isLoading, isSuccess, data: totalCollateral} = useTotalCollateralUsdByChain({ asyncCollateralPositions })
+  const { isPending, isLoading, isSuccess, data: totalCollateral } = useTotalCollateralUsdByChain({ asyncCollateralPositions })
   
   return isSuccess && totalCollateral.gt(Zero) && (
     <Link href={`${Path.Borrow}/collateral`} className="text-decoration-none">

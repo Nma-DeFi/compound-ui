@@ -195,7 +195,7 @@ export default function Borrow() {
 
     return ( 
       <>
-        <div className="col-12 col-xl-6 col-xxl-5 px-0 px-xl-5">
+        <div className="col-12 col-lg-7 col-xl-6 col-xxl-5 px-0 px-lg-5">
           <div className="bg-body p-3 rounded border shadow">
             <h2 className="mb-4">Borrow</h2>
             <div className="d-flex border align-items-center rounded mb-2 p-3">
@@ -290,7 +290,7 @@ export default function Borrow() {
           <BorrowNativeCurrency  {...borrowInfo} />
           <ActionResult {...{ ...borrowResult, onSuccess: resetAmount }} />
         </div>
-        <div className="col-12 col-xl-3 col-xxl-2 px-0 pt-4 pt-xl-0">
+        <div className="col-12 col-lg-3 px-0 pt-4 pt-xl-0">
           { isConnected && 
             <>
               <BorrowPositions /> 

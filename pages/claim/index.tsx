@@ -71,7 +71,7 @@ export default function Claim() {
                         <h2 className="m-0">Claim</h2>
                         <div className="small text-center">
                             <div className="fw-semibold mb-1">Total rewards</div> 
-                            <div className="text-body-secondary" style={{ fontSize: '95%' }}>
+                            <div style={{ fontSize: '95%' }}>
                                 { !isConnected ? ( 
                                         <NoData /> 
                                     ) : (
@@ -81,11 +81,16 @@ export default function Claim() {
                                             ) : (
                                                 <div className="d-flex justify-content-center">
                                                     <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="18" />
-                                                    <Amount value={totalRewards()} /> 
-                                                    { totalRewards().gt(0) &&
-                                                        <div className="ps-2">
-                                                            <PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={totalRewards()} placeHolderCfg={{ col: 6 }} />
-                                                        </div>
+                                                    { totalRewards().gt(0) ? (
+                                                            <>
+                                                                <Amount value={totalRewards()} /> 
+                                                                <div className="text-body-secondary ps-2">
+                                                                    <PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={totalRewards()} placeHolderCfg={{ col: 6 }} />
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <><Amount value={totalRewards()} /> <span className="text-body-secondary ps-1">COMP</span></>
+                                                        )
                                                     }
                                                 </div>
                                             )}

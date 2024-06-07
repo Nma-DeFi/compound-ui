@@ -33,6 +33,7 @@ export function useNetworkEvents() {
     const onAccountChanged = (newAccount: Address) => {
         if (newAccount) {
             dispatch(accountConnected(newAccount))
+            dispatch(rewardsOwedReset())
             resetPositions(dispatch)
         }
     }

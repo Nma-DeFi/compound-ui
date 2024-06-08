@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Path } from "../../components/Layout"
 import { useBootstrap } from "../../hooks/useBootstrap"
 import SelectTokenToBorrow, { SELECT_TOKEN_TO_BORROW_MODAL } from "../../components/pages/borrow/SelectTokenToBorrow"
-import { ReactNode, useEffect, useState } from "react"
+import { ReactNode, useEffect, useMemo, useState } from "react"
 import TokenIcon from "../../components/TokenIcon"
 import { getBaseTokenOrNativeCurrency, getPriceFeed, isNativeCurrencyMarket } from "../../utils/markets"
 import { useCurrentChain } from "../../hooks/useCurrentChain"
@@ -95,9 +95,10 @@ export default function Borrow() {
     const { isSuccess: isBorrowCapacity, data: _borrowCapacity } = asyncBorrowCapacity
     const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountPriceUsd
 
-    //const liquidationRisk = useLiquidationRiskByBorrowAmount({ chainId, publicClient, market, amount, enabled: (mode === Mode.ReadyToBorrow)})
+    const borrowCapacity = useMemo(() => _borrowCapacity?.times(ACCRUED_ESTIMATION), [_borrowCapacity])
+
+    //const liquidationRisk_ = useLiquidationRiskByBorrowAmount({ chainId, publicClient, market, amount, enabled: (mode === Mode.ReadyToBorrow)})
     let liquidationRisk = null
-    const borrowCapacity = _borrowCapacity?.gt(Zero) ? _borrowCapacity.times(ACCRUED_ESTIMATION) : Zero
 
     useEffect(() => { 
       if (isLoading()) {

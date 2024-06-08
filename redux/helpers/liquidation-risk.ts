@@ -6,6 +6,7 @@ import BigNumber from 'bignumber.js'
 import { Market, Token } from '../../types'
 import { getPriceFeed } from '../../utils/markets'
 import { cloneCollateralPositions } from './collateral'
+import { cometProxy } from '../../selectors/market-selector'
 
 export async function getLiquidationRisk({ chainId, market, borrowPositions, collateralPositions, priceService } : {
     chainId: number
@@ -46,6 +47,13 @@ export async function getLiquidationRiskByBorrowAmount({ chainId, market, collat
   }
 
   return borrowCurrent.div(borrowMax).times(100).toNumber()
+}
+
+export async function getLiquidationRiskByBorrowAmountAdded({chainId, market, collateralPositions, borrowPositions, priceService, amountAdded}) {
+  const { borrowBalance } = borrowPositions[cometProxy(market)]
+  const borrowAmount = borrowBalance.plus(amountAdded)
+
+  return await getLiquidationRiskByBorrowAmount({ chainId, market, collateralPositions, priceService, borrowAmount })
 }
 
 export async function getLiquidationRiskByCollateralWithdrawal({ chainId, market, borrowPositions, collateralPositions, priceService, collateral, amount } : {

@@ -1,4 +1,3 @@
-import Head from "next/head"
 import Link from "next/link"
 import { Path } from "../../components/Layout"
 import { useBootstrap } from "../../hooks/useBootstrap"
@@ -37,10 +36,11 @@ import Apr from "../../components/Apr"
 import { useWeb3Modal } from "@web3modal/wagmi/react"
 import Price from "../../components/Price"
 import NoData from "../../components/NoData"
-import { useLiquidationRiskByBorrowAmount } from "../../hooks/useLiquidationRisk"
 import { useTotalCollateralUsdByChain } from "../../hooks/useTotalCollateralUsdByChain"
 import { fillInput } from "../../components/AmountPercent"
 import { AsyncNumber, fromUseQueryAsync, loadAsyncData } from "../../utils/async"
+import { getLiquidationRiskByBorrowAmountAdded } from "../../redux/helpers/liquidation-risk"
+import { useBorrowPositions } from "../../hooks/useBorrowPositions"
 
 const enum Mode {
   InitalLoading,
@@ -78,6 +78,8 @@ export default function Borrow() {
 
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
     const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
+    const { isSuccess: isCollateralPositions, data: collateralPositions } = useCollateralPositions()
+    const { isSuccess: isBorrowPositions, data: borrowPositions } = useBorrowPositions()
 
     const asyncBorrowCapacity = useBorrowCapacity({ chainId, publicClient, marketId: comet })
 
@@ -93,8 +95,9 @@ export default function Borrow() {
     const { isSuccess: isBorrowCapacity, data: _borrowCapacity } = asyncBorrowCapacity
     const { isSuccess: isAmountUsd, data: amountUsd } = asyncAmountPriceUsd
 
-    const borrowCapacity = _borrowCapacity?.times(ACCRUED_ESTIMATION)
-    const liquidationRisk = useLiquidationRiskByBorrowAmount({ chainId, publicClient, market, amount, enabled: (mode === Mode.ReadyToBorrow)})
+    //const liquidationRisk = useLiquidationRiskByBorrowAmount({ chainId, publicClient, market, amount, enabled: (mode === Mode.ReadyToBorrow)})
+    let liquidationRisk = null
+    const borrowCapacity = _borrowCapacity?.gt(Zero) ? _borrowCapacity.times(ACCRUED_ESTIMATION) : Zero
 
     useEffect(() => { 
       if (isLoading()) {
@@ -108,7 +111,12 @@ export default function Borrow() {
       }  else if (isInsufficientBorrowAmount()) {
         setMode(Mode.InsufficientBorrowAmount)
       } else {
-        setMode(Mode.ReadyToBorrow)
+        getLiquidationRiskByBorrowAmountAdded({ 
+            chainId, market, collateralPositions, borrowPositions, 
+            priceService, amountAdded: amount 
+          })
+        .then(risk => liquidationRisk = risk)
+        .then(() => setMode(Mode.ReadyToBorrow))
       }
     })
 
@@ -136,7 +144,7 @@ export default function Borrow() {
 
     function isLoading() {
       if (!isMarkets || !market) return true
-      if (isConnected &&  (!isSupplyPositions || !isBorrowCapacity || !isAmountUsd || !priceService)) return true
+      if (isConnected &&  (!isSupplyPositions || !isCollateralPositions || !isBorrowPositions || !isBorrowCapacity || !isAmountUsd || !priceService)) return true
       return false
     }
 
@@ -161,7 +169,7 @@ export default function Borrow() {
       const borrowInfo = { 
         comet, token, amount, 
         priceFeed, borrowApr, 
-        liquidationRisk: liquidationRisk.data, 
+        liquidationRisk, //liquidationRisk: liquidationRisk.data, 
         onBorrow: setBorrowResult
       }
       setBorrowInfo(borrowInfo)

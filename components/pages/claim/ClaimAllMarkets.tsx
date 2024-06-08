@@ -140,25 +140,29 @@ export default function ClaimAllMarkets({ chain }) {
                                 <table className="table border-top">
                                     <tbody>
                                     { chain.markets.map(market =>
-                                        <tr key={market.id}>
-                                            <td className={`${css['table-label']} table-light`}>
-                                                <span className="fw-semibold">{ getBaseTokenOrNativeCurrency(market, chain.id).symbol }</span> Market
-                                            </td>
-                                            <td>
-                                                { rewards && (chain.id in rewards) && (market.id in rewards[chain.id]) ? (
-                                                    <div className="d-flex justify-content-center align-items-center">
-                                                        <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="20" />
-                                                        <Amount value={ rewards[chain.id][market.id].balance } /> 
-                                                        <span className="text-body-secondary ps-1">{ COMP_TOKEN.symbol }</span>
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-center">
-                                                        <PlaceHolder size={PlaceHolderSize.NORMAL} col={6} />
-                                                    </div>
-                                                )}
+                                        <>
+                                        { !(rewards && (chain.id in rewards) && (market.id in rewards[chain.id]) && rewards[chain.id][market.id].balance.eq(0)) &&
+                                            <tr>
+                                                <td className={`${css['table-label']} table-light`}>
+                                                    <span className="fw-semibold">{ getBaseTokenOrNativeCurrency(market, chain.id).symbol }</span> Market
+                                                </td>
+                                                <td>
+                                                    { rewards && (chain.id in rewards) && (market.id in rewards[chain.id]) ? (
+                                                        <div className="d-flex justify-content-center align-items-center">
+                                                            <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="20" />
+                                                            <Amount value={ rewards[chain.id][market.id].balance } /> 
+                                                            <span className="text-body-secondary ps-1">{ COMP_TOKEN.symbol }</span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center">
+                                                            <PlaceHolder size={PlaceHolderSize.NORMAL} col={6} />
+                                                        </div>
+                                                    )}
 
-                                            </td>
-                                        </tr>
+                                                </td>
+                                            </tr>
+                                        }
+                                        </>
                                     )}
                                     </tbody>
                                 </table>

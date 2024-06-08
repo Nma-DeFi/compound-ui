@@ -78,8 +78,8 @@ export default function Borrow() {
 
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
     const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
-    const { isSuccess: isCollateralPositions, data: collateralPositions } = useCollateralPositions()
-    const { isSuccess: isBorrowPositions, data: borrowPositions } = useBorrowPositions()
+    const { data: collateralPositions } = useCollateralPositions()
+    const { data: borrowPositions } = useBorrowPositions()
 
     const asyncBorrowCapacity = useBorrowCapacity({ chainId, publicClient, marketId: comet })
 
@@ -97,7 +97,6 @@ export default function Borrow() {
 
     const borrowCapacity = useMemo(() => _borrowCapacity?.times(ACCRUED_ESTIMATION), [_borrowCapacity])
 
-    //const liquidationRisk_ = useLiquidationRiskByBorrowAmount({ chainId, publicClient, market, amount, enabled: (mode === Mode.ReadyToBorrow)})
     let liquidationRisk = null
 
     useEffect(() => { 
@@ -117,7 +116,7 @@ export default function Borrow() {
             priceService, amountAdded: amount 
           })
         .then(risk => liquidationRisk = risk)
-        .then(() => setMode(Mode.ReadyToBorrow))
+        setMode(Mode.ReadyToBorrow)
       }
     })
 
@@ -145,7 +144,7 @@ export default function Borrow() {
 
     function isLoading() {
       if (!isMarkets || !market) return true
-      if (isConnected &&  (!isSupplyPositions || !isCollateralPositions || !isBorrowPositions || !isBorrowCapacity || !isAmountUsd || !priceService)) return true
+      if (isConnected &&  (!isSupplyPositions || !isBorrowCapacity || !isAmountUsd || !priceService)) return true
       return false
     }
 
@@ -170,7 +169,7 @@ export default function Borrow() {
       const borrowInfo = { 
         comet, token, amount, 
         priceFeed, borrowApr, 
-        liquidationRisk, //liquidationRisk: liquidationRisk.data, 
+        liquidationRisk,  
         onBorrow: setBorrowResult
       }
       setBorrowInfo(borrowInfo)

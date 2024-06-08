@@ -3,6 +3,7 @@ import { Address, mainnet } from "wagmi";
 import { cometAbi } from "../abi/cometAbi";
 import { PublicClient } from "viem";
 import { PriceFeed, PriceFeedKind } from "../types";
+import { chainName } from "../utils/chains";
 
 export const PRICE_STALE_TIME = 2 * 60 * 1000
 
@@ -50,7 +51,21 @@ export class PriceService {
             promises = [...promises, this.getPriceFromSymbol('ETH')]
         }
 
-        const [ feedPrice, feedScale, ethPrice ] = (await Promise.all(promises)).flat()
+        let promisesData
+        try {
+            promisesData = (await Promise.all(promises)).flat()
+        } catch(e) {
+            const chainId = await this.publicClient.getChainId()
+            console.warn('getPriceFromFeed',
+                'chainId', chainId,
+                'chainName', chainName(chainId),
+                'comet', this.cometContract.address, 
+                'priceFeed address', address, 
+                'priceFeed kind', kind)
+            console.warn('getPriceFromFeed', e)
+        }
+        
+        const [ feedPrice, feedScale, ethPrice ] = promisesData
 
         const price = (Number(feedPrice) / Number(feedScale))
 

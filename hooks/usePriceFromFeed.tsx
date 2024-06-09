@@ -6,7 +6,7 @@ import { PRICE_STALE_TIME, PriceService } from "../services/price-service";
 import { MarketDataService } from "../services/market-data-service";
 import { cometProxy } from "../selectors/market-selector";
 
-async function priceFromFeed(chainId, publicClient, priceFeed) {
+export async function priceFromFeed(chainId, publicClient, priceFeed) {
     const marketDataService = new MarketDataService({ chainId })
     const markets = await marketDataService.findAllMarkets()
     const comet = cometProxy(markets[0])
@@ -15,7 +15,6 @@ async function priceFromFeed(chainId, publicClient, priceFeed) {
 }
 
 export function usePriceFromFeed({ chainId, publicClient, priceFeed, amount = One }) {
-
     const [ asyncPrice, setAsyncPrice ] = useState<AsyncBigNumber>(IdleData)
     
     const { isLoading, isSuccess, isError, data: price, error } =  useQuery({

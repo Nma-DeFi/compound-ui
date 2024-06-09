@@ -18,7 +18,7 @@ import BigNumber from "bignumber.js"
 import PriceAsync from "../../components/PriceAsync"
 import { ActionInfo, Market, PriceFeed } from "../../types"
 import { usePublicClient } from "wagmi"
-import { usePriceFromFeed } from "../../hooks/usePriceFromFeed"
+import { priceFromFeed, usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
 import { SmallSpinner } from "../../components/Spinner"
 import Amount from "../../components/Amount"
@@ -137,7 +137,7 @@ export default function Borrow() {
       if (market && priceService) {
         const feed = getPriceFeed(market, chainId)
         setPriceFeed(feed)
-        const promise = priceService.getPriceFromFeed(feed)
+        const promise = priceFromFeed(chainId, publicClient, feed)
         loadAsyncData(promise, setTokenPrice)
       }
     }, [chainId, market, priceService])

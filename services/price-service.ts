@@ -61,8 +61,8 @@ export class PriceService {
                 'chainName', chainName(chainId),
                 'comet', this.cometContract.address, 
                 'priceFeed address', address, 
-                'priceFeed kind', kind)
-            console.warn('getPriceFromFeed', e)
+                'priceFeed kind', kind, e)
+            throw e
         }
         
         const [ feedPrice, feedScale, ethPrice ] = promisesData

@@ -1,4 +1,3 @@
-import Head from "next/head"
 import NoData from "../../components/NoData"
 import css from '../../styles/pages/Claim.module.scss'
 import { useEffect, useState } from "react"
@@ -19,8 +18,9 @@ import ClaimAllMarkets, { CLAIM_ALL_MODAL } from "../../components/pages/claim/C
 import { getTotalRewards, getTotalRewardsByChain } from "../../redux/helpers/rewards"
 import { Zero } from "../../utils/bn"
 import PlaceHolder from "../../components/PlaceHolder"
-import { useChains } from "../../hooks/useChains"
 import WarningMessage from "../../components/WarningMessage"
+import { orderedChainList } from "../../utils/chains"
+import { useMarkets } from "../../hooks/useMarkets"
 
 export default function Claim() {
 
@@ -30,15 +30,17 @@ export default function Claim() {
     const { isConnected } = useCurrentAccount()
     const { openModal } = useBootstrap()
 
-    const chains = useChains()
+    const chains = orderedChainList()
 
-    const { isSuccess: isRewards, data: rewards } = useRewardsOwed()
+    const rewardsOwed = useRewardsOwed()
+
+    const { isSuccess: isRewards, data: rewards } = rewardsOwed
 
     function handleClaim(chain, market) {
         setClaimInfo({ chain, market, onClaim: setClaimResult })
         openModal(CLAIM_MODAL)
     }
-    
+        
     function handleClaimAll(chain) {
         setClaimInfo({ chain })
         openModal(CLAIM_ALL_MODAL)
@@ -52,10 +54,6 @@ export default function Claim() {
     function totalRewardsBychain(chainId) {
         if (!isRewards) return undefined
         return getTotalRewardsByChain({ rewardsOwed: rewards, chainId })
-    }
-    
-    function isRewardsByMarket(chainId, marketId) {
-        return isRewards && rewards[chainId] && rewards[chainId][marketId]    
     }
 
     function nbMarketsWithRewards(chainId) {
@@ -100,14 +98,8 @@ export default function Claim() {
                             </div>
                         </div>
                     </div>
-                    { chains.isError && 
-                        <WarningMessage>Data currently unavailable</WarningMessage>
-                    }
-                    { chains.isLoading && 
-                        <GrowSpinners nb={5} css="text-center py-5" /> 
-                    }
                     <div id={ css['claim-accordion'] } className="accordion">
-                    { chains.isSuccess && chains.data.map(chain => 
+                    { chains.map(chain => 
                         <div className="accordion-item" key={chain.id}>
                             <h2 className="accordion-header">
                                 <button className={`accordion-button collapsed ${css['accordion-button-custom']}`} type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${chain.id}`} aria-expanded="false" aria-controls={`collapse${chain.id}`}>
@@ -134,22 +126,7 @@ export default function Claim() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            { chain.markets.map(market =>
-                                                <tr key={market.id}>
-                                                    <td>
-                                                        <TokenIcon symbol={ getBaseTokenOrNativeCurrency(market, chain.id).symbol } css={`d-none d-sm-inline me-2 ${css['market-icon']}`} />
-                                                        { getBaseTokenOrNativeCurrency(market, chain.id).symbol } <span className="text-body-secondary">Market</span>
-                                                    </td>
-                                                    <RewardsBalance chain={chain.id} market={market.id} />
-                                                    <td className="text-end">
-                                                    { isConnected && isRewardsByMarket(chain.id, market.id) ?
-                                                        <button type="button" className="btn btn-primary text-white" onClick={() => handleClaim(chain, market)}>Claim</button>
-                                                    :  
-                                                        <button type="button" className="btn btn-primary text-white" disabled>Claim</button>
-                                                    }
-                                                    </td>
-                                                </tr>
-                                            )}
+                                            <MarketsList chain={chain} rewardsOwed={rewardsOwed} onClaimMarket={handleClaim} />
                                             { isConnected && nbMarketsWithRewards(chain.id) > 1  &&
                                                 <tr>
                                                     <td className="text-center" colSpan={3} style={{ cursor: 'pointer', padding: '0.7rem 0' }}>
@@ -174,12 +151,60 @@ export default function Claim() {
     )
 }
 
-export function RewardsBalance({ chain, market }) {
+function MarketsList({ chain, rewardsOwed, onClaimMarket }) {
+    const { isConnected } = useCurrentAccount()
+
+    const markets = useMarkets({ chainId: chain.id })
+
+    const { isSuccess: isRewards, data: rewards } = rewardsOwed
+
+    function isRewardsByMarket(chainId, marketId) {
+        return isRewards && rewards[chainId] && rewards[chainId][marketId]    
+    }
+
+    return ( 
+        <>
+            { markets.isError && 
+                <tr>
+                    <td colSpan={3}>
+                        <WarningMessage>Data currently unavailable</WarningMessage>
+                    </td>
+                </tr> 
+            }
+            { markets.isLoading && 
+                <tr>
+                    <td className="text-center" colSpan={3}>
+                        <GrowSpinners nb={3} css="text-center" /> 
+                    </td>
+                </tr> 
+            }
+            { markets.isSuccess && markets.data.map(market =>
+                <tr key={market.id}>
+                    <td>
+                        <TokenIcon symbol={ getBaseTokenOrNativeCurrency(market, chain.id).symbol } css={`d-none d-sm-inline me-2 ${css['market-icon']}`} />
+                        { getBaseTokenOrNativeCurrency(market, chain.id).symbol } <span className="text-body-secondary">Market</span>
+                    </td>
+                    <RewardsBalance chain={chain.id} market={market.id} rewardsOwed={rewardsOwed} />
+                    <td className="text-end">
+                    { isConnected && isRewardsByMarket(chain.id, market.id) ?
+                        <button type="button" className="btn btn-primary text-white" onClick={() => onClaimMarket(chain, market)}>Claim</button>
+                    :  
+                        <button type="button" className="btn btn-primary text-white" disabled>Claim</button>
+                    }
+                    </td>
+                </tr>
+            )}
+        </>                                               
+    )
+}
+
+function RewardsBalance({ chain, market, rewardsOwed }) {
 
     const [ balance, setBalance ] = useState<BigNumber>()
 
     const { isConnected } = useCurrentAccount()
-    const { isSuccess: isRewards, data: rewards} = useRewardsOwed()
+
+    const { isSuccess: isRewards, data: rewards} = rewardsOwed
         
     useEffect(() => {
         if (isRewards) {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import css from '../../../styles/components/claim/ClaimAllMarkets.module.scss'
-import { SmallSpinner } from '../../Spinner'
+import { GrowSpinners, SmallSpinner } from '../../Spinner'
 import { chainIcon, chainName, transactionUrl } from '../../../utils/chains'
 import { ModalEvent, useModalEvent } from '../../../hooks/useBootstrap'
 import TokenIcon from '../../TokenIcon'
@@ -19,6 +19,8 @@ import { USER_REJECTED_TX } from '../../NetworkSelector'
 import { useAppDispatch } from '../../../redux/hooks'
 import { rewardsOwedResetByChain } from '../../../redux/slices/rewardsOwed'
 import PlaceHolder, { PlaceHolderSize } from '../../PlaceHolder'
+import { MarketDataService } from '../../../services/market-data-service'
+import { useQuery } from '@tanstack/react-query'
 
 export const CLAIM_ALL_MODAL = 'claim-all-modal'
 
@@ -39,6 +41,8 @@ export default function ClaimAllMarkets({ chain }) {
     const { currentChainId } = useCurrentChain()
     const { address: account } = useCurrentAccount()
     
+    const markets = useMarketsList({ chainId: chain?.id })
+
     const { switchNetworkAsync } = useSwitchNetwork()
 
     const dispatch = useAppDispatch()
@@ -139,10 +143,17 @@ export default function ClaimAllMarkets({ chain }) {
                             <>
                                 <table className="table border-top">
                                     <tbody>
-                                    { chain.markets.map(market =>
-                                        <>
-                                        { !(rewards && (chain.id in rewards) && (market.id in rewards[chain.id]) && rewards[chain.id][market.id].balance.eq(0)) &&
-                                            <tr>
+                                    { markets.isLoading && 
+                                        <tr>
+                                            <td className="text-center" colSpan={2}>
+                                                <GrowSpinners nb={4} css="text-center" /> 
+                                            </td>
+                                        </tr> 
+                                    }
+                                    { markets.isSuccess && markets.data
+                                        .filter(market => !(rewards && (chain.id in rewards) && (market.id in rewards[chain.id]) && rewards[chain.id][market.id].balance.eq(0)))
+                                        .map(market =>
+                                            <tr key={market.id}>
                                                 <td className={`${css['table-label']} table-light`}>
                                                     <span className="fw-semibold">{ getBaseTokenOrNativeCurrency(market, chain.id).symbol }</span> Market
                                                 </td>
@@ -161,8 +172,6 @@ export default function ClaimAllMarkets({ chain }) {
 
                                                 </td>
                                             </tr>
-                                        }
-                                        </>
                                     )}
                                     </tbody>
                                 </table>
@@ -213,4 +222,13 @@ export default function ClaimAllMarkets({ chain }) {
             </div>
         </div>
     )
+}
+
+
+function useMarketsList({ chainId }) {
+    return useQuery({
+        queryKey: ['MarketsList', chainId],
+        queryFn: () => (new MarketDataService({ chainId })).findAllMarkets(),
+        enabled: !!chainId
+    })
 }

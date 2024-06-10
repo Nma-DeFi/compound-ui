@@ -84,7 +84,8 @@ export class RewardsService {
     }
 
     static claimAllMarkets({ chain, account, markets, publicClient, walletClient }) {
-        console.log(Date.now(),
+        console.log(
+            Date.now(),
             'RewardsService.claimAllMarkets',
             'chain', chain.name,
             'markets', markets,

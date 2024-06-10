@@ -25,6 +25,7 @@ export class AllowanceService {
             args: [owner, manager]
         })
         console.log(
+            Date.now(),
             'AllowanceService.hasPermission',
             'chain', this.publicClient.chain.name,
             'owner', owner, 'manager', manager,
@@ -36,6 +37,7 @@ export class AllowanceService {
 
     async allow(manager: Address, isAllowed: boolean) {
         console.log(
+            Date.now(),
             'AllowanceService.allow',
             'manager', manager,
             'isAllowed', isAllowed,

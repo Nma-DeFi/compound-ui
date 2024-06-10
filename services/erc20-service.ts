@@ -37,6 +37,7 @@ export class Erc20Service {
             args: [owner]
         })
         console.log(
+            Date.now(),
             'Erc20Service.balanceOf',
             'chain', this.publicClient.chain.name,
             'erc20', this.contract.address,
@@ -53,6 +54,7 @@ export class Erc20Service {
             args: [owner, spender]
         })
         console.log(
+            Date.now(),
             'Erc20Service.allowance',
             'chain', this.publicClient.chain.name,
             'erc20', this.contract.address,
@@ -65,6 +67,7 @@ export class Erc20Service {
     async approve(spender: Address, amount: BigNumber) {
         const _amount = this.toBigInt(amount)
         console.log(
+            Date.now(),
             'Erc20Service.approve',
             'chain', this.publicClient.chain.name,
             'erc20', this.contract.address,

@@ -1,6 +1,5 @@
 import { usePublicClient, useWalletClient } from "wagmi"
 import Amount from "../../Amount"
-import { usePriceFromFeed } from "../../../hooks/usePriceFromFeed"
 import { useCurrentChain } from "../../../hooks/useCurrentChain"
 import PriceAsync from "../../PriceAsync"
 import { nf } from "../../../utils/number"
@@ -16,6 +15,7 @@ import css from '../../../styles/components/borrow/BorrowErc20Token.module.scss'
 import { LiquidationRiskProgress } from "../../LiquidationRisk"
 import { bn } from "../../../utils/bn"
 import { ACTION_RESULT_TOAST } from "../../action-result/ActionResult"
+import { useBaseTokenPriceFromFeed } from "../../../hooks/useBaseTokenPriceFromFeed"
 
 const enum Mode {
   Init,
@@ -41,7 +41,7 @@ export default function BorrowErc20Token({ comet, token, amount, priceFeed, borr
 
   const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
 
-  const price = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
+  const price = useBaseTokenPriceFromFeed({ chainId, publicClient, amount, priceFeed })
 
   const modalEvent = useModalEvent(BORROW_ERC20_MODAL)
 

@@ -18,7 +18,6 @@ import BigNumber from "bignumber.js"
 import PriceAsync from "../../components/PriceAsync"
 import { ActionInfo, Market, PriceFeed } from "../../types"
 import { usePublicClient } from "wagmi"
-import { priceFromFeed, usePriceFromFeed } from "../../hooks/usePriceFromFeed"
 import PlaceHolder, { PlaceHolderSize } from "../../components/PlaceHolder"
 import { SmallSpinner } from "../../components/Spinner"
 import Amount from "../../components/Amount"
@@ -38,9 +37,10 @@ import Price from "../../components/Price"
 import NoData from "../../components/NoData"
 import { useTotalCollateralUsdByChain } from "../../hooks/useTotalCollateralUsdByChain"
 import { fillInput } from "../../components/AmountPercent"
-import { AsyncNumber, fromUseQueryAsync, loadAsyncData } from "../../utils/async"
+import { fromUseQueryAsync } from "../../utils/async"
 import { getLiquidationRiskByBorrowAmountAdded } from "../../redux/helpers/liquidation-risk"
 import { useBorrowPositions } from "../../hooks/useBorrowPositions"
+import { useBaseTokenPriceFromFeed } from "../../hooks/useBaseTokenPriceFromFeed"
 
 const enum Mode {
   InitalLoading,
@@ -60,7 +60,6 @@ export default function Borrow() {
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
-    const [ tokenPrice, setTokenPrice ] = useState<AsyncNumber>()
 
     const { open: openWeb3Modal } = useWeb3Modal()
 
@@ -85,7 +84,8 @@ export default function Borrow() {
 
     const priceService = usePriceService({ chainId, publicClient })
 
-    const asyncAmountPriceUsd = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
+    const tokenPrice = useBaseTokenPriceFromFeed({ chainId, publicClient, priceFeed })
+    const asyncAmountPriceUsd = useBaseTokenPriceFromFeed({ chainId, publicClient, priceFeed, amount })
 
     const token = getBaseTokenOrNativeCurrency(market, chainId)
     const borrowApr = netBorrowAprScaled(market)
@@ -137,8 +137,6 @@ export default function Borrow() {
       if (market && priceService) {
         const feed = getPriceFeed(market, chainId)
         setPriceFeed(feed)
-        const promise = priceFromFeed(chainId, publicClient, feed)
-        loadAsyncData(promise, setTokenPrice)
       }
     }, [chainId, market, priceService])
 
@@ -189,7 +187,8 @@ export default function Borrow() {
     }
 
     function setInput(amount: BigNumber) {
-      fillInput({ amount, id: css['borrow-input'] })
+      const id = css['borrow-input'] 
+      fillInput({ amount, id })
     }
     
     function resetAmount() {

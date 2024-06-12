@@ -1,6 +1,5 @@
 import { usePublicClient, useWaitForTransaction, useWalletClient } from "wagmi"
 import Amount from "../../Amount"
-import { usePriceFromFeed } from "../../../hooks/usePriceFromFeed"
 import { useCurrentChain } from "../../../hooks/useCurrentChain"
 import PriceAsync from "../../PriceAsync"
 import { nf } from "../../../utils/number"
@@ -21,6 +20,7 @@ import { CompoundConfig } from "../../../compound-config"
 import { ActionType } from "../../../types"
 import { bn } from "../../../utils/bn"
 import { ACTION_RESULT_TOAST } from "../../action-result/ActionResult"
+import { useBaseTokenPriceFromFeed } from "../../../hooks/useBaseTokenPriceFromFeed"
 
 const enum Mode {
   Init,
@@ -54,7 +54,7 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
   const allowanceService = useAllowanceService({ comet, publicClient, walletClient, account })
   const withdrawService = useWithdrawService({ comet, publicClient, walletClient, account })
 
-  const price = usePriceFromFeed({ chainId, publicClient, amount, priceFeed })
+  const price = useBaseTokenPriceFromFeed({ chainId, publicClient, amount, priceFeed })
 
   const modalEvent = useModalEvent(BORROW_NATIVE_MODAL)
 

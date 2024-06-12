@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react"
-import { useBorrowPositions } from "../../../hooks/useBorrowPositions"
 import { bna2 } from "../../Amount"
 import Apr from "../../Apr"
-import PriceFromFeed from "../../PriceFromFeed"
 import TokenIcon from "../../TokenIcon"
 import LiquidationRisk from "../../LiquidationRisk"
 import { useCurrentChain } from "../../../hooks/useCurrentChain"
@@ -17,6 +15,7 @@ import RepayNativeCurrency, { REPAY_NATIVE_CURRENCY } from "./RepayNativeCurrenc
 import { Zero } from "../../../utils/bn"
 import { chainIcon, chainName, getTokenOrNativeCurrency } from "../../../utils/chains"
 import css from '../../../styles/components/borrow/BorrowPositions.module.scss'
+import BaseTokenPriceFromFeed from "../../BaseTokenPriceFromFeed"
 
 export const REPAY_RESULT_TOAST = 'repay-result-toast'
 
@@ -85,7 +84,7 @@ export default function BorrowPositions({ asyncBorrowPositions } : { asyncBorrow
                                             <div className="ps-2">
                                                 <div>{ bna2(borrowPosition.borrowBalance) } </div>
                                                 <div className="small text-body-secondary">
-                                                    <PriceFromFeed priceFeed={borrowPosition.priceFeed} amount={borrowPosition.borrowBalance} placeHolderCfg={{ col: 12 }} />
+                                                    <BaseTokenPriceFromFeed priceFeed={borrowPosition.priceFeed} amount={borrowPosition.borrowBalance} placeHolderCfg={{ col: 12 }} />
                                                 </div>
                                             </div>
                                         </div>

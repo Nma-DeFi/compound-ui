@@ -7,7 +7,6 @@ import AmountPercent, { fillInput } from '../../AmountPercent'
 import { SmallSpinner } from '../../Spinner'
 import TokenIcon from '../../TokenIcon'
 import css from '../../../styles/components/borrow/RepayErc20.module.scss'
-import PriceFromFeed from '../../PriceFromFeed'
 import { useCurrentChain } from '../../../hooks/useCurrentChain'
 import { useCurrentAccount } from '../../../hooks/useCurrentAccount'
 import { usePublicClient, useWaitForTransaction, useWalletClient } from 'wagmi'
@@ -22,6 +21,7 @@ import { usePositionsService } from '../../../hooks/usePositionsService'
 import { REPAY_RESULT_TOAST } from './BorrowPositions'
 import Spacer from '../../Spacer'
 import WarningMessage from '../../WarningMessage'
+import BaseTokenPriceFromFeed from '../../BaseTokenPriceFromFeed'
 
 const enum Mode {
   Init,
@@ -235,7 +235,7 @@ export default function RepayErc20Token({ comet, token, onRepay }) {
                           onChange={handleAmountChange} 
                           disabled={Mode.Init === mode} />
                         <div className="small text-body-tertiary">
-                          <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
+                          <BaseTokenPriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

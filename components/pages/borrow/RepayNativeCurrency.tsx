@@ -5,7 +5,6 @@ import { Zero, bn, fromBigInt } from '../../../utils/bn'
 import AmountInput from '../../AmountInput'
 import AmountPercent, { fillInput } from '../../AmountPercent'
 import TokenIcon from '../../TokenIcon'
-import PriceFromFeed from '../../PriceFromFeed'
 import css from '../../../styles/components/borrow/RepayNativeCurrency.module.scss'
 import { useCurrentChain } from '../../../hooks/useCurrentChain'
 import * as ChainUtils from '../../../utils/chains'
@@ -22,6 +21,7 @@ import { REPAY_RESULT_TOAST } from './BorrowPositions'
 import { usePositionsService } from '../../../hooks/usePositionsService'
 import WarningMessage from '../../WarningMessage'
 import Spacer from '../../Spacer'
+import BaseTokenPriceFromFeed from '../../BaseTokenPriceFromFeed'
 
 const enum Mode {
   Init,
@@ -190,7 +190,7 @@ export default function RepayNativeCurrency({ comet, token, onRepay }) {
                           onChange={handleAmountChange} 
                           disabled={Mode.Init === mode} />
                         <div className="small text-body-tertiary">
-                          <PriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
+                          <BaseTokenPriceFromFeed priceFeed={token?.priceFeed} amount={amount} />
                         </div>
                       </div>
                       <div>

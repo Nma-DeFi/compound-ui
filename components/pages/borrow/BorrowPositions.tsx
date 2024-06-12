@@ -9,7 +9,7 @@ import { useCurrentChain } from "../../../hooks/useCurrentChain"
 import { ActionInfo, Market } from "../../../types"
 import { useBootstrap } from "../../../hooks/useBootstrap"
 import RepayErc20Token, { REPAY_ERC20_TOKEN_MODAL } from "./RepayErc20Token"
-import { BorrowBalance } from "../../../redux/slices/positions/borrowPositions"
+import { BorrowBalance, BorrowPositionsState } from "../../../redux/slices/positions/borrowPositions"
 import * as MarketSelector from "../../../selectors/market-selector"
 import * as MarketUtils from "../../../utils/markets"
 import ActionResult from "../../action-result/ActionResult"
@@ -20,17 +20,17 @@ import css from '../../../styles/components/borrow/BorrowPositions.module.scss'
 
 export const REPAY_RESULT_TOAST = 'repay-result-toast'
 
-export default function BorrowPositions() {
+export default function BorrowPositions({ asyncBorrowPositions } : { asyncBorrowPositions: BorrowPositionsState }) {
 
     const { currentChainId: chainId } = useCurrentChain()
 
-    const [borrowPositions, setBorrowPositions] = useState<Array<BorrowBalance>>([])
+    const [borrowBalances, setBorrowBalances] = useState<Array<BorrowBalance>>([])
     const [ market, setMarket ] = useState<Market>()
     const [ repayResult, setRepayResult ] = useState<ActionInfo>()
 
-    const { isSuccess, data } = useBorrowPositions()
-
     const { openModal } = useBootstrap()
+
+    const { isSuccess: isBorrowPositions, data: borrowPositions } = asyncBorrowPositions
 
     const comet = MarketSelector.cometProxy(market)
     const baseToken = MarketUtils.getBaseTokenOrNativeCurrency(market, chainId)
@@ -43,11 +43,11 @@ export default function BorrowPositions() {
     const token = {...baseToken, priceFeed }
 
     useEffect(() => {
-        if (isSuccess) {
-            const borrowPositions = Object.values(data).filter(p => p.borrowBalance.gt(Zero))
-            setBorrowPositions(borrowPositions)
+        if (isBorrowPositions) {
+            const borrowBalances = Object.values(borrowPositions).filter(p => p.borrowBalance.gt(Zero))
+            setBorrowBalances(borrowBalances)
         }
-    }, [isSuccess, data])
+    }, [isBorrowPositions, borrowPositions])
 
     function handleRepay(market: Market) {
         setMarket(market)
@@ -59,21 +59,21 @@ export default function BorrowPositions() {
     }
 
     function isShown() {
-        if (!isSuccess) return false
-        const activePositions = Object.values(data).filter(p => p.borrowBalance.gt(Zero))
+        if (!isBorrowPositions) return false
+        const activePositions = Object.values(borrowPositions).filter(p => p.borrowBalance.gt(Zero))
         return activePositions.length > 0
     }
 
     return <>
         { isShown() &&  (
             <div className="bg-body p-3 rounded border shadow pb-4" style={{ marginBottom: '2rem' }}>     
-                <h4 className={css['title']}>Your { borrowPositions.length > 1 ? 'borrowings' : 'borrowing' }</h4>
+                <h4 className={css['title']}>Your { borrowBalances.length > 1 ? 'borrowings' : 'borrowing' }</h4>
                 <div className={`${css['chain']} d-flex align-items-center`}>
                     <div className={`${css['chain-label']} fw-semibold`}>Chain</div>
                     <img className={css['network-icon']} src={chainIcon(chainId)} alt={chainName(chainId)} />
                     {chainName(chainId)}
                 </div>
-                { borrowPositions.map((borrowPosition, index) => 
+                { borrowBalances.map((borrowPosition, index) => 
                     <div key={index}>
                         <div style={{ padding: '0.6rem 0'}}>       
                             <table className="table table-borderless align-middle mb-0">
@@ -109,7 +109,7 @@ export default function BorrowPositions() {
                                 </tbody>
                             </table>
                         </div>
-                        { index + 1 < borrowPositions.length &&
+                        { index + 1 < borrowBalances.length &&
                             <hr className="mx-2 my-4 text-body-tertiary" />
                         }
                     </div>

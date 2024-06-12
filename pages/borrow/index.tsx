@@ -77,9 +77,14 @@ export default function Borrow() {
     const dispatch = useAppDispatch()
 
     const { isSuccess: isMarkets, data: markets } = useMarkets({ chainId })
-    const { isSuccess: isSupplyPositions, data: supplyPositions } = useSupplyPositions()
-    const { data: collateralPositions } = useCollateralPositions()
-    const { data: borrowPositions } = useBorrowPositions()
+
+    const asyncSupplyPositions = useSupplyPositions()
+    const asyncCollateralPositions = useCollateralPositions()
+    const asyncBorrowPositions = useBorrowPositions()
+
+    const { isSuccess: isSupplyPositions, data: supplyPositions } = asyncSupplyPositions
+    const { data: collateralPositions } = asyncCollateralPositions
+    const { data: borrowPositions } = asyncBorrowPositions
 
     const asyncBorrowCapacity = useBorrowCapacity({ chainId, publicClient, marketId: comet })
 
@@ -298,8 +303,8 @@ export default function Borrow() {
         <div className="col-12 col-lg-3 px-0 pt-4 pt-lg-0">
           { isConnected && 
             <>
-              <BorrowPositions /> 
-              <TotalCollaterals /> 
+              <BorrowPositions { ...{ asyncBorrowPositions } } /> 
+              <TotalCollaterals { ...{ asyncCollateralPositions } } /> 
             </>
           }
         </div>
@@ -348,8 +353,7 @@ function CollateralPanel({ chainId, mode, borrowApr, collaterals }) {
   )
 }
 
-function TotalCollaterals() {
-  const asyncCollateralPositions = useCollateralPositions()
+function TotalCollaterals({ asyncCollateralPositions }) {
   const { isPending, isLoading, isSuccess, data: totalCollateral } = useTotalCollateralUsdByChain({ asyncCollateralPositions })
   
   return isSuccess && totalCollateral.gt(Zero) && (

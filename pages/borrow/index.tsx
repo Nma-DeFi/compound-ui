@@ -60,6 +60,7 @@ export default function Borrow() {
     const [ borrowResult, setBorrowResult ] = useState<ActionInfo>()
     const [ borrowInfo, setBorrowInfo ] = useState(null)
     const [ priceFeed, setPriceFeed ] = useState<PriceFeed>()
+    const [ liquidationRisk, setLiquidationRisk ] = useState<number>()
 
     const { open: openWeb3Modal } = useWeb3Modal()
 
@@ -97,8 +98,6 @@ export default function Borrow() {
 
     const borrowCapacity = useMemo(() => _borrowCapacity?.times(ACCRUED_ESTIMATION), [_borrowCapacity])
 
-    let liquidationRisk = null
-
     useEffect(() => { 
       if (isLoading()) {
         setMode(Mode.Loading)
@@ -115,7 +114,7 @@ export default function Borrow() {
             chainId, market, collateralPositions, borrowPositions, 
             priceService, amountAdded: amount 
           })
-        .then(risk => liquidationRisk = risk)
+        .then(setLiquidationRisk)
         setMode(Mode.ReadyToBorrow)
       }
     })
@@ -167,7 +166,6 @@ export default function Borrow() {
       const borrowInfo = { 
         comet, token, amount, 
         priceFeed, borrowApr, 
-        liquidationRisk,  
         onBorrow: setBorrowResult
       }
       setBorrowInfo(borrowInfo)
@@ -293,8 +291,8 @@ export default function Borrow() {
             </div>
           </div>
           <SelectTokenToBorrow onSelect={setCurrentMarket} />
-          <BorrowErc20Token  {...borrowInfo} />
-          <BorrowNativeCurrency  {...borrowInfo} />
+          <BorrowErc20Token  {...{ ...borrowInfo, liquidationRisk }} />
+          <BorrowNativeCurrency  { ...{...borrowInfo, liquidationRisk }} />
           <ActionResult {...{ ...borrowResult, onSuccess: resetAmount }} />
         </div>
         <div className="col-12 col-lg-3 px-0 pt-4 pt-lg-0">

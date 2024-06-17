@@ -1,6 +1,7 @@
 import { cometAbi } from "../abi/cometAbi"
 import { collateralTokens } from "../selectors/market-selector"
 import { fromBigInt } from "../utils/bn"
+import { chainName } from "../utils/chains"
 
 export class PositionsService {
 
@@ -50,9 +51,11 @@ export class PositionsService {
             })
         )
         const balances = await publicClient.multicall({ contracts, allowFailure: false })
+        const chainId  = await publicClient.getChainId()
         console.log(
             Date.now(), 
             'PositionsService.supplyBalancesOf',
+            'chain', chainName(chainId),
             'account', account,
             'markets', markets,
             'balances', balances,
@@ -95,9 +98,11 @@ export class PositionsService {
             })
         )
         const balances = await publicClient.multicall({ contracts, allowFailure: false })
+        const chainId  = await publicClient.getChainId()
         console.log(
             Date.now(), 
             'PositionsService.borrowBalancesOf',
+            'chain', chainName(chainId),
             'account', account,
             'markets', markets,
             'balances', balances,
@@ -149,9 +154,11 @@ export class PositionsService {
             collateralBalances[comet][token] = multicallData[index]
         })
 
+        const chainId = await publicClient.getChainId()
         console.log(
             Date.now(), 
             'PositionsService.collateralBalancesOf',
+            'chain', chainName(chainId),
             'account', account,
             'markets', markets,
             'balances', collateralBalances,

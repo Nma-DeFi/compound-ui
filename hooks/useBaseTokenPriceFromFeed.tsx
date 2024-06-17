@@ -15,13 +15,6 @@ async function baseTokenPriceFromFeed(publicClient, priceFeed, markets) {
     } else {
         pricePromise = Promise.resolve(null)
     }
-    pricePromise.then(price => {
-        console.log('baseTokenPriceFromFeed', 
-            'priceFeed', priceFeed, 
-            'baseTokenPriceFeeds', baseTokenPriceFeeds,
-            'price', price
-        )
-    })
     return pricePromise
 }
 

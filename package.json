@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@compound-finance/compound-js": "^0.6.2",
+    "@next/third-parties": "^14.2.4",
     "@reduxjs/toolkit": "^2.0.1",
     "@tanstack/react-query": "^5.17.9",
     "@tanstack/react-query-devtools": "^5.17.9",
@@ -19,7 +20,7 @@
     "bootstrap-icons": "^1.11.1",
     "graphql": "^16.8.1",
     "graphql-request": "^6.1.0",
-    "next": "latest",
+    "next": "^14.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-form-stepper": "^2.0.3",

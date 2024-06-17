@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from '../redux/store'
 import { Provider as ReduxProvider } from 'react-redux'
 import { useBootstrap } from '../hooks/useBootstrap';
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 
@@ -32,6 +33,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <ReduxProvider store={store}>
             <Layout>
               <Component {...pageProps} />
+              <GoogleAnalytics gaId="G-DRY0NZNG00" />
             </Layout>
           </ReduxProvider>
       </QueryClientProvider>

@@ -43,7 +43,6 @@ import { useBorrowPositions } from "../../hooks/useBorrowPositions"
 import { useBaseTokenPriceFromFeed } from "../../hooks/useBaseTokenPriceFromFeed"
 
 const enum Mode {
-  InitalLoading,
   Loading,
   NotConnected,
   FarmingBaseToken,

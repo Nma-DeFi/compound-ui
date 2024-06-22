@@ -12,6 +12,7 @@ import { useBootstrap } from '../hooks/useBootstrap';
 import { GoogleAnalytics } from '@next/third-parties/google'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
+const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS
 
 const wagmiConfig = defaultWagmiConfig({ chains: CHAINS, projectId })
 
@@ -33,7 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <ReduxProvider store={store}>
             <Layout>
               <Component {...pageProps} />
-              <GoogleAnalytics gaId="G-DRY0NZNG00" />
+              <GoogleAnalytics gaId={gaId} />
             </Layout>
           </ReduxProvider>
       </QueryClientProvider>

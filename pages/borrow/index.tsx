@@ -221,7 +221,7 @@ export default function Borrow() {
                 </div>
                 <button type="button" className="btn btn-lg btn-light border border-light-subtle rounded-5" onClick={() => openModal(SELECT_TOKEN_TO_BORROW_MODAL)}>
                   <div className="d-flex align-items-center">
-                    <TokenIcon symbol={ token?.symbol } css="me-2 me-sm-3" width="35" />
+                    <TokenIcon symbol={ token?.symbol } css="me-2 me-sm-3" size="35" />
                     <span className="me-2 me-sm-3">
                       { token?.symbol }
                     </span> 
@@ -343,7 +343,7 @@ function CollateralPanel({ chainId, mode, borrowApr, collaterals }) {
           </span>
           { collaterals.map(collateral =>
             <span key={collateral.token.address} className="text-body-tertiary ps-2">
-              <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} width="28" />
+              <TokenIcon symbol={getTokenOrNativeCurrency(chainId, collateral.token)?.symbol} size="28" />
             </span>
           )}
         </div>

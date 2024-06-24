@@ -166,7 +166,7 @@ export default function Collateral() {
                                 <>
                                     {markets.map((market) =>
                                         <div key={market.id} className={marketCss(market)} onClick={() => setCurrentMarket(market)}>
-                                            <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} width={25} css={`me-2 ${css['market-icon']}`} />
+                                            <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId)?.symbol} size={25} css={`me-2 ${css['market-icon']}`} />
                                             { getBaseTokenOrNativeCurrency(market, chainId)?.symbol } <span className="text-body-tertiary ps-1">Market</span>
                                         </div>
                                     )}
@@ -189,7 +189,7 @@ export default function Collateral() {
                 <div key={collateral.token.address} className="row g-0 bg-body shadow border rounded p-3 mb-4">
                     <div className="col-12 col-sm-5">
                         <div className="d-flex align-items-center justify-content-start mb-5 mb-sm-0">
-                            <TokenIcon symbol={ getTokenOrNativeCurrency(chainId, collateral.token)?.symbol } width="48" />
+                            <TokenIcon symbol={ getTokenOrNativeCurrency(chainId, collateral.token)?.symbol } size="48" />
                             <div className={css['collateral-name']}>
                                 <div className="fs-5 fw-semibold">{ getTokenOrNativeCurrency(chainId, collateral.token)?.symbol }</div>
                                 <div className="text-body-secondary">{ getTokenOrNativeCurrency(chainId, collateral.token)?.name }</div>

@@ -177,7 +177,7 @@ export default function BorrowNativeCurrency({ comet, token, amount, priceFeed, 
                   <td className={`${css['table-label']} table-light fw-semibold`}>Borrow amount</td>
                   <td>
                     <div className="d-flex justify-content-center align-items-center">
-                      <TokenIcon symbol={ token?.symbol } css="me-1" width="20" />
+                      <TokenIcon symbol={ token?.symbol } css="me-1" size="20" />
                       <Amount value={ amount } /> 
                       <span className="text-body-secondary ps-1">{ token?.symbol }</span>
                       <span className="ps-3"><PriceAsync asyncPrice={price} /></span>

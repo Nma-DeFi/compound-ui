@@ -230,7 +230,7 @@ export default function DepositBaseTokenErc20(market) {
                       <div>
                         <button type="button" className="btn btn-light border border-light-subtle rounded-4 mb-2">
                             <div className="d-flex align-items-center">
-                                <TokenIcon symbol={token?.symbol} width={30} />
+                                <TokenIcon symbol={token?.symbol} size={30} />
                                 <span className="px-3">{token?.symbol}</span> 
                             </div>
                         </button>

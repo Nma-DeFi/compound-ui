@@ -79,8 +79,8 @@ export default function BorrowPositions({ asyncBorrowPositions } : { asyncBorrow
                                 <tbody>
                                 <tr>
                                     <td className="w-50" style={{ padding: '0.5rem 0 1rem 0' }}>
-                                        <div className="d-flex justify-content-start">
-                                            <TokenIcon symbol={getTokenOrNativeCurrency(chainId, borrowPosition.baseToken).symbol} width={35} />
+                                        <div className="d-flex justify-content-start align-items-center">
+                                            <TokenIcon symbol={getTokenOrNativeCurrency(chainId, borrowPosition.baseToken).symbol} size={35} />
                                             <div className="ps-2">
                                                 <div>{ bna2(borrowPosition.borrowBalance) } </div>
                                                 <div className="small text-body-secondary">

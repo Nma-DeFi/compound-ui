@@ -101,14 +101,14 @@ export default function Earn() {
             { isSuccess && markets.map(market =>
               <div key={baseTokenAddress(market)} className="row g-0 align-items-center p-3 mb-4 bg-body border rounded shadow">
                   <div className="col p-0">
-                      <div className="d-flex justify-content-start">
+                      <div className="d-flex justify-content-start align-items-center">
                         { getBaseTokenOrNativeCurrency(market, chainId) &&
                           <>
-                            <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} css="d-none d-sm-block me-3" width="42" />
+                            <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} css="d-none d-sm-block me-3" size="42" />
                             <div>
-                                <div className="d-flex fs-5">
+                                <div className="d-flex align-items-center fs-5">
                                   {!isConnected &&
-                                    <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} css={`d-block d-sm-none ${css['token-icon-xs']}`} width="25" />
+                                    <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} css={`d-block d-sm-none ${css['token-icon-xs']}`} size="25" />
                                   }
                                   {getBaseTokenOrNativeCurrency(market, chainId).symbol}
                                 </div>

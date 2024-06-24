@@ -160,7 +160,7 @@ export default function ClaimAllMarkets({ chain }) {
                                                 <td>
                                                     { rewards && (chain.id in rewards) && (market.id in rewards[chain.id]) ? (
                                                         <div className="d-flex justify-content-center align-items-center">
-                                                            <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="20" />
+                                                            <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" size="20" />
                                                             <Amount value={ rewards[chain.id][market.id].balance } /> 
                                                             <span className="text-body-secondary ps-1">{ COMP_TOKEN.symbol }</span>
                                                         </div>
@@ -176,8 +176,8 @@ export default function ClaimAllMarkets({ chain }) {
                                     </tbody>
                                 </table>
                                 <div className="d-flex justify-content-center align-items-center">
-                                    <div className="fw-semibold pe-4">Total rewards :</div>
-                                    <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="20" />
+                                    <div className="fw-semibold pe-4">Total :</div>
+                                    <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" size="20" />
                                     <Amount value={totalRewards()} /> 
                                     <div className="text-body-secondary ps-1">{COMP_TOKEN.symbol}</div>
                                     <div className="ps-3">

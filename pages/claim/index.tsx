@@ -78,7 +78,7 @@ export default function Claim() {
                                                 <PlaceHolder col={8} /> 
                                             ) : (
                                                 <div className="d-flex justify-content-center">
-                                                    <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="18" />
+                                                    <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" size="18" />
                                                     { totalRewards().gt(0) ? (
                                                             <>
                                                                 <Amount value={totalRewards()} /> 

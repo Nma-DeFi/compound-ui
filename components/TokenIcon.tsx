@@ -4,10 +4,10 @@ import { getTokenIcon } from "../resources/token-icons";
 type TokenIconParam = {
     symbol: string
     css?: string
-    width?: string | number
+    size?: string | number
 }
 
-export default function TokenIcon({ symbol, css, width } : TokenIconParam) {
+export default function TokenIcon({ symbol, css, size } : TokenIconParam) {
 
     const [icon, setIcon] = useState<string>()
 
@@ -17,6 +17,6 @@ export default function TokenIcon({ symbol, css, width } : TokenIconParam) {
     }, [symbol])
 
     return icon && ( 
-        <img src={icon} alt={symbol} title={symbol} className={css} width={width} /> 
+        <img src={icon} alt={symbol} title={symbol} className={css} width={size} height={size} /> 
     )
 }

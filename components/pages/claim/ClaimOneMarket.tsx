@@ -150,7 +150,7 @@ export default function ClaimOneMarket({ chain, market, onClaim }) {
                                     <td>
                                     { mode >= Mode.ClaimReady &&
                                         <div className="d-flex justify-content-center align-items-center">
-                                            <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" width="20" />
+                                            <TokenIcon symbol={ COMP_TOKEN.symbol } css="me-2" size="20" />
                                             <Amount value={amount} /> 
                                             <span className="text-body-secondary ps-1">{ COMP_TOKEN.symbol }</span>
                                             <span className="ps-3"><PriceFromSymbol symbol={COMP_TOKEN.symbol} amount={amount} placeHolderCfg={{ col: 2 }} /></span>

@@ -44,8 +44,8 @@ export default function SelectTokenToBorrow({ onSelect }) {
             { isSuccess && markets.map((market) =>
               <div key={market.id} className={`bg-body shadow rounded px-3 px-sm-4 py-3 mx-1 mx-sm-2 mt-5 ${css['item-hover']}`} onClick={() => handleSelect(market)}>
                 <div className="d-flex justify-content-between align-items-center mb-5">
-                    <div className="d-flex justify-content-start">
-                        <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} width="45" />
+                    <div className="d-flex justify-content-start align-items-center">
+                        <TokenIcon symbol={getBaseTokenOrNativeCurrency(market, chainId).symbol} size="45" />
                         <div className="ps-3">
                             <div className="fs-4">{getBaseTokenOrNativeCurrency(market, chainId).symbol}</div>
                             <small className="text-body-secondary">{getBaseTokenOrNativeCurrency(market, chainId).name}</small>
